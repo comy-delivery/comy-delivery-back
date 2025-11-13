@@ -1,13 +1,12 @@
 package com.comy_delivery_back.dto.response;
 
-public record ViaCepDTO(
+public record ApiCepDTO(
         String cep,
-        String logradouro,
-
-        String bairro,
-        String localidade,
-        String uf
-
-
+        String address,
+        String district,
+        String city,
+        String state,
+        String lat,
+        String lng
 ) {
 }
