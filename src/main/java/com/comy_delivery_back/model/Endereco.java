@@ -15,8 +15,9 @@ public class Endereco {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idEndereco;
+
     @Column(nullable=false)
-    private String lougradouro;
+    private String logradouro;
 
     @Column(nullable=false)
     private String numero;
@@ -39,6 +40,9 @@ public class Endereco {
     @Enumerated(EnumType.STRING)
     @Column
     private TipoEndereco tipoEndereco;
+
+    @Column(length = 500)
+    private String pontoDeReferecia;
 
     @Column(columnDefinition = "boolean default true")
     private boolean isPadrao;
