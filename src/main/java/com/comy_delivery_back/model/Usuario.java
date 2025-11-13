@@ -21,10 +21,11 @@ public class Usuario {
     @Column(nullable = false)
     private String password;
 
-    private boolean recuperar;
-
     @Enumerated(EnumType.STRING)
     private RoleUsuario roleUsuario;
+
+    @Column(columnDefinition = "boolean default false")
+    private boolean recuperar;
 
     //possibilita settar nas classes filhas
     public RoleUsuario getRoleUsuario(){
