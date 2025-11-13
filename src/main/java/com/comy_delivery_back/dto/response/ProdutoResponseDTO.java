@@ -25,7 +25,7 @@ public record ProdutoResponseDTO(
                 p.getDsProduto(),
                 p.getVlPreco(),
                 p.getImagemProduto(),
-//                new RestauranteDTO(p.getIdRestaurante),
+//                new RestauranteResponseDTO(p.getIdRestaurante),
                 p.getCategoriaProduto(),
                 p.getTempoPreparacao(),
                 p.getIsPromocao(),
