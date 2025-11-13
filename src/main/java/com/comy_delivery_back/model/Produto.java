@@ -49,6 +49,6 @@ public class Produto {
     private boolean isAtivo;
 
     @Column(nullable = false)
-    private LocalDateTime dataCadastro = LocalDateTime.now();
+    private LocalDateTime dataCadastroProduto = LocalDateTime.now();
 
 }
