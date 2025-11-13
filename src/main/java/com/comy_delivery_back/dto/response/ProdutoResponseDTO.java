@@ -31,7 +31,7 @@ public record ProdutoResponseDTO(
                 p.getIsPromocao(),
                 p.getVlPrecoPromocional(),
                 p.isAtivo(),
-                p.getDataCadastro()
+                p.getDataCadastroProduto()
         );
     }
 
