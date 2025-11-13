@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -49,6 +50,8 @@ public class Entregador extends Usuario{
             cascade = CascadeType.ALL
     )
     private List<Entrega> entregasEntregador;
+
+    private LocalDateTime dataCadastroEntregador;
 
     @Column(columnDefinition = "boolean default true")
     private boolean isAtivoEntregador;

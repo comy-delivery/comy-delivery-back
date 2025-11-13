@@ -33,13 +33,12 @@ public class Cliente extends Usuario{
     @Column(length = 11, nullable = false)
     private String telefoneCliente;
 
-    private LocalDateTime dataCadastroCliente;
-
     @OneToMany(
-            mappedBy = "idUsuario",
-            cascade = CascadeType.ALL
+            mappedBy = "idUsuario"
     )
     private List<Endereco> enderecos;
+
+    private LocalDateTime dataCadastroCliente;
 
     @Column(columnDefinition = "boolean default true")
     private boolean isAtivoCliente;
