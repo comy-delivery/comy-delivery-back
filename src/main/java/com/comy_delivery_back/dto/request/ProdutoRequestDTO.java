@@ -16,15 +16,13 @@ public record ProdutoRequestDTO(
 
         byte[] imagemProduto,
 
-//@NotNull(message = "ID do restaurante é obrigatório")
-//Long restauranteId,
+        @NotNull(message = "ID do restaurante é obrigatório")
+        Long restauranteId,
 
         @NotNull(message = "Categoria é obrigatória")
         String categoriaProduto,
 
         Integer tempoPreparacao,
-
-        Boolean isPromocao,
 
         @Positive(message = "Preço promocional deve ser positivo")
         Double vlPrecoPromocional

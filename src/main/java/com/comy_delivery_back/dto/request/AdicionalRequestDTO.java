@@ -1,6 +1,5 @@
 package com.comy_delivery_back.dto.request;
 
-import com.comy_delivery_back.dto.response.ProdutoResponseDTO;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -16,8 +15,8 @@ public record AdicionalRequestDTO(
         @Positive(message = "Preço deve ser positivo")
         Double vlPrecoAdicional,
 
-        @NotNull(message = "O do produto é obrigatório")
-        ProdutoResponseDTO produto
+        @NotNull(message = "O id do produto é obrigatório")
+        Long produtoId
 
 ) {
 }

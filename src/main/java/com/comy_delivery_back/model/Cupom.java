@@ -1,0 +1,52 @@
+package com.comy_delivery_back.model;
+
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Entity
+public class Cupom {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long idCupom;
+
+    @Column(unique = true, nullable = false)
+    private String codigoCupom;
+
+    @Column(length = 100)
+    private String dsCupom;
+
+    @Column(precision = 10, scale = 2)
+    private Double vlDesconto;
+
+    private Double percentualDesconto;
+
+    @Column(precision = 10, scale = 2)
+    private Double vlMinimoPedido;
+
+    @Column(nullable = false)
+    private LocalDateTime dtValidade;
+
+    private Integer qtdUsoMaximo;
+
+    @Column(nullable = false)
+    private Integer qtdUsado = 0;
+
+    @Column(columnDefinition = "boolean default true")
+    private boolean isAtivo;
+
+    @ManyToOne
+    @JoinColumn(name = "restaurante_id")
+    private Restaurante restaurante;
+
+    @Column(nullable = false)
+    private LocalDateTime dataCriacao = LocalDateTime.now();
+
+}

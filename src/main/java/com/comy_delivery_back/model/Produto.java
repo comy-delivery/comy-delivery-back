@@ -29,9 +29,9 @@ public class Produto {
     @Lob
     private byte[] imagemProduto;
 
-//    @ManyToOne
-//    @JoinColumn(name = "restaurante_id", nullable = false)
-//    private Restaurante restaurante;
+    @ManyToOne
+    @JoinColumn(name = "restaurante_id", nullable = false)
+    private Restaurante restaurante;
 
     @Column(nullable = false, length = 100)
     private String categoriaProduto;
