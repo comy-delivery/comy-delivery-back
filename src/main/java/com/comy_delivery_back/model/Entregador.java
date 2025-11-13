@@ -2,6 +2,7 @@ package com.comy_delivery_back.model;
 
 import com.comy_delivery_back.enums.RoleUsuario;
 import com.comy_delivery_back.enums.VeiculoEntregador;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -51,7 +52,8 @@ public class Entregador extends Usuario{
     )
     private List<Entrega> entregasEntregador;
 
-    private LocalDateTime dataCadastroEntregador;
+    @JsonFormat(pattern = "dd-MM-yyyy")
+    private LocalDateTime dataCadastroEntregador = LocalDateTime.now();
 
     @Column(columnDefinition = "boolean default true")
     private boolean isAtivoEntregador;

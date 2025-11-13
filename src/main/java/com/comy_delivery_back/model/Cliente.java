@@ -1,7 +1,9 @@
 package com.comy_delivery_back.model;
 
 import com.comy_delivery_back.enums.RoleUsuario;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.PastOrPresent;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -38,7 +40,8 @@ public class Cliente extends Usuario{
     )
     private List<Endereco> enderecos;
 
-    private LocalDateTime dataCadastroCliente;
+    @JsonFormat(pattern = "dd-MM-yyyy")
+    private LocalDateTime dataCadastroCliente = LocalDateTime.now();
 
     @Column(columnDefinition = "boolean default true")
     private boolean isAtivoCliente;
