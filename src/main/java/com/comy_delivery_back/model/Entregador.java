@@ -1,5 +1,6 @@
 package com.comy_delivery_back.model;
 
+import com.comy_delivery_back.enums.RoleUsuario;
 import com.comy_delivery_back.enums.VeiculoEntregador;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -15,17 +16,22 @@ import java.util.List;
 @PrimaryKeyJoinColumn(name = "idUsuario")
 public class Entregador extends Usuario{
 
+    //seta automatico na criação do entregador
+    public Entregador(){
+        this.setRoleUsuario(RoleUsuario.ENTREGADOR);
+    }
+
     @Column(nullable = false)
     private String nmEntregador;
 
     @Column(nullable = false, unique = true)
-    private String email;
+    private String emailEntregador;
 
     @Column(length = 11)
-    private String telefone;
+    private String telefoneEntregador;
 
     @Column(length = 11, nullable = false, unique = true)
-    private String cpf;
+    private String cpfEntregador;
 
     @Enumerated(EnumType.STRING)
     private VeiculoEntregador veiculo;
@@ -36,16 +42,15 @@ public class Entregador extends Usuario{
     @Column(columnDefinition = "boolean default false")
     private boolean isDisponivel;
 
-    private Double avaliacaoMedia;
+    private Double avaliacaoMediaEntregador;
 
     @OneToMany(
             mappedBy = "idUsuario",
-            cascade = CascadeType.ALL,
-            orphanRemoval = true
+            cascade = CascadeType.ALL
     )
-    private List<Entrega> entregas;
+    private List<Entrega> entregasEntregador;
 
     @Column(columnDefinition = "boolean default true")
-    private boolean isAtivo;
+    private boolean isAtivoEntregador;
 
 }

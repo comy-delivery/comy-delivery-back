@@ -15,7 +15,7 @@ public class Usuario {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idUsuario;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String username;
 
     @Column(nullable = false)
@@ -23,6 +23,15 @@ public class Usuario {
 
     private boolean recuperar;
 
-    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private RoleUsuario roleUsuario;
+
+    //possibilita settar nas classes filhas
+    public RoleUsuario getRoleUsuario(){
+        return roleUsuario;
+    }
+
+    public void setRoleUsuario(RoleUsuario roleUsuario){
+        this.roleUsuario = roleUsuario;
+    }
 }
