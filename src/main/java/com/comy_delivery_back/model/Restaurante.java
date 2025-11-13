@@ -19,6 +19,8 @@ import java.util.List;
 @Data
 @PrimaryKeyJoinColumn(name = "idUsuario")
 public class Restaurante extends Usuario{
+
+    //seta automatico na criação do Restaurante
     public Restaurante(){
         this.setRoleUsuario(RoleUsuario.RESTAURANTE);
     }

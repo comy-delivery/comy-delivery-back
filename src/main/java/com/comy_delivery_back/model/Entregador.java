@@ -18,7 +18,7 @@ import java.util.List;
 @PrimaryKeyJoinColumn(name = "idUsuario")
 public class Entregador extends Usuario{
 
-    //seta automatico na criação do entregador
+    //seta automatico na criação do Entregador
     public Entregador(){
         this.setRoleUsuario(RoleUsuario.ENTREGADOR);
     }
@@ -38,8 +38,11 @@ public class Entregador extends Usuario{
     @Enumerated(EnumType.STRING)
     private VeiculoEntregador veiculo;
 
-    @Column(nullable = false)
+    @Column(unique = true, nullable = false)
     private String placa;
+
+    @JsonFormat(pattern = "dd-MM-yyyy")
+    private LocalDateTime dataCadastroEntregador = LocalDateTime.now();
 
     @Column(columnDefinition = "boolean default false")
     private boolean isDisponivel;
@@ -51,9 +54,6 @@ public class Entregador extends Usuario{
             cascade = CascadeType.ALL
     )
     private List<Entrega> entregasEntregador;
-
-    @JsonFormat(pattern = "dd-MM-yyyy")
-    private LocalDateTime dataCadastroEntregador = LocalDateTime.now();
 
     @Column(columnDefinition = "boolean default true")
     private boolean isAtivoEntregador;

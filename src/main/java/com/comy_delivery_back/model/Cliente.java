@@ -35,13 +35,13 @@ public class Cliente extends Usuario{
     @Column(length = 11, nullable = false)
     private String telefoneCliente;
 
+    @JsonFormat(pattern = "dd-MM-yyyy")
+    private LocalDateTime dataCadastroCliente = LocalDateTime.now();
+
     @OneToMany(
             mappedBy = "idUsuario"
     )
     private List<Endereco> enderecos;
-
-    @JsonFormat(pattern = "dd-MM-yyyy")
-    private LocalDateTime dataCadastroCliente = LocalDateTime.now();
 
     @Column(columnDefinition = "boolean default true")
     private boolean isAtivoCliente;

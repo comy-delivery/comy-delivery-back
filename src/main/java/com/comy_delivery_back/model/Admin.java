@@ -14,6 +14,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @PrimaryKeyJoinColumn(name = "idUsuario")
 public class Admin extends Usuario{
+    //seta automatico na criação do ADMIN
     public Admin(){
         this.setRoleUsuario(RoleUsuario.ADMIN);
     }
