@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -15,7 +16,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-@PrimaryKeyJoinColumn(name = "idUsuario")
+@PrimaryKeyJoinColumn(name = "id")
 public class Cliente extends Usuario{
 
     //seta automatico na criação do cliente
@@ -36,10 +37,11 @@ public class Cliente extends Usuario{
     private String telefoneCliente;
 
     @JsonFormat(pattern = "dd-MM-yyyy")
-    private LocalDateTime dataCadastroCliente = LocalDateTime.now();
+    private LocalDate dataCadastroCliente = LocalDate.now();
 
     @OneToMany(
-            mappedBy = "idUsuario"
+            mappedBy = "cliente",
+            cascade = CascadeType.ALL
     )
     private List<Endereco> enderecos;
 

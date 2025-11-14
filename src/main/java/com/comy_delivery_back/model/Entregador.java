@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -15,7 +16,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-@PrimaryKeyJoinColumn(name = "idUsuario")
+@PrimaryKeyJoinColumn(name = "id")
 public class Entregador extends Usuario{
 
     //seta automatico na criação do Entregador
@@ -42,7 +43,7 @@ public class Entregador extends Usuario{
     private String placa;
 
     @JsonFormat(pattern = "dd-MM-yyyy")
-    private LocalDateTime dataCadastroEntregador = LocalDateTime.now();
+    private LocalDate dataCadastroEntregador = LocalDate.now();
 
     @Column(columnDefinition = "boolean default false")
     private boolean isDisponivel;
@@ -50,7 +51,7 @@ public class Entregador extends Usuario{
     private Double avaliacaoMediaEntregador;
 
     @OneToMany(
-            mappedBy = "idUsuario",
+            mappedBy = "entregador",
             cascade = CascadeType.ALL
     )
     private List<Entrega> entregasEntregador;
