@@ -44,18 +44,18 @@ public class Endereco {
     @Column(length = 500)
     private String pontoDeReferecia;
 
-    @Column(columnDefinition = "boolean default true")
+    @Column(columnDefinition = "boolean default false")
     private boolean isPadrao;
 
     private Double latitude;
 
     private Double longitude;
 
-//    @ManyToOne
-//    @JoinColumn(name = "cliente_id")
-//    private Cliente cliente;
-//
-//    @ManyToOne
-//    @JoinColumn(name = "restaurante_id")
-//    private Restaurante restaurante;
+    @ManyToOne
+    @JoinColumn(name = "cliente_id")
+    private Cliente cliente;
+
+    @ManyToOne
+    @JoinColumn(name = "restaurante_id")
+    private Restaurante restaurante;
 }
