@@ -14,6 +14,7 @@ public record CupomRequestDTO(
 
         String dsCupom,
 
+        @NotBlank(message = "O tipo do cupom precisa ser preenchido")
         TipoCupom tipoCupom,
 
         Double vlDesconto,
