@@ -1,5 +1,6 @@
 package com.comy_delivery_back.model;
 
+import com.comy_delivery_back.enums.TipoCupom;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -22,6 +23,10 @@ public class Cupom {
 
     @Column(length = 100)
     private String dsCupom;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private TipoCupom tipoCupom;
 
     @Column(precision = 10, scale = 2)
     private Double vlDesconto;

@@ -1,5 +1,7 @@
 package com.comy_delivery_back.dto.request;
 
+import com.comy_delivery_back.enums.TipoCupom;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.*;
 
 import java.time.LocalDateTime;
@@ -12,6 +14,8 @@ public record CupomRequestDTO(
 
         String dsCupom,
 
+        TipoCupom tipoCupom,
+
         Double vlDesconto,
 
         Double percentualDesconto,
@@ -21,6 +25,7 @@ public record CupomRequestDTO(
 
         @NotNull(message = "Data de validade é obrigatória")
         @FutureOrPresent
+        @JsonFormat(pattern = "dd/MM/yyyy")
         LocalDateTime dtValidade,
 
         Integer qtdUsoMaximo,
