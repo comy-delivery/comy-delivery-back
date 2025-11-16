@@ -10,14 +10,15 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 @Entity
 @AllArgsConstructor
-@NoArgsConstructor
 @Data
-@PrimaryKeyJoinColumn(name = "idUsuario")
+@PrimaryKeyJoinColumn(name = "id")
 public class Restaurante extends Usuario{
 
     //seta automatico na criação do Restaurante
@@ -42,18 +43,22 @@ public class Restaurante extends Usuario{
     @Column(length = 500)
     private String descricaoRestaurante;
 
-    @OneToMany
+    @OneToMany(
+            mappedBy = "restaurante",
+            cascade = CascadeType.ALL
+    )
     private List<Endereco> enderecos;
 
     @Column
     private CategoriaRestaurante categoria;
 
     @JsonFormat(pattern = "HH:mm")
-    private LocalDateTime horarioAbertura;
+    private LocalTime horarioAbertura;
 
     @JsonFormat(pattern = "HH:mm")
-    private LocalDateTime horarioFechamento;
+    private LocalTime horarioFechamento;
 
+    @ElementCollection //para lista de enums
     @Enumerated(EnumType.STRING)
     private List<DiasSemana> diasFuncionamento;
 
@@ -67,7 +72,7 @@ public class Restaurante extends Usuario{
 
     @Column(nullable = false)
     @JsonFormat(pattern = "dd-MM-yyyy")
-    private LocalDateTime dataCadastro = LocalDateTime.now();
+    private LocalDate dataCadastro = LocalDate.now();
 
     @Column(columnDefinition = "boolean default true")
     private boolean isAtivoRestaurante;
