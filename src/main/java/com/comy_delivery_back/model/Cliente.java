@@ -14,7 +14,6 @@ import java.util.List;
 
 @Entity
 @AllArgsConstructor
-@NoArgsConstructor
 @Data
 @PrimaryKeyJoinColumn(name = "id")
 public class Cliente extends Usuario{
@@ -24,7 +23,7 @@ public class Cliente extends Usuario{
         this.setRoleUsuario(RoleUsuario.CLIENTE);
     }
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 100)
     private String nmCliente;
 
     @Column(unique = true, nullable = false)

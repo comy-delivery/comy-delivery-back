@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 @Entity
 @Data
 @AllArgsConstructor
-@NoArgsConstructor
 @PrimaryKeyJoinColumn(name = "id")
 public class Admin extends Usuario{
     //seta automatico na criação do ADMIN
@@ -20,7 +19,7 @@ public class Admin extends Usuario{
     }
 
     @Column(nullable = false)
-    private String nomeAdmin;
+    private String nmAdmin;
 
     @Column(unique = true, nullable = false)
     private String cpfAdmin;

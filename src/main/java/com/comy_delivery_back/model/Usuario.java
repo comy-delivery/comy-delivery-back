@@ -15,7 +15,7 @@ public class Usuario {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, length = 50)
     private String username;
 
     @Column(nullable = false)
@@ -27,12 +27,5 @@ public class Usuario {
     @Column(columnDefinition = "boolean default false")
     private boolean recuperar;
 
-    //possibilita settar nas classes filhas
-    public RoleUsuario getRoleUsuario(){
-        return roleUsuario;
-    }
 
-    public void setRoleUsuario(RoleUsuario roleUsuario){
-        this.roleUsuario = roleUsuario;
-    }
 }

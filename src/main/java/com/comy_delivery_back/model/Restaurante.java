@@ -17,7 +17,6 @@ import java.util.List;
 
 @Entity
 @AllArgsConstructor
-@NoArgsConstructor
 @Data
 @PrimaryKeyJoinColumn(name = "id")
 public class Restaurante extends Usuario{

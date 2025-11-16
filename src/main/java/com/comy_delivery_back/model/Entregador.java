@@ -13,7 +13,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
-@NoArgsConstructor
 @AllArgsConstructor
 @Data
 @PrimaryKeyJoinColumn(name = "id")
@@ -39,7 +38,7 @@ public class Entregador extends Usuario{
     @Enumerated(EnumType.STRING)
     private VeiculoEntregador veiculo;
 
-    @Column(unique = true, nullable = false)
+    @Column(unique = true, nullable = false, length = 7)
     private String placa;
 
     @JsonFormat(pattern = "dd-MM-yyyy")
