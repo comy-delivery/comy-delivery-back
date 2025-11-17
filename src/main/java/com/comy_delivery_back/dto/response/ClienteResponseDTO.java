@@ -12,7 +12,7 @@ public record ClienteResponseDTO(
         String telefoneCliente,
         LocalDate dataCadastroCliente,
         List<EnderecoResponseDTO> enderecos,
-        boolean isAtivoCliente
+        boolean isAtivo
 ) {
     /*
     public ClienteResponseDTO(Cliente c){
@@ -26,7 +26,7 @@ public record ClienteResponseDTO(
                 c.getDataCadastroCliente(),
                 //enderecos aqui
                 c.getEnderecos(),
-                c.isAtivoCliente()
+                c.isAtivo()
         );
     }*/
 

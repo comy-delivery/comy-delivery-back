@@ -27,5 +27,7 @@ public class Usuario {
     @Column(columnDefinition = "boolean default false")
     private boolean recuperar;
 
+    @Column(columnDefinition = "boolean default true")
+    private boolean isAtivo;
 
 }
