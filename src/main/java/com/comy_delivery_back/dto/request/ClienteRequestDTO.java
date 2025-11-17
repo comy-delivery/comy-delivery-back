@@ -6,6 +6,8 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import org.hibernate.validator.constraints.br.CPF;
 
+import java.util.List;
+
 public record ClienteRequestDTO(
         @NotBlank(message = "O nome de usuario é obrigatório!")
         @Size(min = 4, max = 50, message = "O nome de usuário deve ter entre 4 e 50 caracteres.")
@@ -30,5 +32,6 @@ public record ClienteRequestDTO(
         @Size(min = 10, max = 11, message = "O telefone deve ter 10 ou 11 dígitos.")
         @Pattern(regexp = "^[0-9]{10,11}$", message = "O telefone deve conter apenas números.")
         String telefoneCliente
+
 ) {
 }

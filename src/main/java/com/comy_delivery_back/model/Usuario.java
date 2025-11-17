@@ -4,12 +4,16 @@ import com.comy_delivery_back.enums.RoleUsuario;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
+@Data
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Data
+
 public class Usuario {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,5 +33,8 @@ public class Usuario {
 
     @Column(columnDefinition = "boolean default true")
     private boolean isAtivo;
+
+    private String tokenRecuperacaoSenha;
+    private LocalDateTime expiracaoToken;
 
 }
