@@ -6,17 +6,17 @@ import java.time.LocalDateTime;
 
 public record ProdutoResponseDTO(
         Long idProduto,
- String nmProduto,
- String dsProduto,
- Double vlPreco,
- byte[] imagemProduto,
-//     RestauranteResponseDTO restaurante;
- String categoriaProduto,
- Integer tempoPreparacao,
- Boolean isPromocao,
- Double vlPrecoPromocional,
- boolean isAtivo,
- LocalDateTime dataCadastro) {
+        String nmProduto,
+        String dsProduto,
+        Double vlPreco,
+        byte[] imagemProduto,
+        RestauranteResponseDTO restaurante,
+        String categoriaProduto,
+        Integer tempoPreparacao,
+        Boolean isPromocao,
+        Double vlPrecoPromocional,
+        boolean isAtivo,
+        LocalDateTime dataCadastro) {
 
     public ProdutoResponseDTO(Produto p){
         this(
@@ -25,7 +25,7 @@ public record ProdutoResponseDTO(
                 p.getDsProduto(),
                 p.getVlPreco(),
                 p.getImagemProduto(),
-//                new RestauranteResponseDTO(p.getIdRestaurante),
+                new RestauranteResponseDTO(p.getRestaurante()),
                 p.getCategoriaProduto(),
                 p.getTempoPreparacao(),
                 p.getIsPromocao(),
