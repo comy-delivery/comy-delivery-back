@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -15,7 +17,7 @@ public class Avaliacao {
     private Long idAvaliacao;
 
     @ManyToOne
-    @JoinColumn(name = "restaurante_id")
+    @JoinColumn(name = "restaurante_id", nullable = false)
     private Restaurante restaurante;
 
     @ManyToOne
@@ -27,7 +29,7 @@ public class Avaliacao {
     private Pedido pedido;
 
     @ManyToOne
-    @JoinColumn(name = "entregador_id")
+    @JoinColumn(name = "entregador_id", nullable = false)
     private Entregador entregador;
 
     @Column(nullable = false)
