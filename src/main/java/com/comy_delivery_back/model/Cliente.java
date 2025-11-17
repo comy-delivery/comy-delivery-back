@@ -44,6 +44,4 @@ public class Cliente extends Usuario{
     )
     private List<Endereco> enderecos;
 
-    @Column(columnDefinition = "boolean default true")
-    private boolean isAtivoCliente;
 }

@@ -19,7 +19,7 @@ public record EntregadorResponseDTO(
         String placa,
         LocalDate dataCadastroEntregador,
         List<Long> idEntregas,
-        boolean isAtivoEntregador
+        boolean isAtivo
 ) {
     public EntregadorResponseDTO(Entregador e){
         this(
@@ -37,7 +37,7 @@ public record EntregadorResponseDTO(
                         .stream()
                         .map(Entrega::getIdEntrega)
                         .collect(Collectors.toList()) : List.of(),
-                e.isAtivoEntregador()
+                e.isAtivo()
         );
     }
 }

@@ -7,7 +7,8 @@ public record AdminResponseDTO(
         String username,
         String nmAdmin,
         String cpfAdmin,
-        String emailAdmin
+        String emailAdmin,
+        boolean isAtivo
 ) {
     public AdminResponseDTO(Admin a){
         this(
@@ -15,7 +16,8 @@ public record AdminResponseDTO(
                 a.getUsername(),
                 a.getNmAdmin(),
                 a.getCpfAdmin(),
-                a.getEmailAdmin()
+                a.getEmailAdmin(),
+                a.isAtivo()
         );
     }
 }

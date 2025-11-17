@@ -55,7 +55,5 @@ public class Entregador extends Usuario{
     )
     private List<Entrega> entregasEntregador;
 
-    @Column(columnDefinition = "boolean default true")
-    private boolean isAtivoEntregador;
 
 }

@@ -74,6 +74,4 @@ public class Restaurante extends Usuario{
     @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDate dataCadastro = LocalDate.now();
 
-    @Column(columnDefinition = "boolean default true")
-    private boolean isAtivoRestaurante;
 }

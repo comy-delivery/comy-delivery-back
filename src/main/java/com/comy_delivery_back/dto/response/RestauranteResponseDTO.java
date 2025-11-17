@@ -32,7 +32,7 @@ public record RestauranteResponseDTO(
         boolean isDisponivel,
         @JsonFormat(pattern = "dd-MM-yyyy")
         LocalDate dataCadastro,
-        boolean isAtivoRestaurante
+        boolean isAtivo
 ) {
     public RestauranteResponseDTO(Restaurante r){
         this(
@@ -57,7 +57,7 @@ public record RestauranteResponseDTO(
                 r.isAberto(),
                 r.isDisponivel(),
                 r.getDataCadastro(),
-                r.isAtivoRestaurante()
+                r.isAtivo()
         );
     }
 }
