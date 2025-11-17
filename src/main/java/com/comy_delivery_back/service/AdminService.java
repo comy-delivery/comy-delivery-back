@@ -1,0 +1,59 @@
+package com.comy_delivery_back.service;
+
+import com.comy_delivery_back.dto.request.AdminRequestDTO;
+import com.comy_delivery_back.dto.response.AdminResponseDTO;
+import com.comy_delivery_back.model.Admin;
+import com.comy_delivery_back.repository.AdminRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+@Service
+public class AdminService {
+    @Autowired
+    AdminRepository adminRepository;
+
+    public AdminResponseDTO cadastrarAdmin(AdminRequestDTO adminRequestDTO){
+        if(adminRepository.findByCpfAdmin(adminRequestDTO.cpfAdmin()).isPresent()){
+            throw new RuntimeException("CPF já foi cadastrado");
+        }
+
+        if (adminRepository.findByEmailAdmin(adminRequestDTO.emailAdmin()).isPresent()){
+            throw new RuntimeException("Email já cadastrado.");
+        }
+
+        Admin novoAdmin = new Admin();
+
+        novoAdmin.setUsername(adminRequestDTO.username());
+        novoAdmin.setPassword(adminRequestDTO.password()); //criptografar aqui
+        novoAdmin.setNmAdmin(adminRequestDTO.nmAdmin());
+        novoAdmin.setEmailAdmin(adminRequestDTO.emailAdmin());
+        novoAdmin.setCpfAdmin(adminRequestDTO.cpfAdmin());
+
+        adminRepository.save(novoAdmin);
+
+        return new AdminResponseDTO(
+                novoAdmin.getId(),
+                novoAdmin.getUsername(),
+                novoAdmin.getNmAdmin(),
+                novoAdmin.getCpfAdmin(),
+                novoAdmin.getEmailAdmin(),
+                novoAdmin.isAtivo()
+        );
+    }
+
+    public AdminResponseDTO buscarAdminPorId(Long idAdmin){
+        var admin = adminRepository.findById(idAdmin)
+                .orElseThrow(() -> new IllegalArgumentException("Id não pertence a um admin"));
+
+        return new AdminResponseDTO(
+                admin.getId(),
+                admin.getUsername(),
+                admin.getNmAdmin(),
+                admin.getCpfAdmin(),
+                admin.getEmailAdmin(),
+                admin.isAtivo()
+        );
+    }
+
+
+}

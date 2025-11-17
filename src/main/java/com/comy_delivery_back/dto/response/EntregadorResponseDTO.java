@@ -18,7 +18,7 @@ public record EntregadorResponseDTO(
         VeiculoEntregador veiculo,
         String placa,
         LocalDate dataCadastroEntregador,
-        List<Long> idEntregas,
+        //List<Long> idEntregas,
         boolean isAtivo
 ) {
     public EntregadorResponseDTO(Entregador e){
@@ -32,11 +32,11 @@ public record EntregadorResponseDTO(
                 e.getVeiculo(),
                 e.getPlaca(),
                 e.getDataCadastroEntregador(),
-                e.getEntregasEntregador() != null ?
+                /*e.getEntregasEntregador() != null ?
                         e.getEntregasEntregador()
                         .stream()
                         .map(Entrega::getIdEntrega)
-                        .collect(Collectors.toList()) : List.of(),
+                        .collect(Collectors.toList()) : List.of(),*/
                 e.isAtivo()
         );
     }
