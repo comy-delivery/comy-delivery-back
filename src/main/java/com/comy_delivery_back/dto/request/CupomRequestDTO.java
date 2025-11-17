@@ -12,6 +12,7 @@ public record CupomRequestDTO(
         @Size(min = 10, max = 50)
         String codigoCupom,
 
+        @Size(max=100, message = "A descrição do cupom não pode ter mais que 100 caracteres")
         String dsCupom,
 
         @NotBlank(message = "O tipo do cupom precisa ser preenchido")
@@ -26,7 +27,7 @@ public record CupomRequestDTO(
 
         @NotNull(message = "Data de validade é obrigatória")
         @FutureOrPresent
-        @JsonFormat(pattern = "dd/MM/yyyy")
+        @JsonFormat(pattern = "dd-MM-yyyy")
         LocalDateTime dtValidade,
 
         Integer qtdUsoMaximo,
