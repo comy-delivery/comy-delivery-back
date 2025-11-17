@@ -34,7 +34,7 @@ public class ClienteService {
             throw new IllegalArgumentException("CPF já cadastrado!");
         }
 
-        if (clienteRepository.findByCpfCliente(clienteRequestDTO.emailCliente()).isPresent()) {
+        if (clienteRepository.findByEmailCliente(clienteRequestDTO.emailCliente()).isPresent()) {
             throw new IllegalArgumentException("EMAIL já cadastrado!");
         }
 
