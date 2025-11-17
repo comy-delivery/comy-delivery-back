@@ -12,8 +12,10 @@ import java.util.Optional;
 @Repository
 public interface EntregadorRepository extends JpaRepository<Entregador, Long> {
     Optional<Entregador> findByCpfEntregador(String cpf);
+    Optional<Entregador> findByEmailEntregador(String email);
     boolean existsByIsAtivoTrue();
     List<Entregador> findByIsDisponivelTrue();
+
 
     //revisar depois
     List<Entrega> findAllEntregasByEntregadorId(Long id);
