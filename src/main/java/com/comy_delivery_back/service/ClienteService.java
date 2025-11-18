@@ -5,6 +5,7 @@ import com.comy_delivery_back.dto.request.ClienteRequestDTO;
 import com.comy_delivery_back.dto.request.EnderecoRequestDTO;
 import com.comy_delivery_back.dto.response.ClienteResponseDTO;
 import com.comy_delivery_back.dto.response.EnderecoResponseDTO;
+import com.comy_delivery_back.dto.response.PedidoResponseDTO;
 import com.comy_delivery_back.model.Cliente;
 import com.comy_delivery_back.model.Endereco;
 import com.comy_delivery_back.model.Usuario;
@@ -156,10 +157,26 @@ public class ClienteService {
                 }).toList();
     }
 
-    /*
-    public ClienteResponseDTO atualizarCliente(Long idCliente, AtualizarClienteRequestDTO requestDTO){
+    public List<PedidoResponseDTO> listarPedidos(Long idCliente){
+        Cliente cliente = clienteRepository.findById(idCliente)
+                .orElseThrow(() -> new IllegalArgumentException("id cliente não encontrado."));
+
+        List<PedidoResponseDTO> pedidosCliente = cliente.getPedidos()
+                .stream()
+                .map(PedidoResponseDTO::new)
+                .toList();
+
+        return pedidosCliente;
+    }
+
+
+    public ClienteResponseDTO atualizarDadosCliente(Long idCliente, AtualizarClienteRequestDTO requestDTO){
         Cliente cliente = clienteRepository.findById(idCliente)
                 .orElseThrow(()-> new IllegalArgumentException("Cliente não encontrado."));
+
+        if(requestDTO.nmCliente() != null && !requestDTO.nmCliente().isBlank()){
+            cliente.setNmCliente(requestDTO.nmCliente());
+        }
 
         if(requestDTO.emailCliente() != null && !requestDTO.emailCliente().isBlank()){
             if (requestDTO.emailCliente().equals(cliente.getEmailCliente())){
@@ -168,10 +185,14 @@ public class ClienteService {
 
             cliente.setEmailCliente(requestDTO.emailCliente());
         }
-
-        if(requestDTO.nmCliente() != null && !requestDTO.nmCliente().isBlank()){
-            cliente.setNmCliente(requestDTO.nmCliente());
+        if (requestDTO.telefoneCliente() != null && !requestDTO.telefoneCliente().isBlank()){
+            cliente.setTelefoneCliente(requestDTO.telefoneCliente());
         }
+
+        List<EnderecoResponseDTO> enderecoResponseDTOS = cliente.getEnderecos()
+                .stream()
+                .map(EnderecoResponseDTO::new)
+                .toList();
 
         return new ClienteResponseDTO(
                 cliente.getId(),
@@ -184,7 +205,14 @@ public class ClienteService {
                 enderecoResponseDTOS,
                 cliente.isAtivo()
 
-        )
+        );
+    }
+
+    /*
+    public EnderecoResponseDTO atualizarEnderecoCliente(Long idCliente){
+        Cliente cliente = clienteRepository.findById(idCliente)
+                .orElseThrow(()-> new IllegalArgumentException("Cliente não encontrado."));
+
     }*/
 
     @Transactional
