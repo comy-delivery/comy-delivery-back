@@ -39,6 +39,7 @@ public class Cupom {
     @Column(nullable = false)
     private LocalDateTime dtValidade;
 
+    @Column(nullable = false)
     private Integer qtdUsoMaximo;
 
     @Column(nullable = false)

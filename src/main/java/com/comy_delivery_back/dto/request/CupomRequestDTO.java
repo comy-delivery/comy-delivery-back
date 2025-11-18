@@ -30,6 +30,8 @@ public record CupomRequestDTO(
         @JsonFormat(pattern = "dd-MM-yyyy")
         LocalDateTime dtValidade,
 
+        @NotNull(message = "Precisa definir um limite")
+        @Size(min = 1, message = "Limite minimo é 1")
         Integer qtdUsoMaximo,
 
         @NotNull(message = "ID do restaurante é obrigatório")
