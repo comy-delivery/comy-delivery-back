@@ -1,9 +1,7 @@
 package com.comy_delivery_back.dto.request;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import com.comy_delivery_back.model.Endereco;
+import jakarta.validation.constraints.*;
 import org.hibernate.validator.constraints.br.CPF;
 
 import java.util.List;
@@ -31,7 +29,10 @@ public record ClienteRequestDTO(
         @NotBlank
         @Size(min = 10, max = 11, message = "O telefone deve ter 10 ou 11 dígitos.")
         @Pattern(regexp = "^[0-9]{10,11}$", message = "O telefone deve conter apenas números.")
-        String telefoneCliente
+        String telefoneCliente,
+
+        @NotNull(message = "é obrigatorio a inserção de pelo menos um endereço")
+        List<EnderecoRequestDTO> enderecos
 
 ) {
 }

@@ -1,8 +1,9 @@
 package com.comy_delivery_back.dto.response;
 
+import com.comy_delivery_back.model.Cliente;
+
 import java.time.LocalDate;
 import java.util.List;
-import java.util.stream.Stream;
 
 public record ClienteResponseDTO(
         Long id,
@@ -12,23 +13,6 @@ public record ClienteResponseDTO(
         String cpfCliente,
         String telefoneCliente,
         LocalDate dataCadastroCliente,
-        //List<EnderecoResponseDTO> enderecos,
+        List<EnderecoResponseDTO> enderecos,
         boolean isAtivo
-) {
-    /*
-    public ClienteResponseDTO(Cliente c){
-        this(
-                c.getId(),
-                c.getUsername(),
-                c.getNmCliente(),
-                c.getEmailCliente(),
-                c.getCpfCliente(),
-                c.getTelefoneCliente(),
-                c.getDataCadastroCliente(),
-                //enderecos aqui
-                c.getEnderecos(),
-                c.isAtivo()
-        );
-    }*/
-
-}
+) {}

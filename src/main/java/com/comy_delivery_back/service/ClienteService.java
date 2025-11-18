@@ -1,15 +1,19 @@
 package com.comy_delivery_back.service;
 
+import com.comy_delivery_back.dto.request.AtualizarClienteRequestDTO;
 import com.comy_delivery_back.dto.request.ClienteRequestDTO;
+import com.comy_delivery_back.dto.request.EnderecoRequestDTO;
 import com.comy_delivery_back.dto.response.ClienteResponseDTO;
 import com.comy_delivery_back.dto.response.EnderecoResponseDTO;
 import com.comy_delivery_back.model.Cliente;
 import com.comy_delivery_back.model.Endereco;
 import com.comy_delivery_back.model.Usuario;
 import com.comy_delivery_back.repository.ClienteRepository;
+import com.comy_delivery_back.repository.EnderecoRepository;
 import com.comy_delivery_back.repository.UsuarioRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -28,6 +32,9 @@ public class ClienteService {
     @Autowired
     private EmailService emailService;
 
+    @Autowired
+    private EnderecoRepository enderecoRepository;
+
     @Transactional
     public ClienteResponseDTO cadastrarCliente(ClienteRequestDTO clienteRequestDTO) {
         if (clienteRepository.findByCpfCliente(clienteRequestDTO.cpfCliente()).isPresent()) {
@@ -40,7 +47,6 @@ public class ClienteService {
 
         Cliente novoCliente = new Cliente();
 
-
         novoCliente.setUsername(clienteRequestDTO.username());
         novoCliente.setPassword(clienteRequestDTO.password()); //encoder aqui depois
         novoCliente.setNmCliente(clienteRequestDTO.nmCliente());
@@ -49,9 +55,24 @@ public class ClienteService {
         novoCliente.setTelefoneCliente(clienteRequestDTO.telefoneCliente());
         //colocar role mesmo já sendo setado no model?
 
-        //olhar depois
-        Endereco endereco = new Endereco();
-        novoCliente.setEnderecos((List<Endereco>) endereco);
+        List<Endereco> enderecos = clienteRequestDTO.enderecos().stream()
+                        .map(enderecoRequestDTO -> {
+                            Endereco endereco = new Endereco();
+
+                            endereco.setLogradouro(enderecoRequestDTO.logradouro());
+                            endereco.setNumero(enderecoRequestDTO.numero());
+                            endereco.setComplemento(enderecoRequestDTO.complemento());
+                            endereco.setBairro(enderecoRequestDTO.bairro());
+                            endereco.setCidade(enderecoRequestDTO.cidade());
+                            endereco.setCep(enderecoRequestDTO.cep());
+                            endereco.setEstado(enderecoRequestDTO.estado());
+                            endereco.setTipoEndereco(enderecoRequestDTO.tipoEndereco());
+
+                            return endereco;
+                        }).toList();
+        novoCliente.setEnderecos(enderecos); //cliente recebe o endereco
+
+        enderecos.forEach(endereco -> endereco.setCliente(novoCliente)); //endereco recebe o cliente que pertence
 
         clienteRepository.save(novoCliente);
 
@@ -62,15 +83,42 @@ public class ClienteService {
                 novoCliente.getEmailCliente(),
                 novoCliente.getCpfCliente(),
                 novoCliente.getTelefoneCliente(),
-                novoCliente.getDataCadastroCliente(), //ver se ta retornando mesmo sem setar no service
+                novoCliente.getDataCadastroCliente(),//ver se ta retornando mesmo sem setar no service
+                novoCliente.getEnderecos().stream().map(EnderecoResponseDTO::new).toList(),
                 novoCliente.isAtivo()
         );
+    }
+
+    @Transactional
+    public EnderecoResponseDTO cadastrarNovoEndereco(Long idCliente, EnderecoRequestDTO enderecoRequestDTO){
+        Cliente cliente = clienteRepository.findById(idCliente)
+                .orElseThrow(()-> new IllegalArgumentException("Cliente não encontrado"));
+
+        Endereco novoEndereco = new Endereco();
+
+        novoEndereco.setLogradouro(enderecoRequestDTO.logradouro());
+        novoEndereco.setNumero(enderecoRequestDTO.numero());
+        novoEndereco.setComplemento(enderecoRequestDTO.complemento());
+        novoEndereco.setBairro(enderecoRequestDTO.bairro());
+        novoEndereco.setCidade(enderecoRequestDTO.cidade());
+        novoEndereco.setEstado(enderecoRequestDTO.estado());
+        novoEndereco.setTipoEndereco(enderecoRequestDTO.tipoEndereco());
+        novoEndereco.setCliente(cliente);
+
+        enderecoRepository.save(novoEndereco);
+
+        return new EnderecoResponseDTO(novoEndereco);
     }
 
     @Transactional
     public ClienteResponseDTO buscarClientePorId (Long idCliente){
         var cliente = clienteRepository.findById(idCliente)
                 .orElseThrow(()-> new IllegalArgumentException("Id informado não corresponde a nenhum cliente"));
+
+        List<EnderecoResponseDTO> enderecoResponseDTOS = cliente.getEnderecos()
+                .stream()
+                .map(EnderecoResponseDTO::new)
+                .toList();
 
         return new ClienteResponseDTO(
                 cliente.getId(),
@@ -80,6 +128,7 @@ public class ClienteService {
                 cliente.getCpfCliente(),
                 cliente.getTelefoneCliente(),
                 cliente.getDataCadastroCliente(),
+                enderecoResponseDTOS,
                 cliente.isAtivo()
         );
     }
@@ -88,17 +137,55 @@ public class ClienteService {
     public List<ClienteResponseDTO> buscarClientesAtivos (){
         return clienteRepository.findAllByIsAtivoTrue()
                 .stream()
-                .map(c -> new ClienteResponseDTO(
-                        c.getId(),
-                        c.getUsername(),
-                        c.getNmCliente(),
-                        c.getEmailCliente(),
-                        c.getCpfCliente(),
-                        c.getTelefoneCliente(),
-                        c.getDataCadastroCliente(),
-                        c.isAtivo()
-                )).toList();
+                .map(c -> {
+                    List<EnderecoResponseDTO> enderecoResponseDTOS = c.getEnderecos().stream()
+                            .map(EnderecoResponseDTO::new)
+                            .toList();
+
+                    return new ClienteResponseDTO(
+                            c.getId(),
+                            c.getUsername(),
+                            c.getNmCliente(),
+                            c.getEmailCliente(),
+                            c.getCpfCliente(),
+                            c.getTelefoneCliente(),
+                            c.getDataCadastroCliente(),
+                            enderecoResponseDTOS,
+                            c.isAtivo()
+                    );
+                }).toList();
     }
+
+    /*
+    public ClienteResponseDTO atualizarCliente(Long idCliente, AtualizarClienteRequestDTO requestDTO){
+        Cliente cliente = clienteRepository.findById(idCliente)
+                .orElseThrow(()-> new IllegalArgumentException("Cliente não encontrado."));
+
+        if(requestDTO.emailCliente() != null && !requestDTO.emailCliente().isBlank()){
+            if (requestDTO.emailCliente().equals(cliente.getEmailCliente())){
+                throw new IllegalArgumentException("Email pertence a outro usuario");
+            }
+
+            cliente.setEmailCliente(requestDTO.emailCliente());
+        }
+
+        if(requestDTO.nmCliente() != null && !requestDTO.nmCliente().isBlank()){
+            cliente.setNmCliente(requestDTO.nmCliente());
+        }
+
+        return new ClienteResponseDTO(
+                cliente.getId(),
+                cliente.getUsername(),
+                cliente.getNmCliente(),
+                cliente.getEmailCliente(),
+                cliente.getCpfCliente(),
+                cliente.getTelefoneCliente(),
+                cliente.getDataCadastroCliente(),
+                enderecoResponseDTOS,
+                cliente.isAtivo()
+
+        )
+    }*/
 
     @Transactional
     public void deletarCliente(Long idCliente){
@@ -121,7 +208,7 @@ public class ClienteService {
 
         clienteRepository.save(cliente);
 
-        String linkRecuperacao = "URL_DO_SEU_FRONTEND/reset-password?token=" + token;
+        String linkRecuperacao = "http://localhost/8084/reset-password?token=" + token;
 
         try{
             emailService.enviarEmailRecuperacao(cliente.getEmailCliente(), linkRecuperacao);
