@@ -16,8 +16,6 @@ public record ProdutoRequestDTO(
         @Positive(message = "Preço deve ser positivo")
         Double vlPreco,
 
-        byte[] imagemProduto,
-
         @NotNull(message = "ID do restaurante é obrigatório")
         Long restauranteId,
 

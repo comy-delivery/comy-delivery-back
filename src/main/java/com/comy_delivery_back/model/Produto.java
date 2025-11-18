@@ -27,6 +27,7 @@ public class Produto {
     private Double vlPreco;
 
     @Lob
+    @Column(columnDefinition = "BLOB")
     private byte[] imagemProduto;
 
     @ManyToOne
