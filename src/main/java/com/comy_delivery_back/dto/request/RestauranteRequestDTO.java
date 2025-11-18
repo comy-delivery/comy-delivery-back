@@ -56,7 +56,9 @@ public record RestauranteRequestDTO(
         @NotEmpty(message = "Os dias de funcionamento são obrigatórios.")
         List<DiasSemana> diasFuncionamento,
 
-        @NotNull(message = "O tempo médio de entrega é obrigatório.")
+        List<ProdutoRequestDTO> produtos,
+
+        //@NotNull(message = "O tempo médio de entrega é obrigatório.")
         @Min(value = 5, message = "O tempo mínimo de entrega é de 5 minutos.")
         Integer tempoMediaEntrega
 ) {
