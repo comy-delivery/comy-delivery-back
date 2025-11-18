@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -61,6 +62,14 @@ public class Restaurante extends Usuario{
     @ElementCollection //para lista de enums
     @Enumerated(EnumType.STRING)
     private List<DiasSemana> diasFuncionamento;
+
+    @OneToMany(
+            mappedBy = "restaurante",
+            cascade = CascadeType.ALL
+    )
+    private List<Produto> produtos = new ArrayList<>();
+
+    private List<Pedido> pedidos = new ArrayList<>();
 
     private Integer tempoMediaEntrega;
 
