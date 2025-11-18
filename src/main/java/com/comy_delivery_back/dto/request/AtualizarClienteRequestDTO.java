@@ -6,6 +6,6 @@ public record AtualizarClienteRequestDTO(
         String nmCliente,
         String emailCliente,
         String telefoneCliente
-        //Endereco endereco -> perguntar pra helo como que ela vai fazer
+        //Endereco enderecoPrincipal criar atualizarEndereco
 ) {
 }

@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 @Data
 @Entity
@@ -30,13 +31,18 @@ public class Cliente extends Usuario{
     @Column(length = 11, nullable = false)
     private String telefoneCliente;
 
-    @JsonFormat(pattern = "dd-MM-yyyy")
-    private LocalDate dataCadastroCliente = LocalDate.now();
+    @OneToMany(
+            mappedBy = "cliente"
+    )
+    private List<Pedido> pedidos = new ArrayList<>();
 
     @OneToMany(
             mappedBy = "cliente",
             cascade = CascadeType.ALL
     )
     private List<Endereco> enderecos;
+
+    @JsonFormat(pattern = "dd-MM-yyyy")
+    private LocalDate dataCadastroCliente = LocalDate.now();
 
 }
