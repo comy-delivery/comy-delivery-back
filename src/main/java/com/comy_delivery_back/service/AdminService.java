@@ -4,13 +4,16 @@ import com.comy_delivery_back.dto.request.AdminRequestDTO;
 import com.comy_delivery_back.dto.response.AdminResponseDTO;
 import com.comy_delivery_back.model.Admin;
 import com.comy_delivery_back.repository.AdminRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class AdminService {
-    @Autowired
-    AdminRepository adminRepository;
+
+    private final AdminRepository adminRepository;
+
+    public AdminService(AdminRepository adminRepository){
+        this.adminRepository = adminRepository;
+    }
 
     public AdminResponseDTO cadastrarAdmin(AdminRequestDTO adminRequestDTO){
         if(adminRepository.findByCpfAdmin(adminRequestDTO.cpfAdmin()).isPresent()){
@@ -31,29 +34,23 @@ public class AdminService {
 
         adminRepository.save(novoAdmin);
 
-        return new AdminResponseDTO(
-                novoAdmin.getId(),
-                novoAdmin.getUsername(),
-                novoAdmin.getNmAdmin(),
-                novoAdmin.getCpfAdmin(),
-                novoAdmin.getEmailAdmin(),
-                novoAdmin.isAtivo()
-        );
+        return new AdminResponseDTO(novoAdmin);
     }
 
     public AdminResponseDTO buscarAdminPorId(Long idAdmin){
-        var admin = adminRepository.findById(idAdmin)
+        Admin admin = adminRepository.findById(idAdmin)
                 .orElseThrow(() -> new IllegalArgumentException("Id não pertence a um admin"));
 
-        return new AdminResponseDTO(
-                admin.getId(),
-                admin.getUsername(),
-                admin.getNmAdmin(),
-                admin.getCpfAdmin(),
-                admin.getEmailAdmin(),
-                admin.isAtivo()
-        );
+        return new AdminResponseDTO(admin);
     }
 
+    //metodo extra apenas para teste
+    public void deletarAdmin(Long idAdmin){
+        Admin admin = adminRepository.findById(idAdmin)
+                .orElseThrow(() -> new IllegalArgumentException("Id não pertence a um admin"));
+
+        admin.setAtivo(false);
+
+    }
 
 }
