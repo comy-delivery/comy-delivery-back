@@ -8,13 +8,10 @@ import com.comy_delivery_back.dto.response.EnderecoResponseDTO;
 import com.comy_delivery_back.dto.response.PedidoResponseDTO;
 import com.comy_delivery_back.model.Cliente;
 import com.comy_delivery_back.model.Endereco;
-import com.comy_delivery_back.model.Usuario;
 import com.comy_delivery_back.repository.ClienteRepository;
 import com.comy_delivery_back.repository.EnderecoRepository;
-import com.comy_delivery_back.repository.UsuarioRepository;
 import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.crossstore.ChangeSetPersister;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -24,17 +21,19 @@ import java.util.UUID;
 @Service
 public class ClienteService {
 
-    @Autowired
-    private ClienteRepository clienteRepository;
+    private final ClienteRepository clienteRepository;
+    private final EnderecoRepository enderecoRepository;
+    private final PasswordEncoder passwordEncoder;//usar depois
+    private final EmailService emailService;
 
-    @Autowired
-    private UsuarioRepository usuarioRepository;
-
-    @Autowired
-    private EmailService emailService;
-
-    @Autowired
-    private EnderecoRepository enderecoRepository;
+    public ClienteService(ClienteRepository clienteRepository,
+                          EnderecoRepository enderecoRepository, PasswordEncoder passwordEncoder,
+                          EmailService emailService) {
+        this.clienteRepository = clienteRepository;
+        this.enderecoRepository = enderecoRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.emailService = emailService;
+    }
 
     @Transactional
     public ClienteResponseDTO cadastrarCliente(ClienteRequestDTO clienteRequestDTO) {
@@ -49,12 +48,11 @@ public class ClienteService {
         Cliente novoCliente = new Cliente();
 
         novoCliente.setUsername(clienteRequestDTO.username());
-        novoCliente.setPassword(clienteRequestDTO.password()); //encoder aqui depois
+        novoCliente.setPassword(passwordEncoder.encode(clienteRequestDTO.password()));
         novoCliente.setNmCliente(clienteRequestDTO.nmCliente());
         novoCliente.setCpfCliente(clienteRequestDTO.cpfCliente());
         novoCliente.setEmailCliente(clienteRequestDTO.emailCliente());
         novoCliente.setTelefoneCliente(clienteRequestDTO.telefoneCliente());
-        //colocar role mesmo já sendo setado no model?
 
         List<Endereco> enderecos = clienteRequestDTO.enderecos().stream()
                         .map(enderecoRequestDTO -> {
@@ -77,17 +75,7 @@ public class ClienteService {
 
         clienteRepository.save(novoCliente);
 
-        return new ClienteResponseDTO(
-                novoCliente.getId(),
-                novoCliente.getUsername(),
-                novoCliente.getNmCliente(),
-                novoCliente.getEmailCliente(),
-                novoCliente.getCpfCliente(),
-                novoCliente.getTelefoneCliente(),
-                novoCliente.getDataCadastroCliente(),//ver se ta retornando mesmo sem setar no service
-                novoCliente.getEnderecos().stream().map(EnderecoResponseDTO::new).toList(),
-                novoCliente.isAtivo()
-        );
+        return new ClienteResponseDTO(novoCliente);
     }
 
     @Transactional
@@ -116,47 +104,17 @@ public class ClienteService {
         var cliente = clienteRepository.findById(idCliente)
                 .orElseThrow(()-> new IllegalArgumentException("Id informado não corresponde a nenhum cliente"));
 
-        List<EnderecoResponseDTO> enderecoResponseDTOS = cliente.getEnderecos()
-                .stream()
-                .map(EnderecoResponseDTO::new)
-                .toList();
-
-        return new ClienteResponseDTO(
-                cliente.getId(),
-                cliente.getUsername(),
-                cliente.getNmCliente(),
-                cliente.getEmailCliente(),
-                cliente.getCpfCliente(),
-                cliente.getTelefoneCliente(),
-                cliente.getDataCadastroCliente(),
-                enderecoResponseDTOS,
-                cliente.isAtivo()
-        );
+        return new ClienteResponseDTO(cliente);
     }
 
     @Transactional
     public List<ClienteResponseDTO> buscarClientesAtivos (){
         return clienteRepository.findAllByIsAtivoTrue()
                 .stream()
-                .map(c -> {
-                    List<EnderecoResponseDTO> enderecoResponseDTOS = c.getEnderecos().stream()
-                            .map(EnderecoResponseDTO::new)
-                            .toList();
-
-                    return new ClienteResponseDTO(
-                            c.getId(),
-                            c.getUsername(),
-                            c.getNmCliente(),
-                            c.getEmailCliente(),
-                            c.getCpfCliente(),
-                            c.getTelefoneCliente(),
-                            c.getDataCadastroCliente(),
-                            enderecoResponseDTOS,
-                            c.isAtivo()
-                    );
-                }).toList();
+                .map(ClienteResponseDTO::new).toList();
     }
 
+    @Transactional
     public List<PedidoResponseDTO> listarPedidos(Long idCliente){
         Cliente cliente = clienteRepository.findById(idCliente)
                 .orElseThrow(() -> new IllegalArgumentException("id cliente não encontrado."));
@@ -169,7 +127,7 @@ public class ClienteService {
         return pedidosCliente;
     }
 
-
+    @Transactional
     public ClienteResponseDTO atualizarDadosCliente(Long idCliente, AtualizarClienteRequestDTO requestDTO){
         Cliente cliente = clienteRepository.findById(idCliente)
                 .orElseThrow(()-> new IllegalArgumentException("Cliente não encontrado."));
@@ -178,9 +136,11 @@ public class ClienteService {
             cliente.setNmCliente(requestDTO.nmCliente());
         }
 
-        if(requestDTO.emailCliente() != null && !requestDTO.emailCliente().isBlank()){
-            if (requestDTO.emailCliente().equals(cliente.getEmailCliente())){
-                throw new IllegalArgumentException("Email pertence a outro usuario");
+        if (requestDTO.emailCliente() != null && !requestDTO.emailCliente().isBlank() &&
+                !requestDTO.emailCliente().equalsIgnoreCase(cliente.getEmailCliente())) {
+
+            if (clienteRepository.findByEmailCliente(requestDTO.emailCliente()).isPresent()) {
+                throw new IllegalArgumentException("E-mail já cadastrado para outro usuário.");
             }
 
             cliente.setEmailCliente(requestDTO.emailCliente());
@@ -189,31 +149,58 @@ public class ClienteService {
             cliente.setTelefoneCliente(requestDTO.telefoneCliente());
         }
 
-        List<EnderecoResponseDTO> enderecoResponseDTOS = cliente.getEnderecos()
-                .stream()
-                .map(EnderecoResponseDTO::new)
-                .toList();
-
-        return new ClienteResponseDTO(
-                cliente.getId(),
-                cliente.getUsername(),
-                cliente.getNmCliente(),
-                cliente.getEmailCliente(),
-                cliente.getCpfCliente(),
-                cliente.getTelefoneCliente(),
-                cliente.getDataCadastroCliente(),
-                enderecoResponseDTOS,
-                cliente.isAtivo()
-
-        );
+        return new ClienteResponseDTO(cliente);
     }
 
-    /*
-    public EnderecoResponseDTO atualizarEnderecoCliente(Long idCliente){
+    @Transactional
+    public EnderecoResponseDTO atualizarEnderecoCliente(Long idCliente, Long idEndereco, EnderecoRequestDTO enderecoRequestDTO) {
         Cliente cliente = clienteRepository.findById(idCliente)
-                .orElseThrow(()-> new IllegalArgumentException("Cliente não encontrado."));
+                .orElseThrow(() -> new IllegalArgumentException("Cliente não encontrado."));
 
-    }*/
+        Endereco endereco = enderecoRepository.findById(idEndereco)
+                .orElseThrow(()-> new IllegalArgumentException("Endereço não encontrado."));
+
+        if (!endereco.getCliente().getId().equals(idCliente)){
+            throw new IllegalArgumentException("Endereço não pertence ao cliente informado.");
+        }
+
+        if (enderecoRequestDTO.logradouro() != null && !enderecoRequestDTO.logradouro().isBlank()){
+            endereco.setLogradouro(enderecoRequestDTO.logradouro());
+        }
+
+        if (enderecoRequestDTO.numero() != null && !enderecoRequestDTO.numero().isBlank()){
+            endereco.setNumero(enderecoRequestDTO.numero());
+        }
+
+        if (enderecoRequestDTO.complemento() != null && !enderecoRequestDTO.complemento().isBlank()){
+            endereco.setComplemento(enderecoRequestDTO.complemento());
+        }
+
+        if (enderecoRequestDTO.bairro() != null && !enderecoRequestDTO.bairro().isBlank()){
+            endereco.setBairro(enderecoRequestDTO.bairro());
+        }
+
+        if (enderecoRequestDTO.cidade() != null && !enderecoRequestDTO.cidade().isBlank()){
+            endereco.setCidade(enderecoRequestDTO.cidade());
+        }
+
+        if (enderecoRequestDTO.cep() != null && !enderecoRequestDTO.cep().isBlank()){
+            endereco.setCep(enderecoRequestDTO.cep());
+        }
+
+        if (enderecoRequestDTO.estado() != null && !enderecoRequestDTO.estado().isBlank()){
+            endereco.setEstado(enderecoRequestDTO.estado());
+        }
+
+        if (enderecoRequestDTO.tipoEndereco() != null){
+            endereco.setTipoEndereco(enderecoRequestDTO.tipoEndereco());
+        }
+
+        enderecoRepository.save(endereco);
+
+        return new EnderecoResponseDTO(endereco);
+
+    }
 
     @Transactional
     public void deletarCliente(Long idCliente){
@@ -226,7 +213,7 @@ public class ClienteService {
     @Transactional
     public boolean iniciarRecuperacaoSenha(String email){
         Cliente cliente = clienteRepository.findByEmailCliente(email)
-                .orElseThrow(() -> new RuntimeException("Usuario não encontrado para o email: " + email));
+                .orElseThrow(() -> new IllegalArgumentException("Usuario não encontrado para o email: " + email));
 
         String token = UUID.randomUUID().toString();
         LocalDateTime expiracao = LocalDateTime.now().plusMinutes(15);
@@ -246,6 +233,7 @@ public class ClienteService {
         }
     }
 
+    @Transactional
     public boolean redefinirSenha(String token, String novaSenha){
         Cliente cliente = clienteRepository.findByTokenRecuperacao(token)
                 .orElseThrow(() -> new IllegalArgumentException("Token não encontrado"));
@@ -258,7 +246,7 @@ public class ClienteService {
             throw new RuntimeException("Token de recuperação expirado.");
         }
 
-        cliente.setPassword(novaSenha); //criptografar depois
+        cliente.setPassword(passwordEncoder.encode(novaSenha));
 
         //limpeza de token
         cliente.setTokenRecuperacaoSenha(null);
@@ -267,7 +255,4 @@ public class ClienteService {
 
         return true;
     }
-
-
-
 }
