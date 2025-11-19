@@ -35,5 +35,4 @@ public record EntregadorRequestDTO(
         @NotBlank
         @Size(max = 7, min = 7, message = "A placa deve conter 7 caracters")
         String placa
-        ) {
-}
+        ) {}
