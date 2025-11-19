@@ -6,6 +6,7 @@ import com.comy_delivery_back.dto.request.EnderecoRequestDTO;
 import com.comy_delivery_back.dto.response.ClienteResponseDTO;
 import com.comy_delivery_back.dto.response.EnderecoResponseDTO;
 import com.comy_delivery_back.dto.response.PedidoResponseDTO;
+import com.comy_delivery_back.exception.EnderecoNaoEncontradoException;
 import com.comy_delivery_back.model.Cliente;
 import com.comy_delivery_back.model.Endereco;
 import com.comy_delivery_back.repository.ClienteRepository;
@@ -158,7 +159,7 @@ public class ClienteService {
                 .orElseThrow(() -> new IllegalArgumentException("Cliente não encontrado."));
 
         Endereco endereco = enderecoRepository.findById(idEndereco)
-                .orElseThrow(()-> new IllegalArgumentException("Endereço não encontrado."));
+                .orElseThrow(()-> new EnderecoNaoEncontradoException(idEndereco));
 
         if (!endereco.getCliente().getId().equals(idCliente)){
             throw new IllegalArgumentException("Endereço não pertence ao cliente informado.");

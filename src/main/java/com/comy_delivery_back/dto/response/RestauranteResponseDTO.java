@@ -27,7 +27,7 @@ public record RestauranteResponseDTO(
         @JsonFormat(pattern = "HH:mm")
         LocalTime horarioFechamento,
         List<DiasSemana> diasFuncionamento,
-        List<ProdutoResponseDTO> produtos, //carregar só nome depois depois
+        List<Long> produtosId,
         Integer tempoMediaEntrega,
         Double avaliacaoMediaRestaurante,
         boolean isAberto,
@@ -35,31 +35,32 @@ public record RestauranteResponseDTO(
         @JsonFormat(pattern = "dd-MM-yyyy")
         LocalDate dataCadastro,
         boolean isAtivo
-) {/*
-    public RestauranteResponseDTO(Restaurante r){
+) {
+    public RestauranteResponseDTO(Restaurante restaurante){
         this(
-                r.getId(),
-                r.getUsername(),
-                r.getNmRestaurante(),
-                r.getEmailRestaurante(),
-                r.getCnpj(),
-                r.getTelefoneRestaurante(),
-                //convertendo para byte p/ string
-                r.getImagemLogo() != null ?
-                        Base64.getEncoder().encodeToString(r.getImagemLogo()) :
-                        null,
-                r.getDescricaoRestaurante(),
-                //r.getEnderecos(),
-                r.getCategoria(),
-                r.getHorarioAbertura(),
-                r.getHorarioFechamento(),
-                r.getDiasFuncionamento(),
-                r.getTempoMediaEntrega(),
-                r.getAvaliacaoMediaRestaurante(),
-                r.isAberto(),
-                r.isDisponivel(),
-                r.getDataCadastro(),
-                r.isAtivo()
+                restaurante.getId(),
+                restaurante.getUsername(),
+                restaurante.getNmRestaurante(),
+                restaurante.getEmailRestaurante(),
+                restaurante.getCnpj(),
+                restaurante.getTelefoneRestaurante(),
+                restaurante.getImagemLogo() != null
+                        ? Base64.getEncoder().encodeToString(restaurante.getImagemLogo()) : null,
+                restaurante.getDescricaoRestaurante(),
+                restaurante.getEnderecos().stream().map(EnderecoResponseDTO::new).toList(),
+                restaurante.getCategoria(),
+                restaurante.getHorarioFechamento(),
+                restaurante.getHorarioAbertura(),
+                restaurante.getDiasFuncionamento(),
+                restaurante.getProdutos() != null
+                        ? restaurante.getProdutos().stream().map(Produto::getIdProduto).toList() : List.of(),
+                restaurante.getTempoMediaEntrega(),
+                restaurante.getAvaliacaoMediaRestaurante(),
+                restaurante.isAberto(),
+                restaurante.isDisponivel(),
+                restaurante.getDataCadastro(),
+                restaurante.isAtivo()
+
         );
-    }*/
+    }
 }

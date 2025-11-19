@@ -5,22 +5,33 @@ import com.comy_delivery_back.dto.request.RestauranteRequestDTO;
 import com.comy_delivery_back.dto.response.EnderecoResponseDTO;
 import com.comy_delivery_back.dto.response.ProdutoResponseDTO;
 import com.comy_delivery_back.dto.response.RestauranteResponseDTO;
+import com.comy_delivery_back.enums.DiasSemana;
+import com.comy_delivery_back.exception.EnderecoNaoEncontradoException;
 import com.comy_delivery_back.model.Endereco;
 import com.comy_delivery_back.model.Restaurante;
+import com.comy_delivery_back.repository.EnderecoRepository;
 import com.comy_delivery_back.repository.RestauranteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
+import java.time.DayOfWeek;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 @Service
 public class RestauranteService {
-    @Autowired
-    private RestauranteRepository restauranteRepository;
+
+    private final RestauranteRepository restauranteRepository;
+    private final EnderecoRepository enderecoRepository;
+
+    public RestauranteService(RestauranteRepository restauranteRepository,
+                              EnderecoRepository enderecoRepository) {
+        this.restauranteRepository = restauranteRepository;
+        this.enderecoRepository = enderecoRepository;
+    }
 
     public RestauranteResponseDTO cadastrarRestaurante(RestauranteRequestDTO restauranteRequestDTO, MultipartFile imagemFile) throws IOException {
         if (restauranteRepository.findByCpnj(restauranteRequestDTO.emailRestaurante()).isPresent()){
@@ -45,7 +56,7 @@ public class RestauranteService {
         novoRestaurante.setTelefoneRestaurante(restauranteRequestDTO.telefoneRestaurante());
 
         if (imagemFile != null && !imagemFile.isEmpty()) {
-            //converte o MultipartFile em byte[]
+            //converte o MultipartFile em byte
             byte[] imagemBytes = imagemFile.getBytes();
             novoRestaurante.setImagemLogo(imagemBytes);
         } else {
@@ -81,32 +92,117 @@ public class RestauranteService {
         Restaurante restauranteSalvo = restauranteRepository.save(novoRestaurante);
 
 
-        return new RestauranteResponseDTO(
-                restauranteSalvo.getId(),
-                restauranteSalvo.getUsername(),
-                restauranteSalvo.getNmRestaurante(),
-                restauranteSalvo.getEmailRestaurante(),
-                restauranteSalvo.getCnpj(),
-                restauranteSalvo.getTelefoneRestaurante(),
-                restauranteSalvo.getImagemLogo() != null ? Base64.getEncoder().encodeToString(novoRestaurante.getImagemLogo()) : null,
-                restauranteSalvo.getDescricaoRestaurante(),
-                restauranteSalvo.getEnderecos().stream().map(EnderecoResponseDTO::new).toList(),
-                restauranteSalvo.getCategoria(),
-                restauranteSalvo.getHorarioAbertura(),
-                restauranteSalvo.getHorarioFechamento(),
-                restauranteSalvo.getDiasFuncionamento(),
-                restauranteSalvo.getProdutos().stream().map(ProdutoResponseDTO::new).toList(),
-                restauranteSalvo.getTempoMediaEntrega(),
-                restauranteSalvo.getAvaliacaoMediaRestaurante(),
-                restauranteSalvo.isAberto(),
-                restauranteSalvo.isDisponivel(),
-                restauranteSalvo.getDataCadastro(),
-                restauranteSalvo.isAtivo()
-        );
+        return new RestauranteResponseDTO(restauranteSalvo);
     }
 
-    public RestauranteResponseDTO atualizarRestaurante(){
+    public RestauranteResponseDTO atualizarRestaurante(Long idRestaurante,
+                                                       RestauranteRequestDTO restauranteRequestDTO,
+                                                       MultipartFile imagemLogo) throws IOException {
+        Restaurante restaurante = restauranteRepository.findById(idRestaurante)
+                .orElseThrow(() -> new IllegalArgumentException("Id restaurante não encontrado."));
 
+
+        if(restauranteRequestDTO.nmRestaurante() != null && !restauranteRequestDTO.nmRestaurante().isBlank()){
+            restaurante.setNmRestaurante(restauranteRequestDTO.nmRestaurante());
+        }
+        if (restauranteRequestDTO.emailRestaurante() != null && !restauranteRequestDTO.emailRestaurante().isBlank() &&
+                !restauranteRequestDTO.emailRestaurante().equalsIgnoreCase(restaurante.getEmailRestaurante())){
+            if (restauranteRepository.findByEmailRestaurante(restauranteRequestDTO.emailRestaurante()).isPresent()){
+                throw new IllegalArgumentException("E-mail já cadastrado para outro restaurante.");
+            }
+
+            restaurante.setEmailRestaurante(restauranteRequestDTO.emailRestaurante());
+        }
+
+        if (restauranteRequestDTO.telefoneRestaurante() != null && !restauranteRequestDTO.telefoneRestaurante().isBlank()){
+            restaurante.setTelefoneRestaurante(restauranteRequestDTO.telefoneRestaurante());
+        }
+
+        if (imagemLogo != null && !imagemLogo.isEmpty()){
+            try{
+                byte[] logoBytes = imagemLogo.getBytes();
+                restaurante.setImagemLogo(logoBytes);
+            } catch (IOException e) {
+                throw new RuntimeException("Falha ao ler o arquivo de imagem.", e);
+            }
+        }
+
+        if(restauranteRequestDTO.descricaoRestaurante() != null && !restauranteRequestDTO.descricaoRestaurante().isBlank()){
+            restaurante.setDescricaoRestaurante(restauranteRequestDTO.descricaoRestaurante());
+        }
+
+        if (restauranteRequestDTO.categoria() != null){
+            restaurante.setCategoria(restauranteRequestDTO.categoria());
+        }
+
+        if (restauranteRequestDTO.horarioAbertura() != null){
+            restaurante.setHorarioAbertura(restauranteRequestDTO.horarioAbertura());
+        }
+
+        if (restauranteRequestDTO.horarioFechamento() != null){
+            restaurante.setHorarioFechamento(restauranteRequestDTO.horarioFechamento());
+        }
+
+        if (restauranteRequestDTO.diasFuncionamento() != null){
+            restaurante.setDiasFuncionamento(restauranteRequestDTO.diasFuncionamento());
+        }
+
+        if (restauranteRequestDTO.tempoMediaEntrega() != null){
+            restaurante.setTempoMediaEntrega(restauranteRequestDTO.tempoMediaEntrega());
+        }
+
+        restauranteRepository.save(restaurante);
+
+        return new RestauranteResponseDTO(restaurante);
+    }
+
+    public EnderecoResponseDTO alterarEnderecoRestaurante(Long idRestaurante, Long idEndereco,
+                                                          EnderecoRequestDTO enderecoRequestDTO){
+        Restaurante restaurante = restauranteRepository.findById(idRestaurante)
+                .orElseThrow(() -> new IllegalArgumentException("Restaurante não encontrado."));
+
+        Endereco endereco = enderecoRepository.findByIdEndereco(idEndereco)
+                .orElseThrow(() -> new EnderecoNaoEncontradoException(idEndereco));
+
+        if (!endereco.getRestaurante().getId().equals(idRestaurante)){
+            throw new IllegalArgumentException("Endereço não pertence ao restaurante informado.");
+        }
+
+        if (enderecoRequestDTO.logradouro() != null && !enderecoRequestDTO.logradouro().isBlank()){
+            endereco.setLogradouro(enderecoRequestDTO.logradouro());
+        }
+
+        if (enderecoRequestDTO.numero() != null && !enderecoRequestDTO.numero().isBlank()){
+            endereco.setNumero(enderecoRequestDTO.numero());
+        }
+
+        if (enderecoRequestDTO.complemento() != null && !enderecoRequestDTO.complemento().isBlank()){
+            endereco.setComplemento(enderecoRequestDTO.complemento());
+        }
+
+        if (enderecoRequestDTO.bairro() != null && !enderecoRequestDTO.bairro().isBlank()){
+            endereco.setBairro(enderecoRequestDTO.bairro());
+        }
+
+        if (enderecoRequestDTO.cidade() != null && !enderecoRequestDTO.cidade().isBlank()){
+            endereco.setCidade(enderecoRequestDTO.cidade());
+        }
+
+        if (enderecoRequestDTO.cep() != null && !enderecoRequestDTO.cep().isBlank()){
+            endereco.setCep(enderecoRequestDTO.cep());
+        }
+
+        if (enderecoRequestDTO.estado() != null && !enderecoRequestDTO.estado().isBlank()){
+            endereco.setEstado(enderecoRequestDTO.estado());
+        }
+
+        if (enderecoRequestDTO.tipoEndereco() != null){
+            endereco.setTipoEndereco(enderecoRequestDTO.tipoEndereco());
+        }
+
+        enderecoRepository.save(endereco);
+
+        return new EnderecoResponseDTO(endereco);
     }
 
     public RestauranteResponseDTO buscarRestaurantePorId(Long idRestaurante){
@@ -118,28 +214,7 @@ public class RestauranteService {
                 .map(EnderecoResponseDTO::new)
                 .toList();
 
-        return new RestauranteResponseDTO(
-                restaurante.getId(),
-                restaurante.getUsername(),
-                restaurante.getNmRestaurante(),
-                restaurante.getEmailRestaurante(),
-                restaurante.getCnpj(),
-                restaurante.getTelefoneRestaurante(),
-                Base64.getEncoder().encodeToString(restaurante.getImagemLogo()),
-                restaurante.getDescricaoRestaurante(),
-                restaurante.getEnderecos().stream().map(EnderecoResponseDTO::new).toList(),
-                restaurante.getCategoria(),
-                restaurante.getHorarioAbertura(),
-                restaurante.getHorarioFechamento(),
-                restaurante.getDiasFuncionamento(),
-                restaurante.getProdutos().stream().map(ProdutoResponseDTO::new).toList(),
-                restaurante.getTempoMediaEntrega(),
-                restaurante.getAvaliacaoMediaRestaurante(),
-                restaurante.isAberto(),
-                restaurante.isDisponivel(),
-                restaurante.getDataCadastro(),
-                restaurante.isAtivo()
-        );
+        return new RestauranteResponseDTO(restaurante);
 
     }
 
@@ -152,28 +227,7 @@ public class RestauranteService {
                 .map(EnderecoResponseDTO::new)
                 .toList();
 
-        return new RestauranteResponseDTO(
-                restaurante.getId(),
-                restaurante.getUsername(),
-                restaurante.getNmRestaurante(),
-                restaurante.getEmailRestaurante(),
-                restaurante.getCnpj(),
-                restaurante.getTelefoneRestaurante(),
-                Base64.getEncoder().encodeToString(restaurante.getImagemLogo()),
-                restaurante.getDescricaoRestaurante(),
-                restaurante.getEnderecos().stream().map(EnderecoResponseDTO::new).toList(),
-                restaurante.getCategoria(),
-                restaurante.getHorarioAbertura(),
-                restaurante.getHorarioFechamento(),
-                restaurante.getDiasFuncionamento(),
-                restaurante.getProdutos().stream().map(ProdutoResponseDTO::new).toList(),
-                restaurante.getTempoMediaEntrega(),
-                restaurante.getAvaliacaoMediaRestaurante(),
-                restaurante.isAberto(),
-                restaurante.isDisponivel(),
-                restaurante.getDataCadastro(),
-                restaurante.isAtivo()
-        );
+        return new RestauranteResponseDTO(restaurante);
     }
 
     public List<ProdutoResponseDTO> listarProdutosRestaurante(Long idRestaurante){
@@ -191,42 +245,13 @@ public class RestauranteService {
     public List<RestauranteResponseDTO> listarRestaurantesAbertos(){
         List<RestauranteResponseDTO> restaurantesAbertos = restauranteRepository.findAllByIsAbertoTrue()
                 .stream()
-                .map(restaurante -> new RestauranteResponseDTO(
-                        restaurante.getId(),
-                        restaurante.getUsername(),
-                        restaurante.getNmRestaurante(),
-                        restaurante.getEmailRestaurante(),
-                        restaurante.getCnpj(),
-                        restaurante.getTelefoneRestaurante(),
-                        Base64.getEncoder().encodeToString(restaurante.getImagemLogo()),
-                        restaurante.getDescricaoRestaurante(),
-                        restaurante.getEnderecos().stream().map(EnderecoResponseDTO::new).toList(),
-                        restaurante.getCategoria(),
-                        restaurante.getHorarioAbertura(),
-                        restaurante.getHorarioFechamento(),
-                        restaurante.getDiasFuncionamento(),
-                        restaurante.getProdutos().stream().map(ProdutoResponseDTO::new).toList(),
-                        restaurante.getTempoMediaEntrega(),
-                        restaurante.getAvaliacaoMediaRestaurante(),
-                        restaurante.isAberto(),
-                        restaurante.isDisponivel(),
-                        restaurante.getDataCadastro(),
-                        restaurante.isAtivo()
-                )).toList();
+                .map(RestauranteResponseDTO::new).toList();
 
         return restaurantesAbertos;
 
     }
 
-    public List<ProdutoResponseDTO> listarPedidosAtivos(Long idRestaurante){
 
-    }
-
-    public double calcularAvaliacaoMediaRestaurante (){
-
-    }
-
-    //fechar automatico nos dias e horarios necessarios
     public void fecharRestaurante(Long idRestaurante){
         Restaurante restaurante = restauranteRepository.findById(idRestaurante)
                 .orElseThrow(() -> new IllegalArgumentException("id restaurante não encontrado"));
@@ -235,13 +260,42 @@ public class RestauranteService {
 
     }
 
-    //abrir automatico nos dias e horarios necessarios
     public void abrirRestaurante(Long idRestaurante){
         Restaurante restaurante = restauranteRepository.findById(idRestaurante)
                 .orElseThrow(() -> new IllegalArgumentException("id restaurante não encontrado"));
 
         restaurante.setAberto(true);
 
+    }
+
+    public void atualizarStatusAberturaFechamento(){
+        LocalTime horaAtual = LocalTime.now();
+        DayOfWeek diaAtualDayOfWeek = DayOfWeek.from(LocalDateTime.now()); //ver se precisa de traducao
+
+        //metodo static do enum DiasSemana
+        DiasSemana diaAtualEnum = DiasSemana.fromDayOfWeek(diaAtualDayOfWeek);
+
+        List<Restaurante> restaurantes = restauranteRepository.findAll();
+
+        for (Restaurante restaurante : restaurantes){
+            if (restaurante.isAtivo() && restaurante.isDisponivel()){
+                boolean deveEstarAberto = false;
+
+                if(restaurante.getDiasFuncionamento().contains(diaAtualEnum.name())){
+                    LocalTime abertura = restaurante.getHorarioAbertura();
+                    LocalTime fechamento = restaurante.getHorarioFechamento();
+
+                    if (horaAtual.isAfter(abertura) && horaAtual.isBefore(fechamento)){
+                        deveEstarAberto = true;
+                    }
+                }
+
+                if (restaurante.isAberto() != deveEstarAberto){
+                    restaurante.setAberto(deveEstarAberto);
+                    restauranteRepository.save(restaurante);
+                }
+            }
+        }
     }
 
     public void indiponibilizarRestaurante(Long idRestaurante){
