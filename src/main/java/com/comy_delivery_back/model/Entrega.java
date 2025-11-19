@@ -17,31 +17,31 @@ public class Entrega {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idEntrega;
 
-    //@OneToOne
-    //@JoinColumn(name = "pedido_id"
-    //private Pedido pedido
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "pedido_id", unique = true, nullable = false)
+    private Pedido pedido;
 
-    @ManyToOne
+    @ManyToOne (fetch = FetchType.LAZY)
     @JoinColumn(name = "entregador_id")
     private Entregador entregador;
 
     @Enumerated(EnumType.STRING)
-    private StatusEntrega statusEntrega;
+    @Column(nullable = false)
+    private StatusEntrega statusEntrega = StatusEntrega.PENDENTE;
 
-    @ManyToOne
+    @ManyToOne (fetch = FetchType.LAZY)
     @JoinColumn(name = "endereco_origem_id", nullable = false)
     private Endereco enderecoOrigem;
 
-    @ManyToOne
+    @ManyToOne (fetch = FetchType.LAZY)
     @JoinColumn(name = "endereco_destino_id", nullable = false)
     private Endereco enderecoDestino;
 
+    private LocalDateTime dataHoraInicio;
 
-    private LocalDateTime dtHrInicio;
+    private Integer tempoEstimadoMinutos;
 
-    private Integer tempoEstimado;
-
-    private LocalDateTime dtHrConclusao;
+    private LocalDateTime dataHoraConclusao;
 
     private Double vlEntrega;
 
