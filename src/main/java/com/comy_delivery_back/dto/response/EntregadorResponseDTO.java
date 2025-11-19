@@ -6,7 +6,6 @@ import com.comy_delivery_back.model.Entregador;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public record EntregadorResponseDTO(
         Long id,
@@ -18,26 +17,22 @@ public record EntregadorResponseDTO(
         VeiculoEntregador veiculo,
         String placa,
         LocalDate dataCadastroEntregador,
-        //List<Long> idEntregas,
+        List<Long> entregarId,
         boolean isAtivo
 ) {
-    public EntregadorResponseDTO(Entregador e){
+    public EntregadorResponseDTO(Entregador entregador){
         this(
-                e.getId(),
-                e.getUsername(),
-                e.getNmEntregador(),
-                e.getEmailEntregador(),
-                e.getCpfEntregador(),
-                e.getTelefoneEntregador(),
-                e.getVeiculo(),
-                e.getPlaca(),
-                e.getDataCadastroEntregador(),
-                /*e.getEntregasEntregador() != null ?
-                        e.getEntregasEntregador()
-                        .stream()
-                        .map(Entrega::getIdEntrega)
-                        .collect(Collectors.toList()) : List.of(),*/
-                e.isAtivo()
+                entregador.getId(),
+                entregador.getUsername(),
+                entregador.getNmEntregador(),
+                entregador.getEmailEntregador(),
+                entregador.getCpfEntregador(),
+                entregador.getTelefoneEntregador(),
+                entregador.getVeiculo(),
+                entregador.getPlaca(),
+                entregador.getDataCadastroEntregador(),
+                entregador.getEntregasEntregador().stream().map(Entrega::getIdEntrega).toList(),
+                entregador.isAtivo()
         );
     }
 }
