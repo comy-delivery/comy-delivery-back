@@ -7,11 +7,15 @@ import com.comy_delivery_back.dto.response.ProdutoResponseDTO;
 import com.comy_delivery_back.dto.response.RestauranteResponseDTO;
 import com.comy_delivery_back.enums.DiasSemana;
 import com.comy_delivery_back.exception.EnderecoNaoEncontradoException;
+import com.comy_delivery_back.exception.RestauranteNaoEncontradoException;
 import com.comy_delivery_back.model.Endereco;
 import com.comy_delivery_back.model.Restaurante;
 import com.comy_delivery_back.repository.EnderecoRepository;
 import com.comy_delivery_back.repository.RestauranteRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cglib.core.Local;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -20,25 +24,31 @@ import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class RestauranteService {
 
     private final RestauranteRepository restauranteRepository;
     private final EnderecoRepository enderecoRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
 
     public RestauranteService(RestauranteRepository restauranteRepository,
-                              EnderecoRepository enderecoRepository) {
+                              EnderecoRepository enderecoRepository, PasswordEncoder passwordEncoder, EmailService emailService) {
         this.restauranteRepository = restauranteRepository;
         this.enderecoRepository = enderecoRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.emailService = emailService;
     }
 
+    @Transactional
     public RestauranteResponseDTO cadastrarRestaurante(RestauranteRequestDTO restauranteRequestDTO, MultipartFile imagemFile) throws IOException {
         if (restauranteRepository.findByCpnj(restauranteRequestDTO.emailRestaurante()).isPresent()){
             throw new IllegalArgumentException("CNPJ já cadastrado.");
         }
 
-        if (restauranteRepository.findByEmailRestaurante(restauranteRequestDTO.emailRestaurante()).isPresent()){
+        if (restauranteRepository.findByEmailRestaurante(restauranteRequestDTO.cnpj()).isPresent()){
             throw new IllegalArgumentException("E-mail já cadastrado.");
         }
 
@@ -49,7 +59,7 @@ public class RestauranteService {
         Restaurante novoRestaurante = new Restaurante();
 
         novoRestaurante.setUsername(restauranteRequestDTO.username());
-        novoRestaurante.setPassword(restauranteRequestDTO.password()); //encoder aqui
+        novoRestaurante.setPassword(passwordEncoder.encode(restauranteRequestDTO.password()));
         novoRestaurante.setNmRestaurante(restauranteRequestDTO.nmRestaurante());
         novoRestaurante.setEmailRestaurante(restauranteRequestDTO.emailRestaurante());
         novoRestaurante.setCnpj(restauranteRequestDTO.cnpj());
@@ -95,6 +105,7 @@ public class RestauranteService {
         return new RestauranteResponseDTO(restauranteSalvo);
     }
 
+    @Transactional
     public RestauranteResponseDTO atualizarRestaurante(Long idRestaurante,
                                                        RestauranteRequestDTO restauranteRequestDTO,
                                                        MultipartFile imagemLogo) throws IOException {
@@ -156,6 +167,7 @@ public class RestauranteService {
         return new RestauranteResponseDTO(restaurante);
     }
 
+    @Transactional
     public EnderecoResponseDTO alterarEnderecoRestaurante(Long idRestaurante, Long idEndereco,
                                                           EnderecoRequestDTO enderecoRequestDTO){
         Restaurante restaurante = restauranteRepository.findById(idRestaurante)
@@ -205,6 +217,7 @@ public class RestauranteService {
         return new EnderecoResponseDTO(endereco);
     }
 
+    @Transactional
     public RestauranteResponseDTO buscarRestaurantePorId(Long idRestaurante){
         Restaurante restaurante = restauranteRepository.findById(idRestaurante)
                 .orElseThrow(() -> new IllegalArgumentException("Id Restaurante não encontrado"));
@@ -217,7 +230,7 @@ public class RestauranteService {
         return new RestauranteResponseDTO(restaurante);
 
     }
-
+    @Transactional
     public RestauranteResponseDTO buscarRestaurantePorCnpj(String cnpj){
         Restaurante restaurante = restauranteRepository.findByCpnj(cnpj)
                 .orElseThrow(() -> new IllegalArgumentException("Cnpj Restaurante não encontrado"));
@@ -230,6 +243,7 @@ public class RestauranteService {
         return new RestauranteResponseDTO(restaurante);
     }
 
+    @Transactional
     public List<ProdutoResponseDTO> listarProdutosRestaurante(Long idRestaurante){
         Restaurante restaurante = restauranteRepository.findById(idRestaurante)
                 .orElseThrow(() -> new IllegalArgumentException("id restaurante não encontrado."));
@@ -242,6 +256,7 @@ public class RestauranteService {
         return produtosRestaurante; //ver depois
     }
 
+    @Transactional
     public List<RestauranteResponseDTO> listarRestaurantesAbertos(){
         List<RestauranteResponseDTO> restaurantesAbertos = restauranteRepository.findAllByIsAbertoTrue()
                 .stream()
@@ -251,7 +266,7 @@ public class RestauranteService {
 
     }
 
-
+    @Transactional
     public void fecharRestaurante(Long idRestaurante){
         Restaurante restaurante = restauranteRepository.findById(idRestaurante)
                 .orElseThrow(() -> new IllegalArgumentException("id restaurante não encontrado"));
@@ -260,6 +275,7 @@ public class RestauranteService {
 
     }
 
+    @Transactional
     public void abrirRestaurante(Long idRestaurante){
         Restaurante restaurante = restauranteRepository.findById(idRestaurante)
                 .orElseThrow(() -> new IllegalArgumentException("id restaurante não encontrado"));
@@ -268,9 +284,10 @@ public class RestauranteService {
 
     }
 
+    @Transactional
     public void atualizarStatusAberturaFechamento(){
         LocalTime horaAtual = LocalTime.now();
-        DayOfWeek diaAtualDayOfWeek = DayOfWeek.from(LocalDateTime.now()); //ver se precisa de traducao
+        DayOfWeek diaAtualDayOfWeek = DayOfWeek.from(LocalDateTime.now().getDayOfWeek());
 
         //metodo static do enum DiasSemana
         DiasSemana diaAtualEnum = DiasSemana.fromDayOfWeek(diaAtualDayOfWeek);
@@ -285,8 +302,17 @@ public class RestauranteService {
                     LocalTime abertura = restaurante.getHorarioAbertura();
                     LocalTime fechamento = restaurante.getHorarioFechamento();
 
-                    if (horaAtual.isAfter(abertura) && horaAtual.isBefore(fechamento)){
-                        deveEstarAberto = true;
+                    if (abertura.isBefore(fechamento)) {
+                        //Horario normal (10:00 - 22:00)
+                        if (horaAtual.isAfter(abertura) && horaAtual.isBefore(fechamento)) {
+                            deveEstarAberto = true;
+                        }
+                    } else {
+                        //Horario Noturno/Virada de Dia (22:00 - 02:00)
+                        // Aberto se for DEPOIS da abertura (22:00) OU ANTES do fechamento (02:00)
+                        if (horaAtual.isAfter(abertura) || horaAtual.isBefore(fechamento)) {
+                            deveEstarAberto = true;
+                        }
                     }
                 }
 
@@ -298,6 +324,7 @@ public class RestauranteService {
         }
     }
 
+    @Transactional
     public void indiponibilizarRestaurante(Long idRestaurante){
         Restaurante restaurante = restauranteRepository.findById(idRestaurante)
                 .orElseThrow(() -> new IllegalArgumentException("id restaurante não encontrado"));
@@ -305,6 +332,7 @@ public class RestauranteService {
         restaurante.setDisponivel(false);
     }
 
+    @Transactional
     public void disponibilidarRestaurante(Long idRestaurante){
         Restaurante restaurante = restauranteRepository.findById(idRestaurante)
                 .orElseThrow(() -> new IllegalArgumentException("id restaurante não encontrado"));
@@ -312,11 +340,56 @@ public class RestauranteService {
         restaurante.setDisponivel(true);
     }
 
+    @Transactional
     public void deletarRestaurante(Long idRestaurante){
         Restaurante restaurante = restauranteRepository.findById(idRestaurante)
                 .orElseThrow(() -> new IllegalArgumentException("id restaurante não encontrado"));
         restaurante.setAtivo(false);
 
+    }
+
+    @Transactional
+    public boolean iniciarRecuperacaoSenha (String email){
+        Restaurante restaurante = restauranteRepository.findByEmailRestaurante(email)
+                .orElseThrow(() -> new RestauranteNaoEncontradoException(email));
+
+        String token = UUID.randomUUID().toString();
+        LocalDateTime expiracao = LocalDateTime.now().plusMinutes(15);
+
+        restaurante.setTokenRecuperacaoSenha(token);
+        restaurante.setExpiracaoToken(expiracao);
+
+        restauranteRepository.save(restaurante);
+
+        String linkRecuperacao = "http://localhost/8084/reset-password?token=" + token;
+
+        try{
+            emailService.enviarEmailRecuperacao(restaurante.getEmailRestaurante(), linkRecuperacao);
+            return true;
+        } catch (Exception e) {
+            throw new RuntimeException("Falha ao enviar e-mail de recuperação ", e);
+        }
+    }
+
+    @Transactional
+    public boolean redefinirSenha(String token, String novaSenha){
+        Restaurante restaurante = restauranteRepository.findByTokenRecuperacao(token)
+                .orElseThrow(() -> new IllegalArgumentException("Token de recuperação inválido ou não encontrado."));
+
+        if (restaurante.getExpiracaoToken() != null && restaurante.getExpiracaoToken().isBefore(LocalDateTime.now())){
+            restaurante.setTokenRecuperacaoSenha(null);
+            restaurante.setExpiracaoToken(null);
+            restauranteRepository.save(restaurante);
+            throw new RuntimeException("Token de recuperação expirado. Solicite uma nova recuperação.");
+        }
+
+        restaurante.setPassword(passwordEncoder.encode(novaSenha));
+
+        restaurante.setTokenRecuperacaoSenha(null);
+        restaurante.setExpiracaoToken(null);
+        restauranteRepository.save(restaurante);
+
+        return true;
     }
 
 }
