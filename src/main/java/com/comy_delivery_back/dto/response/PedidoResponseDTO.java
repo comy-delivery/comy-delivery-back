@@ -12,7 +12,8 @@ public record PedidoResponseDTO(
         Long idPedido,
         Long clienteId,
         RestauranteResponseDTO restaurante,
-        EnderecoResponseDTO endereco,
+        EnderecoResponseDTO enderecoEntrega,
+        EnderecoResponseDTO enderecoOrigem,
         CupomResponseDTO cupom,
         List<ItemPedidoResponseDTO> itensPedido,
         LocalDateTime dtCriacao,
@@ -24,7 +25,10 @@ public record PedidoResponseDTO(
         StatusPedido status,
         FormaPagamento formaPagamento,
         Integer tempoEstimadoEntrega,
-        String dsObservacoes
+        String dsObservacoes,
+        boolean isAceito,
+        LocalDateTime dtAceitacao,
+        String motivoRecusa
 
 ) {
 
@@ -33,8 +37,9 @@ public record PedidoResponseDTO(
                 p.getIdPedido(),
                 p.getCliente().getId(),
                 new RestauranteResponseDTO(p.getRestaurante()),
-                new EnderecoResponseDTO(p.getEndereco()),
-                new CupomResponseDTO(p.getCupom()),
+                new EnderecoResponseDTO(p.getEnderecoEntrega()),
+                new EnderecoResponseDTO(p.getEnderecoOrigem()),
+                p.getCupom() != null ? new CupomResponseDTO(p.getCupom()) : null,
                 p.getItensPedido().stream().map(ItemPedidoResponseDTO::new).collect(Collectors.toList()),
                 p.getDtCriacao(),
                 p.getDtAtualizacao(),
@@ -45,7 +50,10 @@ public record PedidoResponseDTO(
                 p.getStatus(),
                 p.getFormaPagamento(),
                 p.getTempoEstimadoEntrega(),
-                p.getDsObservacoes()
+                p.getDsObservacoes(),
+                p.isAceito(),
+                p.getDtAceitacao(),
+                p.getMotivoRecusa()
         );
     }
 }

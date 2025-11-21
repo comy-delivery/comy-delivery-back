@@ -1,5 +1,6 @@
 package com.comy_delivery_back.service;
 
+import com.comy_delivery_back.dto.request.AceitarPedidoRequestDTO;
 import com.comy_delivery_back.dto.request.ItemPedidoRequestDTO;
 import com.comy_delivery_back.dto.request.PedidoRequestDTO;
 import com.comy_delivery_back.dto.response.PedidoResponseDTO;
@@ -42,20 +43,33 @@ public class PedidoService {
     @Transactional
     public PedidoResponseDTO criarPedido(PedidoRequestDTO dto) {
         Cliente cliente = clienteRepository.findById(dto.cliente())
-                .orElseThrow(() -> new RuntimeException("Cliente não encontrado"));
+                .orElseThrow(() -> new ClienteNaoEncontradoException(dto.cliente()));
 
         Restaurante restaurante = restauranteRepository.findById(dto.restaurante())
-                .orElseThrow(() -> new RuntimeException("Restaurante não encontrado"));
+                .orElseThrow(() -> new RestauranteNaoEncontradoException(dto.restaurante()));
 
-        Endereco endereco = enderecoRepository.findById(dto.endereco())
-                .orElseThrow(() -> new EnderecoNaoEncontradoException(dto.endereco()));
+        Endereco enderecoEntrega = enderecoRepository.findById(dto.enderecoEntregaId())
+                .orElseThrow(() -> new EnderecoNaoEncontradoException(dto.enderecoEntregaId()));
+
+        Endereco enderecoOrigem = enderecoRepository.findById(dto.enderecoOrigemId())
+                .orElseThrow(() -> new EnderecoNaoEncontradoException(dto.enderecoOrigemId()));
+
+        if (!enderecoEntrega.getCliente().getId().equals(dto.cliente())) {
+            throw new PedidoException("O endereço de entrega não pertence ao cliente informado");
+        }
+
+        if (!enderecoOrigem.getRestaurante().getId().equals(dto.restaurante())) {
+            throw new PedidoException("O endereço de origem não pertence ao restaurante informado");
+        }
 
         Pedido pedido = new Pedido();
         BeanUtils.copyProperties(dto, pedido);
-
+        pedido.setCliente(cliente);
+        pedido.setRestaurante(restaurante);
+        pedido.setEnderecoEntrega(enderecoEntrega);
+        pedido.setEnderecoOrigem(enderecoOrigem);
         pedido.setFormaPagamento(dto.formaPagamento());
         pedido.setDsObservacoes(dto.dsObservacoes());
-
 
         if (dto.cupomId() != null) {
             Cupom cupom = cupomRepository.findById(dto.cupomId())
@@ -69,13 +83,12 @@ public class PedidoService {
 
         for (ItemPedidoRequestDTO itemDTO : dto.itensPedido()) {
             Produto produto = produtoRepository.findById(itemDTO.produtoId())
-                    .orElseThrow(() -> new ProdutoNaoEncontradoException(itemDTO.produtoId())); // Corrigido para produtoId
+                    .orElseThrow(() -> new ProdutoNaoEncontradoException(itemDTO.produtoId()));
 
             ItemPedido item = new ItemPedido();
-            BeanUtils.copyProperties(itemDTO, item);
             item.setPedido(pedido);
             item.setProduto(produto);
-
+            item.setQtQuantidade(itemDTO.qtQuantidade());
             item.setVlPrecoUnitario(produto.getVlPreco());
             item.setDsObservacao(itemDTO.dsObservacao());
 
@@ -90,19 +103,16 @@ public class PedidoService {
                         .sum();
 
                 Double valorAdicionaisComQuantidade = valorTotalAdicionais * itemDTO.qtQuantidade();
-
                 subtotalItem = subtotalItem + valorAdicionaisComQuantidade;
             }
 
             item.setVlSubtotal(subtotalItem);
-
             subtotal = subtotal + subtotalItem;
 
             itemPedidoRepository.save(item);
         }
 
         pedido.setVlSubtotal(subtotal);
-
 
         Double desconto = 0.00;
         if (pedido.getCupom() != null) {
@@ -111,13 +121,65 @@ public class PedidoService {
         pedido.setVlDesconto(desconto);
 
         Double total = subtotal + pedido.getVlFrete() - desconto;
-
         pedido.setVlTotal(total);
-
         pedido.setTempoEstimadoEntrega(restaurante.getTempoMediaEntrega());
 
         pedido = pedidoRepository.save(pedido);
 
+        return new PedidoResponseDTO(pedido);
+    }
+
+    @Transactional
+    public PedidoResponseDTO aceitarPedido(Long idPedido, AceitarPedidoRequestDTO dto) {
+        Pedido pedido = pedidoRepository.findById(idPedido)
+                .orElseThrow(() -> new PedidoNaoEncontradoException(idPedido));
+
+        if (pedido.getStatus() != StatusPedido.PENDENTE) {
+            throw new PedidoException("Apenas pedidos pendentes podem ser aceitos ou recusados");
+        }
+
+        if (pedido.isAceito()) {
+            throw new PedidoException("Este pedido já foi aceito anteriormente");
+        }
+
+        if (dto.aceitar()) {
+            pedido.setAceito(true);
+            pedido.setDtAceitacao(LocalDateTime.now());
+            pedido.setStatus(StatusPedido.CONFIRMADO);
+            pedido.setDtAtualizacao(LocalDateTime.now());
+        } else {
+            if (dto.motivoRecusa() == null || dto.motivoRecusa().isBlank()) {
+                throw new PedidoException("Motivo de recusa é obrigatório");
+            }
+            pedido.setAceito(false);
+            pedido.setMotivoRecusa(dto.motivoRecusa());
+            pedido.setStatus(StatusPedido.CANCELADO);
+            pedido.setDtAtualizacao(LocalDateTime.now());
+        }
+
+        pedido = pedidoRepository.save(pedido);
+        return new PedidoResponseDTO(pedido);
+    }
+
+    @Transactional
+    public PedidoResponseDTO recusarPedido(Long idPedido, String motivo) {
+        if (motivo == null || motivo.isBlank()) {
+            throw new PedidoException("Motivo de recusa é obrigatório");
+        }
+
+        Pedido pedido = pedidoRepository.findById(idPedido)
+                .orElseThrow(() -> new PedidoNaoEncontradoException(idPedido));
+
+        if (pedido.getStatus() != StatusPedido.PENDENTE) {
+            throw new PedidoException("Apenas pedidos pendentes podem ser recusados");
+        }
+
+        pedido.setAceito(false);
+        pedido.setMotivoRecusa(motivo);
+        pedido.setStatus(StatusPedido.CANCELADO);
+        pedido.setDtAtualizacao(LocalDateTime.now());
+
+        pedido = pedidoRepository.save(pedido);
         return new PedidoResponseDTO(pedido);
     }
 
@@ -139,13 +201,40 @@ public class PedidoService {
                 .collect(Collectors.toList());
     }
 
+    public List<PedidoResponseDTO> listarPedidosPendentes(Long restauranteId) {
+        return pedidoRepository.findByRestaurante_IdRestauranteAndStatus(restauranteId, StatusPedido.PENDENTE)
+                .stream()
+                .map(PedidoResponseDTO::new)
+                .collect(Collectors.toList());
+    }
+
+    public List<PedidoResponseDTO> listarPedidosAceitos(Long restauranteId) {
+        List<Pedido> pedidos = pedidoRepository.findByRestaurante_IdRestaurante(restauranteId);
+        return pedidos.stream()
+                .filter(Pedido::isAceito)
+                .map(PedidoResponseDTO::new)
+                .collect(Collectors.toList());
+    }
+
+    public List<PedidoResponseDTO> listarPedidosRecusados(Long restauranteId) {
+        List<Pedido> pedidos = pedidoRepository.findByRestaurante_IdRestaurante(restauranteId);
+        return pedidos.stream()
+                .filter(p -> !p.isAceito() && p.getMotivoRecusa() != null)
+                .map(PedidoResponseDTO::new)
+                .collect(Collectors.toList());
+    }
+
     @Transactional
     public PedidoResponseDTO atualizarStatus(Long id, StatusPedido novoStatus) {
         Pedido pedido = pedidoRepository.findById(id)
                 .orElseThrow(() -> new PedidoNaoEncontradoException(id));
 
-        pedido.setStatus(novoStatus);
+        if (!pedido.isAceito() && novoStatus != StatusPedido.CANCELADO) {
+            throw new PedidoException("Apenas pedidos aceitos podem ter o status atualizado");
+        }
 
+        pedido.setStatus(novoStatus);
+        pedido.setDtAtualizacao(LocalDateTime.now());
 
         pedido = pedidoRepository.save(pedido);
         return new PedidoResponseDTO(pedido);
@@ -187,7 +276,7 @@ public class PedidoService {
     @Transactional
     public Boolean finalizarPedido(Long id) {
         Pedido pedido = pedidoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Pedido não encontrado"));
+                .orElseThrow(() -> new PedidoNaoEncontradoException(id));
         pedido.setStatus(StatusPedido.ENTREGUE);
         pedido.setDtAtualizacao(LocalDateTime.now());
         pedidoRepository.save(pedido);
@@ -213,6 +302,6 @@ public class PedidoService {
             case PERCENTUAL -> valorPedido * (cupom.getPercentualDesconto() / 100);
             default -> 0.00;
         };
-
     }
+
 }
