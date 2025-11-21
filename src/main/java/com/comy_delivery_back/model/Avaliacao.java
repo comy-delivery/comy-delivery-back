@@ -43,6 +43,4 @@ public class Avaliacao {
 
     private Integer avaliacaoEntrega;
 
-    private Integer avaliacaoComida;
-
 }

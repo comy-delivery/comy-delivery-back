@@ -54,11 +54,6 @@ public class AvaliacaoService {
 
         avaliacao.setDsComentario(dto.dsComentario());
 
-        if (dto.avaliacaoComida() == null) {
-            avaliacao.setAvaliacaoComida(dto.nuNota());
-        } else {
-            avaliacao.setAvaliacaoComida(dto.avaliacaoComida());
-        }
 
         if (dto.avaliacaoEntrega() == null) {
             avaliacao.setAvaliacaoEntrega(dto.nuNota());

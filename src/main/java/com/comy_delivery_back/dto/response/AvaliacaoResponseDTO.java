@@ -24,9 +24,8 @@ public record AvaliacaoResponseDTO(
 
         LocalDateTime dtAvaliacao,
 
-        Integer avaliacaoEntrega,
+        Integer avaliacaoEntrega
 
-        Integer avaliacaoComida
 ) {
 
     public AvaliacaoResponseDTO(Avaliacao a){
@@ -39,8 +38,7 @@ public record AvaliacaoResponseDTO(
                 a.getNuNota(),
                 a.getDsComentario(),
                 a.getDtAvaliacao(),
-                a.getAvaliacaoEntrega(),
-                a.getAvaliacaoComida()
+                a.getAvaliacaoEntrega()
         );
     }
 }
