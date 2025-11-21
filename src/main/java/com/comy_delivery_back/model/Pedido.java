@@ -30,8 +30,13 @@ public class Pedido {
     private Restaurante restaurante;
 
     @ManyToOne
-    @JoinColumn(name = "endereco_id", nullable = false)
-    private Endereco endereco;
+    @JoinColumn(name = "endereco_entrega_id", nullable = false)
+    private Endereco enderecoEntrega;
+
+    @ManyToOne
+    @JoinColumn(name = "endereco_origem_id", nullable = false)
+    private Endereco enderecoOrigem;
+
 
     @ManyToOne
     @JoinColumn(name = "cupom_id")
@@ -70,6 +75,15 @@ public class Pedido {
 
     @Column(length = 500)
     private String dsObservacoes;
+
+    @Column(nullable = false, columnDefinition = "boolean default false")
+    private boolean isAceito = false;
+
+    private LocalDateTime dtAceitacao;
+
+    @Column(length = 300)
+    private String motivoRecusa;
+
 
 
 }
