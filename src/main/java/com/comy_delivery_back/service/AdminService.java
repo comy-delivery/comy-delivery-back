@@ -2,6 +2,7 @@ package com.comy_delivery_back.service;
 
 import com.comy_delivery_back.dto.request.AdminRequestDTO;
 import com.comy_delivery_back.dto.response.AdminResponseDTO;
+import com.comy_delivery_back.exception.RegistrosDuplicadosException;
 import com.comy_delivery_back.model.Admin;
 import com.comy_delivery_back.repository.AdminRepository;
 import org.springframework.stereotype.Service;
@@ -17,11 +18,11 @@ public class AdminService {
 
     public AdminResponseDTO cadastrarAdmin(AdminRequestDTO adminRequestDTO){
         if(adminRepository.findByCpfAdmin(adminRequestDTO.cpfAdmin()).isPresent()){
-            throw new RuntimeException("CPF já foi cadastrado");
+            throw new RegistrosDuplicadosException("CPF já foi cadastrado");
         }
 
         if (adminRepository.findByEmailAdmin(adminRequestDTO.emailAdmin()).isPresent()){
-            throw new RuntimeException("Email já cadastrado.");
+            throw new RegistrosDuplicadosException("Email já cadastrado.");
         }
 
         Admin novoAdmin = new Admin();

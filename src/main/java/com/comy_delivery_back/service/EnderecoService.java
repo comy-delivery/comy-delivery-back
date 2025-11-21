@@ -50,7 +50,7 @@ public class EnderecoService {
         novo.setNumero(enderecoDTO.numero());
         novo.setComplemento(enderecoDTO.complemento());
         novo.setTipoEndereco(enderecoDTO.tipoEndereco());
-        novo.setPontoDeReferecia(enderecoDTO.pontoDeReferecia());
+        novo.setPontoDeReferencia(enderecoDTO.pontoDeReferencia());
 
         Endereco enderecoSalvo = enderecoRepository.save(novo);
         return new EnderecoResponseDTO(enderecoSalvo);
@@ -65,7 +65,7 @@ public class EnderecoService {
 
     @Transactional
     public List<EnderecoResponseDTO> listarPorCliente(Long clienteId) {
-        return enderecoRepository.findByCliente_IdUsuario(clienteId).stream()
+        return enderecoRepository.findByCliente_Id(clienteId).stream()
                 .map(EnderecoResponseDTO::new)
                 .collect(Collectors.toList());
     }

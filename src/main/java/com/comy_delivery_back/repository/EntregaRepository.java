@@ -10,7 +10,7 @@ import java.util.Optional;
 
 @Repository
 public interface EntregaRepository extends JpaRepository<Entrega, Long> {
-    Optional<Entrega> findByPedidoId(Long pedidoId);
+    Optional<Entrega> findByPedido_IdPedido(Long pedidoId);
     List<Entrega> findByStatusEntrega(StatusEntrega statusEntrega);
     List<Entrega> findByEntregadorId(Long entregadorId);
     List<Entrega> findByEntregadorIdAndStatusEntrega(Long entregadorId, StatusEntrega statusEntrega);

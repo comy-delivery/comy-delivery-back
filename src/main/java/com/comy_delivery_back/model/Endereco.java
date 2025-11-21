@@ -42,7 +42,7 @@ public class Endereco {
     private TipoEndereco tipoEndereco;
 
     @Column(length = 500)
-    private String pontoDeReferecia;
+    private String pontoDeReferencia;
 
     @Column(columnDefinition = "boolean default false")
     private boolean isPadrao;

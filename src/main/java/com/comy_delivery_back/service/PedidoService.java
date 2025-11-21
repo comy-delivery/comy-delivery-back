@@ -190,26 +190,26 @@ public class PedidoService {
     }
 
     public List<PedidoResponseDTO> listarPorCliente(Long clienteId) {
-        return pedidoRepository.findByCliente_IdCliente(clienteId).stream()
+        return pedidoRepository.findByCliente_Id(clienteId).stream()
                 .map(PedidoResponseDTO::new)
                 .collect(Collectors.toList());
     }
 
     public List<PedidoResponseDTO> listarPorRestaurante(Long restauranteId) {
-        return pedidoRepository.findByRestaurante_IdRestaurante(restauranteId).stream()
+        return pedidoRepository.findByRestaurante_Id(restauranteId).stream()
                 .map(PedidoResponseDTO::new)
                 .collect(Collectors.toList());
     }
 
     public List<PedidoResponseDTO> listarPedidosPendentes(Long restauranteId) {
-        return pedidoRepository.findByRestaurante_IdRestauranteAndStatus(restauranteId, StatusPedido.PENDENTE)
+        return pedidoRepository.findByRestaurante_IdAndStatus(restauranteId, StatusPedido.PENDENTE)
                 .stream()
                 .map(PedidoResponseDTO::new)
                 .collect(Collectors.toList());
     }
 
     public List<PedidoResponseDTO> listarPedidosAceitos(Long restauranteId) {
-        List<Pedido> pedidos = pedidoRepository.findByRestaurante_IdRestaurante(restauranteId);
+        List<Pedido> pedidos = pedidoRepository.findByRestaurante_Id(restauranteId);
         return pedidos.stream()
                 .filter(Pedido::isAceito)
                 .map(PedidoResponseDTO::new)
@@ -217,7 +217,7 @@ public class PedidoService {
     }
 
     public List<PedidoResponseDTO> listarPedidosRecusados(Long restauranteId) {
-        List<Pedido> pedidos = pedidoRepository.findByRestaurante_IdRestaurante(restauranteId);
+        List<Pedido> pedidos = pedidoRepository.findByRestaurante_Id(restauranteId);
         return pedidos.stream()
                 .filter(p -> !p.isAceito() && p.getMotivoRecusa() != null)
                 .map(PedidoResponseDTO::new)
@@ -285,16 +285,16 @@ public class PedidoService {
 
     private Double calcularDesconto(Cupom cupom, Double valorPedido) {
         if (!cupom.isAtivo()) {
-            throw new RuntimeException("Cupom inativo");
+            throw new CupomInvalidoException("Cupom inativo");
         }
 
         if (cupom.getDtValidade().isBefore(LocalDateTime.now())) {
-            throw new RuntimeException("Cupom expirado");
+            throw new CupomInvalidoException("Cupom expirado");
         }
 
         if (cupom.getVlMinimoPedido() != null &&
                 valorPedido.compareTo(cupom.getVlMinimoPedido()) < 0) {
-            throw new RuntimeException("Valor mínimo do pedido não atingido");
+            throw new CupomInvalidoException("Valor mínimo não atingido");
         }
 
         return switch (cupom.getTipoCupom()) {

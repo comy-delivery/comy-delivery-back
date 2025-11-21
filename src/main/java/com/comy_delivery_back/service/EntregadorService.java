@@ -2,6 +2,8 @@ package com.comy_delivery_back.service;
 
 import com.comy_delivery_back.dto.request.EntregadorRequestDTO;
 import com.comy_delivery_back.dto.response.EntregadorResponseDTO;
+import com.comy_delivery_back.exception.EntregadorNaoEncontradoException;
+import com.comy_delivery_back.exception.RegistrosDuplicadosException;
 import com.comy_delivery_back.model.Entregador;
 import com.comy_delivery_back.repository.EntregadorRepository;
 import jakarta.transaction.Transactional;
@@ -23,11 +25,11 @@ public class EntregadorService {
     @Transactional
     public EntregadorResponseDTO cadastrarEntregador(EntregadorRequestDTO entregadorRequestDTO){
         if (entregadorRepository.findByCpfEntregador(entregadorRequestDTO.cpfEntregador()).isPresent()){
-            throw new RuntimeException("CPF vinculado a uma conta");
+            throw new RegistrosDuplicadosException("CPF vinculado a uma conta");
         }
 
         if (entregadorRepository.findByEmailEntregador(entregadorRequestDTO.emailEntregador()).isPresent()){
-            throw new RuntimeException("Email vinculado a uma conta");
+            throw new RegistrosDuplicadosException("Email vinculado a uma conta");
         }
 
         Entregador novoEntregador = new Entregador();
@@ -47,7 +49,7 @@ public class EntregadorService {
     @Transactional
     public EntregadorResponseDTO buscarEntregadorPorId(Long idEntregador){
         Entregador entregador = entregadorRepository.findById(idEntregador)
-                .orElseThrow(() -> new RuntimeException("Id não encontrado"));
+                .orElseThrow(() -> new EntregadorNaoEncontradoException(idEntregador));
 
         return new EntregadorResponseDTO(entregador);
     }
@@ -62,7 +64,7 @@ public class EntregadorService {
 
     public EntregadorResponseDTO atualizarDadosEntregador(Long idEntregador, EntregadorRequestDTO entregadorRequestDTO){
         Entregador entregador = entregadorRepository.findById(idEntregador)
-                .orElseThrow(() -> new RuntimeException("Id não encontrado"));
+                .orElseThrow(() -> new EntregadorNaoEncontradoException(idEntregador));
 
         if (entregadorRequestDTO.nmEntregador() != null && !entregadorRequestDTO.nmEntregador().isBlank()){
             entregador.setNmEntregador(entregadorRequestDTO.nmEntregador());

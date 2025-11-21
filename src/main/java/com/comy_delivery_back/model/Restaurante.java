@@ -69,6 +69,9 @@ public class Restaurante extends Usuario{
     )
     private List<Produto> produtos = new ArrayList<>();
 
+    @OneToMany(
+            mappedBy = "restaurante"
+    )
     private List<Pedido> pedidos = new ArrayList<>();
 
     private Integer tempoMediaEntrega;

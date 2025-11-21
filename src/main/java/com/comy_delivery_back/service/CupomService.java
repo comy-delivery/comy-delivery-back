@@ -2,7 +2,10 @@ package com.comy_delivery_back.service;
 
 import com.comy_delivery_back.dto.request.CupomRequestDTO;
 import com.comy_delivery_back.dto.response.CupomResponseDTO;
+import com.comy_delivery_back.exception.CupomInvalidoException;
 import com.comy_delivery_back.exception.CupomNaoEncontradoException;
+import com.comy_delivery_back.exception.RegistrosDuplicadosException;
+import com.comy_delivery_back.exception.RestauranteNaoEncontradoException;
 import com.comy_delivery_back.model.Cupom;
 import com.comy_delivery_back.model.Restaurante;
 import com.comy_delivery_back.repository.CupomRepository;
@@ -29,7 +32,7 @@ public class CupomService {
     @Transactional
     public CupomResponseDTO criarCupom(CupomRequestDTO dto) {
         if (cupomRepository.findByCodigoCupom(dto.codigoCupom()).isPresent()) {
-            throw new RuntimeException("Código de cupom já existe");
+            throw new RegistrosDuplicadosException("O cupom já existe com o código:"+dto.codigoCupom());
         }
 
         Cupom cupom = new Cupom();
@@ -43,7 +46,7 @@ public class CupomService {
 
         if (dto.restauranteId() != null) {
             Restaurante restaurante = restauranteRepository.findById(dto.restauranteId())
-                    .orElseThrow(() -> new RuntimeException("Restaurante não encontrado"));
+                    .orElseThrow(() -> new RestauranteNaoEncontradoException(dto.restauranteId()));
             cupom.setRestaurante(restaurante);
         }
         return new CupomResponseDTO(cupomRepository.save(cupom));
@@ -82,19 +85,19 @@ public class CupomService {
                 .orElseThrow(() -> new CupomNaoEncontradoException(codigo));
 
         if (!cupom.isAtivo()) {
-            throw new RuntimeException("Cupom inativo");
+            throw new CupomInvalidoException("Cupom inativo");
         }
 
         if (cupom.getDtValidade().isBefore(LocalDateTime.now())) {
-            throw new RuntimeException("Cupom expirado");
+            throw new CupomInvalidoException("Cupom expirado");
         }
 
         if (cupom.getQtdUsoMaximo() != null && cupom.getQtdUsado() >= cupom.getQtdUsoMaximo()) {
-            throw new RuntimeException("Cupom atingiu o limite de uso");
+            throw new CupomInvalidoException("Cupom atingiu o limite de uso");
         }
 
         if (cupom.getVlMinimoPedido() != null && valorPedido.compareTo(cupom.getVlMinimoPedido()) < 0) {
-            throw new RuntimeException("Valor mínimo do pedido não atingido");
+            throw new CupomInvalidoException("Valor mínimo do pedido não atingido");
         }
 
         return true;
@@ -114,19 +117,19 @@ public class CupomService {
                 .orElseThrow(() -> new CupomNaoEncontradoException(id));
 
         if (!cupom.isAtivo()) {
-            throw new RuntimeException("Cupom está inativo");
+            throw new CupomInvalidoException("Cupom inativo");
         }
 
         if (cupom.getDtValidade().isBefore(LocalDateTime.now())) {
-            throw new RuntimeException("Cupom expirado");
+            throw new CupomInvalidoException("Cupom expirado");
         }
 
         if (cupom.getQtdUsoMaximo() != null && cupom.getQtdUsado() >= cupom.getQtdUsoMaximo()) {
-            throw new RuntimeException("Cupom atingiu o limite de uso");
+            throw new CupomInvalidoException("Cupom atingiu o limite de uso");
         }
 
         if (cupom.getVlMinimoPedido() != null && valorPedido.compareTo(cupom.getVlMinimoPedido()) < 0) {
-            throw new RuntimeException("Valor do pedido é menor que o mínimo necessário para usar este cupom");
+            throw new CupomInvalidoException("Valor do pedido é menor que o mínimo necessário para usar este cupom");
         }
 
         Double desconto = switch (cupom.getTipoCupom()) {

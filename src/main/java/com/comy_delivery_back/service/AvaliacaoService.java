@@ -2,7 +2,10 @@ package com.comy_delivery_back.service;
 
 import com.comy_delivery_back.dto.request.AvaliacaoRequestDTO;
 import com.comy_delivery_back.dto.response.AvaliacaoResponseDTO;
+import com.comy_delivery_back.exception.ClienteNaoEncontradoException;
+import com.comy_delivery_back.exception.EntregadorNaoEncontradoException;
 import com.comy_delivery_back.exception.PedidoNaoEncontradoException;
+import com.comy_delivery_back.exception.RestauranteNaoEncontradoException;
 import com.comy_delivery_back.model.*;
 import com.comy_delivery_back.repository.*;
 import org.springframework.beans.BeanUtils;
@@ -32,16 +35,16 @@ public class AvaliacaoService {
     @Transactional
     public AvaliacaoResponseDTO adicionarAvaliacao(AvaliacaoRequestDTO dto) {
         Restaurante restaurante = restauranteRepository.findById(dto.restauranteId())
-                .orElseThrow(() -> new RuntimeException("Restaurante não encontrado"));
+                .orElseThrow(() -> new RestauranteNaoEncontradoException(dto.restauranteId()));
 
         Cliente cliente = clienteRepository.findById(dto.clienteId())
-                .orElseThrow(() -> new RuntimeException("Cliente não encontrado"));
+                .orElseThrow(() -> new ClienteNaoEncontradoException(dto.clienteId()));
 
         Pedido pedido = pedidoRepository.findById(dto.pedidoId())
                 .orElseThrow(() -> new PedidoNaoEncontradoException(dto.pedidoId()));
 
         Entregador entregador = entregadorRepository.findById(dto.entregadorId())
-                .orElseThrow(() -> new RuntimeException("Entregador não encontrado"));
+                .orElseThrow(() -> new EntregadorNaoEncontradoException(dto.entregadorId()));
 
         Avaliacao avaliacao = new Avaliacao();
 
@@ -70,7 +73,7 @@ public class AvaliacaoService {
     }
 
     public List<AvaliacaoResponseDTO> listarPorRestaurante(Long restauranteId) {
-        return avaliacaoRepository.findByRestaurante_IdRestaurante(restauranteId).stream()
+        return avaliacaoRepository.findByRestaurante_Id(restauranteId).stream()
                 .map(AvaliacaoResponseDTO::new)
                 .collect(Collectors.toList());
     }
@@ -79,7 +82,7 @@ public class AvaliacaoService {
     public void atualizarMediaRestaurante(Long restauranteId) {
         Double media = avaliacaoRepository.calcularMediaAvaliacaoRestaurante(restauranteId);
         Restaurante restaurante = restauranteRepository.findById(restauranteId)
-                .orElseThrow(() -> new RuntimeException("Restaurante não encontrado"));
+                .orElseThrow(() -> new RestauranteNaoEncontradoException(restauranteId));
         restaurante.setAvaliacaoMediaRestaurante(media != null ? media : 0.0);
         restauranteRepository.save(restaurante);
     }
@@ -88,7 +91,7 @@ public class AvaliacaoService {
     public void atualizarMediaEntregador(Long entregadorId) {
         Double media = avaliacaoRepository.calcularMediaAvaliacaoEntregador(entregadorId);
         Entregador entregador = entregadorRepository.findById(entregadorId)
-                .orElseThrow(() -> new RuntimeException("Entregador não encontrado"));
+                .orElseThrow(() -> new EntregadorNaoEncontradoException(entregadorId));
         entregador.setAvaliacaoMediaEntregador(media != null ? media : 0.0);
         entregadorRepository.save(entregador);
     }

@@ -39,41 +39,33 @@ public class GlobalExceptionHandler {
 //        return ResponseEntity.status(httpStatus).body(problemDetail);
 //    }
 
-//    @ExceptionHandler(UsuarioNaoEncontradoException.class)
-//    public ResponseEntity<ProblemDetail> handleUsuarioNaoEncontradoException(UsuarioNaoEncontradoException exception){
-//        HttpStatus httpStatus = HttpStatus.NOT_FOUND;
-//        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(httpStatus, exception.getMessage() );
-//        problemDetail.setTitle(httpStatus.name());
-//
-//        return ResponseEntity.status(httpStatus).body(problemDetail);
-//    }
 
-//    @ExceptionHandler(EntregadorNaoEncontradoException.class)
-//    public ResponseEntity<ProblemDetail> handleEntregadorNaoEncontradoException(EntregadorNaoEncontradoException exception){
-//        HttpStatus httpStatus = HttpStatus.NOT_FOUND;
-//        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(httpStatus, exception.getMessage() );
-//        problemDetail.setTitle(httpStatus.name());
-//
-//        return ResponseEntity.status(httpStatus).body(problemDetail);
-//    }
+    @ExceptionHandler(EntregadorNaoEncontradoException.class)
+    public ResponseEntity<ProblemDetail> handleEntregadorNaoEncontradoException(EntregadorNaoEncontradoException exception){
+        HttpStatus httpStatus = HttpStatus.NOT_FOUND;
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(httpStatus, exception.getMessage() );
+        problemDetail.setTitle(httpStatus.name());
 
-//    @ExceptionHandler(ClienteNaoEncontradoException.class)
-//    public ResponseEntity<ProblemDetail> handleClienteNaoEncontradoException(ClienteNaoEncontradoException exception){
-//        HttpStatus httpStatus = HttpStatus.NOT_FOUND;
-//        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(httpStatus, exception.getMessage() );
-//        problemDetail.setTitle(httpStatus.name());
-//
-//        return ResponseEntity.status(httpStatus).body(problemDetail);
-//    }
+        return ResponseEntity.status(httpStatus).body(problemDetail);
+    }
 
-//    @ExceptionHandler(RestauranteNaoEncontradoException.class)
-//    public ResponseEntity<ProblemDetail> handleRestauranteNaoEncontradoException(RestauranteNaoEncontradoException exception){
-//        HttpStatus httpStatus = HttpStatus.NOT_FOUND;
-//        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(httpStatus, exception.getMessage() );
-//        problemDetail.setTitle(httpStatus.name());
-//
-//        return ResponseEntity.status(httpStatus).body(problemDetail);
-//    }
+    @ExceptionHandler(ClienteNaoEncontradoException.class)
+    public ResponseEntity<ProblemDetail> handleClienteNaoEncontradoException(ClienteNaoEncontradoException exception){
+        HttpStatus httpStatus = HttpStatus.NOT_FOUND;
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(httpStatus, exception.getMessage() );
+        problemDetail.setTitle(httpStatus.name());
+
+        return ResponseEntity.status(httpStatus).body(problemDetail);
+    }
+
+    @ExceptionHandler(RestauranteNaoEncontradoException.class)
+    public ResponseEntity<ProblemDetail> handleRestauranteNaoEncontradoException(RestauranteNaoEncontradoException exception){
+        HttpStatus httpStatus = HttpStatus.NOT_FOUND;
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(httpStatus, exception.getMessage() );
+        problemDetail.setTitle(httpStatus.name());
+
+        return ResponseEntity.status(httpStatus).body(problemDetail);
+    }
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ProblemDetail> handleIllegalArgumentException(IllegalArgumentException exception) {
@@ -114,6 +106,15 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(CupomNaoEncontradoException.class)
     public ResponseEntity<ProblemDetail> handleCupomNaoEncontradoException(CupomNaoEncontradoException exception){
         HttpStatus httpStatus = HttpStatus.NOT_FOUND;
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(httpStatus, exception.getMessage() );
+        problemDetail.setTitle(httpStatus.name());
+
+        return ResponseEntity.status(httpStatus).body(problemDetail);
+    }
+
+    @ExceptionHandler(CupomInvalidoException.class)
+    public ResponseEntity<ProblemDetail> handleCupomInvalidoException(CupomInvalidoException exception){
+        HttpStatus httpStatus = HttpStatus.METHOD_NOT_ALLOWED;
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(httpStatus, exception.getMessage() );
         problemDetail.setTitle(httpStatus.name());
 
@@ -167,6 +168,24 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(SQLException.class)
     public ResponseEntity<ProblemDetail> handleSQLException(SQLException exception){
+        HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(httpStatus, exception.getMessage() );
+        problemDetail.setTitle(httpStatus.name());
+
+        return ResponseEntity.status(httpStatus).body(problemDetail);
+    }
+
+    @ExceptionHandler(RegistrosDuplicadosException.class)
+    public ResponseEntity<ProblemDetail> handleRegistroDuplicadoException(RegistrosDuplicadosException exception){
+        HttpStatus httpStatus = HttpStatus.CONFLICT;
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(httpStatus, exception.getMessage() );
+        problemDetail.setTitle(httpStatus.name());
+
+        return ResponseEntity.status(httpStatus).body(problemDetail);
+    }
+
+    @ExceptionHandler(RegraDeNegocioException.class)
+    public ResponseEntity<ProblemDetail> handleRegraDeNegocioException(RegraDeNegocioException exception){
         HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(httpStatus, exception.getMessage() );
         problemDetail.setTitle(httpStatus.name());

@@ -18,7 +18,7 @@ public record CupomResponseDTO (
         Integer qtdUsoMaximo,
         Integer qtdUsado,
         boolean isAtivo,
-        Long restauranteId,
+        RestauranteResponseDTO restauranteId,
         LocalDateTime dataCriacao
 ){
 
@@ -35,7 +35,7 @@ public record CupomResponseDTO (
                 c.getQtdUsoMaximo(),
                 c.getQtdUsado(),
                 c.isAtivo(),
-                c.getRestaurante().getIdUsuario(),
+                new RestauranteResponseDTO(c.getRestaurante()),
                 c.getDataCriacao()
         );
     }

@@ -14,7 +14,7 @@ import java.util.Optional;
 
 @Repository
 public interface RestauranteRepository extends JpaRepository<Restaurante, Long> {
-    Optional<Restaurante> findByCpnj(String cnpj);
+    Optional<Restaurante> findByCnpj(String cnpj);
     Optional<Restaurante> findByEmailRestaurante(String email);
     Optional<Restaurante> findByUsername(String username);
     List<Restaurante> findAllByIsAbertoTrue();
