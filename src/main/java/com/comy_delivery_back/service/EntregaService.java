@@ -51,6 +51,7 @@ public class EntregaService {
 
     }
 
+    @Transactional
     public EntregaResponseDTO atualizarEntrega(Long idEntrega, AtualizarStatusEntregaDTO atualizarStatusEntregaDTO){
         Entrega entrega = entregaRepository.findById(idEntrega)
                 .orElseThrow(() -> new EntregaNaoEncontradaException(idEntrega));
@@ -105,6 +106,7 @@ public class EntregaService {
         return new EntregaResponseDTO(entrega);
     }
 
+    @Transactional
     public EntregaResponseDTO buscarEntregaPorIdPedido(Long idPedido){
         Entrega entrega = entregaRepository.findByPedidoId(idPedido)
                 .orElseThrow(()-> new PedidoNaoEncontradoException(idPedido));
@@ -112,6 +114,7 @@ public class EntregaService {
         return new EntregaResponseDTO(entrega);
     }
 
+    @Transactional
     public List<EntregaResponseDTO> buscarEntregaEntregadorPorStatus(Long idEntregador, StatusEntrega statusEntrega){
         return entregaRepository.findByEntregadorIdAndStatusEntrega(idEntregador, statusEntrega)
                 .stream()
@@ -119,12 +122,14 @@ public class EntregaService {
 
     }
 
+    @Transactional
     public List<EntregaResponseDTO> buscarEntregaPorStatus(StatusEntrega statusEntrega){
         return entregaRepository.findByStatusEntrega(statusEntrega)
                 .stream()
                 .map(EntregaResponseDTO::new).toList();
     }
 
+    @Transactional
     public List<EntregaResponseDTO> buscarEntregasPorEntregador(Long idEntregador){
         return entregaRepository.findByEntregadorId(idEntregador)
                 .stream()
