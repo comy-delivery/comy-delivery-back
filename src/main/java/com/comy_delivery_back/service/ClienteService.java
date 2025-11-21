@@ -6,7 +6,9 @@ import com.comy_delivery_back.dto.request.EnderecoRequestDTO;
 import com.comy_delivery_back.dto.response.ClienteResponseDTO;
 import com.comy_delivery_back.dto.response.EnderecoResponseDTO;
 import com.comy_delivery_back.dto.response.PedidoResponseDTO;
+import com.comy_delivery_back.exception.ClienteNaoEncontradoException;
 import com.comy_delivery_back.exception.EnderecoNaoEncontradoException;
+import com.comy_delivery_back.exception.RegistrosDuplicadosException;
 import com.comy_delivery_back.model.Cliente;
 import com.comy_delivery_back.model.Endereco;
 import com.comy_delivery_back.repository.ClienteRepository;
@@ -118,7 +120,7 @@ public class ClienteService {
     @Transactional
     public List<PedidoResponseDTO> listarPedidos(Long idCliente){
         Cliente cliente = clienteRepository.findById(idCliente)
-                .orElseThrow(() -> new IllegalArgumentException("id cliente não encontrado."));
+                .orElseThrow(() -> new ClienteNaoEncontradoException(idCliente));
 
         List<PedidoResponseDTO> pedidosCliente = cliente.getPedidos()
                 .stream()
@@ -131,7 +133,7 @@ public class ClienteService {
     @Transactional
     public ClienteResponseDTO atualizarDadosCliente(Long idCliente, AtualizarClienteRequestDTO requestDTO){
         Cliente cliente = clienteRepository.findById(idCliente)
-                .orElseThrow(()-> new IllegalArgumentException("Cliente não encontrado."));
+                .orElseThrow(()-> new ClienteNaoEncontradoException(idCliente));
 
         if(requestDTO.nmCliente() != null && !requestDTO.nmCliente().isBlank()){
             cliente.setNmCliente(requestDTO.nmCliente());
@@ -141,7 +143,7 @@ public class ClienteService {
                 !requestDTO.emailCliente().equalsIgnoreCase(cliente.getEmailCliente())) {
 
             if (clienteRepository.findByEmailCliente(requestDTO.emailCliente()).isPresent()) {
-                throw new IllegalArgumentException("E-mail já cadastrado para outro usuário.");
+                throw new RegistrosDuplicadosException("E-mail já cadastrado para outro usuário.");
             }
 
             cliente.setEmailCliente(requestDTO.emailCliente());
@@ -156,7 +158,7 @@ public class ClienteService {
     @Transactional
     public EnderecoResponseDTO atualizarEnderecoCliente(Long idCliente, Long idEndereco, EnderecoRequestDTO enderecoRequestDTO) {
         Cliente cliente = clienteRepository.findById(idCliente)
-                .orElseThrow(() -> new IllegalArgumentException("Cliente não encontrado."));
+                .orElseThrow(() -> new ClienteNaoEncontradoException(idCliente));
 
         Endereco endereco = enderecoRepository.findById(idEndereco)
                 .orElseThrow(()-> new EnderecoNaoEncontradoException(idEndereco));
@@ -206,7 +208,7 @@ public class ClienteService {
     @Transactional
     public void deletarCliente(Long idCliente){
         var cliente = clienteRepository.findById(idCliente)
-                .orElseThrow(()-> new IllegalArgumentException("Usuario não encontrado pelo ID fornecido."));
+                .orElseThrow(()-> new ClienteNaoEncontradoException(idCliente));
 
         cliente.setAtivo(false);
     }
@@ -214,7 +216,7 @@ public class ClienteService {
     @Transactional
     public boolean iniciarRecuperacaoSenha(String email){
         Cliente cliente = clienteRepository.findByEmailCliente(email)
-                .orElseThrow(() -> new IllegalArgumentException("Usuario não encontrado para o email: " + email));
+                .orElseThrow(() -> new ClienteNaoEncontradoException(email));
 
         String token = UUID.randomUUID().toString();
         LocalDateTime expiracao = LocalDateTime.now().plusMinutes(15);

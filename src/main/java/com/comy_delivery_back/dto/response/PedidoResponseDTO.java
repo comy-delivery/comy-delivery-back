@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 
 public record PedidoResponseDTO(
         Long idPedido,
-        Long clienteId,
+        ClienteResponseDTO cliente,
         RestauranteResponseDTO restaurante,
         EnderecoResponseDTO enderecoEntrega,
         EnderecoResponseDTO enderecoOrigem,
@@ -35,7 +35,7 @@ public record PedidoResponseDTO(
     public  PedidoResponseDTO(Pedido p){
         this(
                 p.getIdPedido(),
-                p.getCliente().getId(),
+                new ClienteResponseDTO(p.getCliente()),
                 new RestauranteResponseDTO(p.getRestaurante()),
                 new EnderecoResponseDTO(p.getEnderecoEntrega()),
                 new EnderecoResponseDTO(p.getEnderecoOrigem()),

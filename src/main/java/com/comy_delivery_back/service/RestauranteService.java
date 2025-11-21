@@ -44,7 +44,7 @@ public class RestauranteService {
 
     @Transactional
     public RestauranteResponseDTO cadastrarRestaurante(RestauranteRequestDTO restauranteRequestDTO, MultipartFile imagemFile) throws IOException {
-        if (restauranteRepository.findByCpnj(restauranteRequestDTO.emailRestaurante()).isPresent()){
+        if (restauranteRepository.findByCnpj(restauranteRequestDTO.emailRestaurante()).isPresent()){
             throw new IllegalArgumentException("CNPJ já cadastrado.");
         }
 
@@ -232,7 +232,7 @@ public class RestauranteService {
     }
     @Transactional
     public RestauranteResponseDTO buscarRestaurantePorCnpj(String cnpj){
-        Restaurante restaurante = restauranteRepository.findByCpnj(cnpj)
+        Restaurante restaurante = restauranteRepository.findByCnpj(cnpj)
                 .orElseThrow(() -> new IllegalArgumentException("Cnpj Restaurante não encontrado"));
 
         List<EnderecoResponseDTO> enderecoResponseDTOS = restaurante.getEnderecos()

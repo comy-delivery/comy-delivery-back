@@ -3,6 +3,7 @@ package com.comy_delivery_back.service;
 import com.comy_delivery_back.dto.request.ProdutoRequestDTO;
 import com.comy_delivery_back.dto.response.ProdutoResponseDTO;
 import com.comy_delivery_back.exception.ProdutoNaoEncontradoException;
+import com.comy_delivery_back.exception.RestauranteNaoEncontradoException;
 import com.comy_delivery_back.model.Produto;
 import com.comy_delivery_back.model.Restaurante;
 import com.comy_delivery_back.repository.ProdutoRepository;
@@ -30,7 +31,7 @@ public class ProdutoService {
     @Transactional
     public ProdutoResponseDTO criarProduto(ProdutoRequestDTO dto, MultipartFile imagemFile) throws IOException {
         Restaurante restaurante = restauranteRepository.findById(dto.restauranteId())
-                .orElseThrow(() -> new RuntimeException("Restaurante não encontrado"));
+                .orElseThrow(() -> new RestauranteNaoEncontradoException(dto.restauranteId()));
 
         Produto produto = new Produto();
         BeanUtils.copyProperties(dto, produto);
@@ -55,7 +56,7 @@ public class ProdutoService {
     }
 
     public List<ProdutoResponseDTO> listarPorRestaurante(Long restauranteId) {
-        return produtoRepository.findByRestaurante_IdRestauranteAndIsAtivoTrue(restauranteId).stream()
+        return produtoRepository.findByRestaurante_IdAndIsAtivoTrue(restauranteId).stream()
                 .map(ProdutoResponseDTO::new)
                 .collect(Collectors.toList());
     }
@@ -72,7 +73,7 @@ public class ProdutoService {
                 .orElseThrow(() -> new ProdutoNaoEncontradoException(id));
 
         Restaurante restaurante = restauranteRepository.findById(dto.restauranteId())
-                .orElseThrow(() -> new RuntimeException("Restaurante não encontrado"));
+                .orElseThrow(() -> new RestauranteNaoEncontradoException(dto.restauranteId()));
 
         BeanUtils.copyProperties(dto, produto);
 
@@ -91,7 +92,7 @@ public class ProdutoService {
     @Transactional
     public void deletarProduto(Long id) {
         Produto produto = produtoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
+                .orElseThrow(() -> new ProdutoNaoEncontradoException(id));
         produto.setAtivo(false);
         produtoRepository.save(produto);
     }

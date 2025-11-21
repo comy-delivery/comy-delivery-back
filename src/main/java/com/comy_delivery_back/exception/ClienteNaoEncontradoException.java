@@ -6,6 +6,6 @@ public class ClienteNaoEncontradoException extends RuntimeException {
     }
 
     public ClienteNaoEncontradoException(String identificador){
-        super(String.format("O cliente com o identificador %s não foi encontrado"));
+        super(String.format("O cliente com o identificador %s não foi encontrado", identificador));
     }
 }

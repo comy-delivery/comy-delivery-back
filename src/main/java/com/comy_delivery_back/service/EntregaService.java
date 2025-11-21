@@ -108,7 +108,7 @@ public class EntregaService {
 
     @Transactional
     public EntregaResponseDTO buscarEntregaPorIdPedido(Long idPedido){
-        Entrega entrega = entregaRepository.findByPedidoId(idPedido)
+        Entrega entrega = entregaRepository.findByPedido_IdPedido(idPedido)
                 .orElseThrow(()-> new PedidoNaoEncontradoException(idPedido));
 
         return new EntregaResponseDTO(entrega);

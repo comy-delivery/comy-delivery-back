@@ -12,13 +12,13 @@ import java.util.List;
 @Repository
 public interface PedidoRepository extends JpaRepository<Pedido,Long> {
 
-    List<Pedido> findByCliente_IdCliente(Long clienteId);
+    List<Pedido> findByCliente_Id(Long clienteId);
 
-    List<Pedido> findByRestaurante_IdRestaurante(Long restauranteId);
+    List<Pedido> findByRestaurante_Id(Long restauranteId);
 
     List<Pedido> findByStatus(StatusPedido status);
 
-    List<Pedido> findByRestaurante_IdRestauranteAndStatus(Long restauranteId, StatusPedido status);
+    List<Pedido> findByRestaurante_IdAndStatus(Long restauranteId, StatusPedido status);
 
     @Query("SELECT p FROM Pedido p WHERE p.restaurante.id = :restauranteId AND p.isAceito = true")
     List<Pedido> findPedidosAceitosByRestaurante(@Param("restauranteId") Long restauranteId);

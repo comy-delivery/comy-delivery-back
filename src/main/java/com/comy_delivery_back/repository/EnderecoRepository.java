@@ -12,8 +12,8 @@ public interface EnderecoRepository extends JpaRepository<Endereco,Long> {
 
     Optional<Endereco> findByIdEndereco(Long idEndereco);
 
-    List<Endereco> findByCliente_IdUsuario(Long clienteId);
-    List<Endereco> findByRestaurante_IdRestaurante(Long restauranteId);
+    List<Endereco> findByCliente_Id(Long clienteId);
+    List<Endereco> findByRestaurante_Id(Long restauranteId);
 
 
 }
