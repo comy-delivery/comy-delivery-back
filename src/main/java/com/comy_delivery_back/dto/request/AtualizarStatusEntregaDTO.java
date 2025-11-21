@@ -4,6 +4,7 @@ import com.comy_delivery_back.enums.StatusEntrega;
 
 public record AtualizarStatusEntregaDTO(
         StatusEntrega statusEntrega,
-        Long entregadorId
+        Long entregadorId,
+        Double avaliacaoCliente
 ) {
 }
