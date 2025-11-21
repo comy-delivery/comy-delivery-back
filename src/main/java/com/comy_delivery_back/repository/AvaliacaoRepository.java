@@ -14,10 +14,10 @@ public interface AvaliacaoRepository extends JpaRepository<Avaliacao,Long> {
     List<Avaliacao> findByUsuario_IdUsuario(Long usuarioId);
     List<Avaliacao> findByEntregador_IdEntregador(Long entregadorId);
 
-    @Query("SELECT AVG(a.nuNota) FROM Avaliacao a WHERE a.restaurante.idRestaurante = :restauranteId")
+    @Query("SELECT AVG(a.nuNota) FROM Avaliacao a WHERE a.restaurante.id = :restauranteId")
     Double calcularMediaAvaliacaoRestaurante(Long restauranteId);
 
-    @Query("SELECT AVG(a.avaliacaoEntrega) FROM Avaliacao a WHERE a.entregador.idEntregador = :entregadorId")
+    @Query("SELECT AVG(a.avaliacaoEntrega) FROM Avaliacao a WHERE a.entregador.id = :entregadorId")
     Double calcularMediaAvaliacaoEntregador(Long entregadorId);
 
 }
