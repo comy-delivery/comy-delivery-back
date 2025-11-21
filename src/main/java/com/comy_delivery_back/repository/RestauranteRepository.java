@@ -2,6 +2,7 @@ package com.comy_delivery_back.repository;
 
 import com.comy_delivery_back.enums.CategoriaRestaurante;
 import com.comy_delivery_back.enums.DiasSemana;
+import com.comy_delivery_back.model.Cliente;
 import com.comy_delivery_back.model.Restaurante;
 import feign.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -19,6 +20,7 @@ public interface RestauranteRepository extends JpaRepository<Restaurante, Long> 
     List<Restaurante> findAllByIsAbertoTrue();
     List<Restaurante> findByIsDisponivelTrue();
     List<Restaurante> findByCategoria(CategoriaRestaurante categoriaRestaurante);
+    Optional<Restaurante> findByTokenRecuperacao(String token);
 
     @Query("SELECT r FROM Restaurante r WHERE :dia MEMBER OF r.diasFuncionamento")
     List<Restaurante> findByDiaFuncionamento(@Param("dia") DiasSemana dia);
