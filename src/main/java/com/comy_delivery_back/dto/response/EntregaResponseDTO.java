@@ -15,6 +15,6 @@ public record EntregaResponseDTO (
         LocalDateTime dataHoraConclusao,
         Integer tempoEstimadoMinutos,
         Double valorEntrega,
-        Double avaliacaoEntregaCliente
+        Double avaliacaoCliente
 ){
 }
