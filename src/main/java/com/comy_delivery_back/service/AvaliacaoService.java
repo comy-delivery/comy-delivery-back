@@ -53,12 +53,25 @@ public class AvaliacaoService {
         avaliacao.setEntregador(entregador);
 
         avaliacao.setDsComentario(dto.dsComentario());
-        avaliacao.setAvaliacaoComida(dto.avaliacaoComida());
-        avaliacao.setAvaliacaoEntrega(dto.avaliacaoEntrega());
+
+        if (dto.avaliacaoComida() == null) {
+            avaliacao.setAvaliacaoComida(dto.nuNota());
+        } else {
+            avaliacao.setAvaliacaoComida(dto.avaliacaoComida());
+        }
+
+        if (dto.avaliacaoEntrega() == null) {
+            avaliacao.setAvaliacaoEntrega(dto.nuNota());
+        } else {
+            avaliacao.setAvaliacaoEntrega(dto.avaliacaoEntrega());
+        }
+
+        Avaliacao avaliacaoSalva = avaliacaoRepository.save(avaliacao);
 
         atualizarMediaRestaurante(dto.restauranteId());
+        atualizarMediaEntregador(dto.entregadorId());
 
-        return new AvaliacaoResponseDTO(avaliacaoRepository.save(avaliacao));
+        return new AvaliacaoResponseDTO(avaliacaoSalva);
     }
 
     public List<AvaliacaoResponseDTO> listarPorRestaurante(Long restauranteId) {
@@ -74,6 +87,15 @@ public class AvaliacaoService {
                 .orElseThrow(() -> new RuntimeException("Restaurante não encontrado"));
         restaurante.setAvaliacaoMediaRestaurante(media != null ? media : 0.0);
         restauranteRepository.save(restaurante);
+    }
+
+    @Transactional
+    public void atualizarMediaEntregador(Long entregadorId) {
+        Double media = avaliacaoRepository.calcularMediaAvaliacaoEntregador(entregadorId);
+        Entregador entregador = entregadorRepository.findById(entregadorId)
+                .orElseThrow(() -> new RuntimeException("Entregador não encontrado"));
+        entregador.setAvaliacaoMediaEntregador(media != null ? media : 0.0);
+        entregadorRepository.save(entregador);
     }
 
     @Transactional
