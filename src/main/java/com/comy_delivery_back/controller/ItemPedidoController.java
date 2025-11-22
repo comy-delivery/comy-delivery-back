@@ -16,7 +16,6 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
-@CrossOrigin(origins = "*")
 @RequestMapping("/api/item")
 @Tag(name = "Item Pedido Controller", description = "Endpoints para gerenciamento de itens de pedido")
 public class ItemPedidoController {

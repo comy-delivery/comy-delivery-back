@@ -228,12 +228,14 @@ public class ClienteService {
 
         String linkRecuperacao = "http://localhost/8084/reset-password?token=" + token;
 
-        try{
-            emailService.enviarEmailRecuperacao(cliente.getEmailCliente(), linkRecuperacao);
+
+            emailService.enviarEmailRecuperacao(cliente.getEmailCliente(), linkRecuperacao)
+                    .exceptionally(ex ->{
+                        System.err.println("Falha ao enviar e-mail de recuperação: " + ex.getMessage());
+                        return false;
+                    });
             return true;
-        } catch (Exception e) {
-            throw new RuntimeException("Falha ao enviar e-mail de recuperação ", e);
-        }
+
     }
 
     @Transactional

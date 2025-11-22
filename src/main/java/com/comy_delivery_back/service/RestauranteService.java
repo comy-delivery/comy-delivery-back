@@ -361,12 +361,12 @@ public class RestauranteService {
 
         String linkRecuperacao = "http://localhost/8084/reset-password?token=" + token;
 
-        try{
-            emailService.enviarEmailRecuperacao(restaurante.getEmailRestaurante(), linkRecuperacao);
-            return true;
-        } catch (Exception e) {
-            throw new RuntimeException("Falha ao enviar e-mail de recuperação ", e);
-        }
+        emailService.enviarEmailRecuperacao(restaurante.getEmailRestaurante(), linkRecuperacao)
+                .exceptionally(ex ->{
+                    System.err.println("Falha ao enviar e-mail de recuperação: " + ex.getMessage());
+                    return false;
+                });
+        return true;
     }
 
     @Transactional
