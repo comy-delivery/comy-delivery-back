@@ -11,6 +11,7 @@ import com.comy_delivery_back.repository.*;
 import com.comy_delivery_back.utils.DistanciaUtils;
 import com.comy_delivery_back.utils.FreteUtils;
 import com.comy_delivery_back.utils.StatusPedidoValidator;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +21,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class PedidoService {
 
@@ -54,6 +56,7 @@ public class PedidoService {
 
     @Transactional
     public PedidoResponseDTO criarPedido(PedidoRequestDTO dto) {
+        log.info("A iniciar criação de pedido. Cliente: {}, Restaurante: {}", dto.cliente(), dto.restaurante());
         Cliente cliente = clienteRepository.findById(dto.cliente())
                 .orElseThrow(() -> new ClienteNaoEncontradoException(dto.cliente()));
 
@@ -91,6 +94,7 @@ public class PedidoService {
         }
 
         pedido = pedidoRepository.save(pedido);
+        log.debug("Pedido salvo inicialmente com ID: {}", pedido.getIdPedido());
 
         BigDecimal subtotal = processarItensPedido(pedido, dto.itensPedido());
 
@@ -109,13 +113,18 @@ public class PedidoService {
 
         pedido = pedidoRepository.save(pedido);
 
+        log.info("Pedido criado com sucesso. ID: {}, Total: {}", pedido.getIdPedido(), pedido.getVlTotal());
         return new PedidoResponseDTO(pedido);
     }
 
     @Transactional
     public PedidoResponseDTO aceitarPedido(Long idPedido, AceitarPedidoRequestDTO dto) {
+        log.info("Tentativa de aceitar/recusar pedido ID: {}", idPedido);
         Pedido pedido = pedidoRepository.findById(idPedido)
-                .orElseThrow(() -> new PedidoNaoEncontradoException(idPedido));
+                .orElseThrow(() -> {
+                    log.error("Pedido não encontrado: {}", idPedido);
+                    return new PedidoNaoEncontradoException(idPedido);
+                });
 
         if (pedido.getStatus() != StatusPedido.PENDENTE) {
             throw new PedidoException("Apenas pedidos pendentes podem ser aceitos ou recusados");
@@ -126,6 +135,7 @@ public class PedidoService {
         }
 
         if (dto.aceitar()) {
+            log.info("Pedido {} aceite pelo restaurante.", idPedido);
             pedido.setAceito(true);
             pedido.setDtAceitacao(LocalDateTime.now());
             pedido.setStatus(StatusPedido.CONFIRMADO);
@@ -136,7 +146,7 @@ public class PedidoService {
                     pedido.getIdPedido(),
                     pedido.getRestaurante().getNmRestaurante()
             ).exceptionally(ex -> {
-                System.err.println("Falha ao enviar email de confirmação: " + ex.getMessage());
+                log.error("Falha ao enviar email de confirmação: " + ex.getMessage());
                 return false;
             });
 
@@ -144,6 +154,7 @@ public class PedidoService {
             if (dto.motivoRecusa() == null || dto.motivoRecusa().isBlank()) {
                 throw new PedidoException("Motivo de recusa é obrigatório");
             }
+            log.warn("Pedido {} recusado pelo restaurante. Motivo: {}", idPedido, dto.motivoRecusa());
             pedido.setAceito(false);
             pedido.setMotivoRecusa(dto.motivoRecusa());
             pedido.setStatus(StatusPedido.CANCELADO);
@@ -242,6 +253,7 @@ public class PedidoService {
 
     @Transactional
     public PedidoResponseDTO atualizarStatus(Long id, StatusPedido novoStatus) {
+        log.info("A atualizar status do pedido {} para {}", id, novoStatus);
         Pedido pedido = pedidoRepository.findById(id)
                 .orElseThrow(() -> new PedidoNaoEncontradoException(id));
 
@@ -255,6 +267,7 @@ public class PedidoService {
         pedido.setDtAtualizacao(LocalDateTime.now());
 
         pedido = pedidoRepository.save(pedido);
+        log.info("Status do pedido {} atualizado com sucesso.", id);
         return new PedidoResponseDTO(pedido);
     }
 

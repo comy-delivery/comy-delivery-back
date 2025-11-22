@@ -14,11 +14,13 @@ import com.comy_delivery_back.repository.EntregaRepository;
 import com.comy_delivery_back.repository.EntregadorRepository;
 import com.comy_delivery_back.repository.PedidoRepository;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Slf4j
 @Service
 public class EntregaService {
     private final EntregaRepository entregaRepository;
@@ -34,6 +36,8 @@ public class EntregaService {
     @Transactional
     public EntregaResponseDTO cadastrarEntrega(EntregaRequestDTO entregaRequestDTO){
 
+        log.info("A criar nova entrega para o pedido ID: {}", entregaRequestDTO.pedidoId());
+
         Pedido pedido = pedidoRepository.findById(entregaRequestDTO.pedidoId())
                 .orElseThrow(() -> new PedidoNaoEncontradoException(entregaRequestDTO.pedidoId()));
 
@@ -47,14 +51,20 @@ public class EntregaService {
 
         Entrega entrega = entregaRepository.save(novaEntrega);
 
+        log.info("Entrega criada com sucesso. ID Entrega: {}", entrega.getIdEntrega());
         return new EntregaResponseDTO(entrega);
 
     }
 
     @Transactional
     public EntregaResponseDTO atualizarEntrega(Long idEntrega, AtualizarStatusEntregaDTO atualizarStatusEntregaDTO){
+        log.info("A atualizar entrega ID: {}. Novo Status: {}", idEntrega, atualizarStatusEntregaDTO.statusEntrega());
+
         Entrega entrega = entregaRepository.findById(idEntrega)
-                .orElseThrow(() -> new EntregaNaoEncontradaException(idEntrega));
+                .orElseThrow(() -> {
+                    log.error("Entrega não encontrada: {}", idEntrega);
+                    return new EntregaNaoEncontradaException(idEntrega);
+                });
 
         StatusEntrega novoStatus = atualizarStatusEntregaDTO.statusEntrega();
         StatusEntrega statusAtual = entrega.getStatusEntrega();
@@ -67,7 +77,7 @@ public class EntregaService {
             if (atualizarStatusEntregaDTO.entregadorId() == null){
                 throw new IllegalArgumentException("é obrigatorio o entregador aceitar a corrida.");
             }
-
+            log.info("Entrega {} iniciada pelo entregador {}", idEntrega, atualizarStatusEntregaDTO.entregadorId());
             Entregador entregador = entregadorRepository.findById(atualizarStatusEntregaDTO.entregadorId())
                     .orElseThrow(() -> new EntregadorNaoEncontradoException(atualizarStatusEntregaDTO.entregadorId()));
 
@@ -82,6 +92,7 @@ public class EntregaService {
                 if (atualizarStatusEntregaDTO.avaliacaoCliente() < 0 || atualizarStatusEntregaDTO.avaliacaoCliente() > 5) {
                     throw new IllegalArgumentException("A avaliação deve estar entre 0 e 5."); //ver depois se vai a 5
                 }
+                log.info("Entrega {} concluída. Avaliação: {}", idEntrega, atualizarStatusEntregaDTO.avaliacaoCliente());
                 entrega.setAvaliacaoCliente(atualizarStatusEntregaDTO.avaliacaoCliente());
             } else {
                 throw new IllegalArgumentException("A avaliação do cliente é obrigatória na conclusão da entrega.");

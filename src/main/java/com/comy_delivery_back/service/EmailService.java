@@ -1,5 +1,6 @@
 package com.comy_delivery_back.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -8,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.concurrent.CompletableFuture;
 
+@Slf4j
 @Service
 public class EmailService {
     private final JavaMailSender javaMailSender;
@@ -21,6 +23,7 @@ public class EmailService {
 
     @Async
     public CompletableFuture<Boolean> enviarEmail(String destinatario, String assunto, String corpo){
+        log.info("A iniciar envio de e-mail para: {}", destinatario);
         SimpleMailMessage mensagem = new SimpleMailMessage();
 
         mensagem.setFrom(remetente);
@@ -30,10 +33,10 @@ public class EmailService {
 
         try{
             javaMailSender.send(mensagem);
-            System.out.println("E-mail enviado com sucesso para: " + destinatario);
+            log.info("E-mail enviado com sucesso para: {}", destinatario);
             return CompletableFuture.completedFuture(true);
         }catch (Exception e){
-            System.err.println("Erro ao enviar e-mail: " + e.getMessage());
+            log.error("Erro ao enviar e-mail para {}: {}", destinatario, e.getMessage(), e);
             return CompletableFuture.completedFuture(false);
         }
 
@@ -41,6 +44,7 @@ public class EmailService {
 
     @Async
     public CompletableFuture<Boolean> enviarEmailRecuperacao(String destinatario, String linkRecuperacao) {
+        log.debug("A preparar e-mail de recuperação para: {}", destinatario);
         String assunto = "Comy Delivery - Redefinição de senha";
         String corpo = String.format(
                 "Você solicitou a redefinição de sua senha.\n\n" +
@@ -60,7 +64,7 @@ public class EmailService {
             String destinatario,
             Long numeroPedido,
             String nomeRestaurante) {
-
+        log.debug("A preparar e-mail de confirmar pedido para: {}", destinatario);
         String assunto = "Comy Delivery - Pedido Confirmado #" + numeroPedido;
         String corpo = String.format(
                 "Seu pedido #%d foi confirmado!\n\n" +
@@ -80,7 +84,7 @@ public class EmailService {
             String destinatario,
             Long numeroPedido,
             String motivo) {
-
+        log.debug("A preparar e-mail de pedido cancelado para: {}", destinatario);
         String assunto = "Comy Delivery - Pedido Cancelado #" + numeroPedido;
         String corpo = String.format(
                 "Infelizmente seu pedido #%d foi cancelado.\n\n" +

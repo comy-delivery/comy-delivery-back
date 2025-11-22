@@ -7,12 +7,13 @@ import com.comy_delivery_back.exception.RegistrosDuplicadosException;
 import com.comy_delivery_back.model.Entregador;
 import com.comy_delivery_back.repository.EntregadorRepository;
 import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
+
 import java.util.List;
 
+@Slf4j
 @Service
 public class EntregadorService {
 
@@ -24,6 +25,7 @@ public class EntregadorService {
 
     @Transactional
     public EntregadorResponseDTO cadastrarEntregador(EntregadorRequestDTO entregadorRequestDTO){
+        log.info("Novo registo de entregador. CPF: {}, Veículo: {}", entregadorRequestDTO.cpfEntregador(), entregadorRequestDTO.veiculo());
         if (entregadorRepository.findByCpfEntregador(entregadorRequestDTO.cpfEntregador()).isPresent()){
             throw new RegistrosDuplicadosException("CPF vinculado a uma conta");
         }
@@ -93,6 +95,7 @@ public class EntregadorService {
 
     @Transactional
     public void marcarComoDisponivel(Long idEntregador){
+        log.info("Entregador ID {} marcou-se como DISPONÍVEL.", idEntregador);
         Entregador entregador = entregadorRepository.findById(idEntregador)
                 .orElseThrow(()-> new IllegalArgumentException("entregador nao encontrado."));
 

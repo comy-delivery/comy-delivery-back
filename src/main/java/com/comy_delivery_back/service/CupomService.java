@@ -10,6 +10,7 @@ import com.comy_delivery_back.model.Cupom;
 import com.comy_delivery_back.model.Restaurante;
 import com.comy_delivery_back.repository.CupomRepository;
 import com.comy_delivery_back.repository.RestauranteRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +21,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class CupomService {
 
@@ -83,6 +85,7 @@ public class CupomService {
 
     @Transactional
     public boolean validarCupom(String codigo, BigDecimal valorPedido) {
+        log.debug("A validar cupom '{}' para pedido de valor {}", codigo, valorPedido);
         Cupom cupom = cupomRepository.findByCodigoCupom(codigo.toUpperCase())
                 .orElseThrow(() -> new CupomNaoEncontradoException(codigo));
 
@@ -91,6 +94,7 @@ public class CupomService {
         }
 
         if (cupom.getDtValidade().isBefore(LocalDateTime.now())) {
+            log.warn("Tentativa de uso de cupom expirado: {}", codigo);
             throw new CupomInvalidoException("Cupom expirado");
         }
 
@@ -102,6 +106,7 @@ public class CupomService {
             throw new CupomInvalidoException("Valor mínimo do pedido não atingido");
         }
 
+        log.info("Cupom '{}' validado com sucesso.", codigo);
         return true;
     }
 
