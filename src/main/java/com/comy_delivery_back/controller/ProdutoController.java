@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.util.List;
 
 @RestController
-@CrossOrigin(origins = "*")
 @RequestMapping("/api/produto")
 @Tag(name = "Produto Controller", description = "Controller para as operações com o banco de dados para os produtos")
 public class ProdutoController {
