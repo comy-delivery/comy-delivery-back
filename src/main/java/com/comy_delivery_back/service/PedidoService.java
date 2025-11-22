@@ -31,6 +31,7 @@ public class PedidoService {
     private final CupomRepository cupomRepository;
     private final ItemPedidoRepository itemPedidoRepository;
     private final AdicionalRepository adicionalRepository;
+    private final EmailService emailService;
 
     public PedidoService(PedidoRepository pedidoRepository,
                          ClienteRepository clienteRepository,
@@ -39,7 +40,7 @@ public class PedidoService {
                          ProdutoRepository produtoRepository,
                          CupomRepository cupomRepository,
                          ItemPedidoRepository itemPedidoRepository,
-                         AdicionalRepository adicionalRepository) {
+                         AdicionalRepository adicionalRepository, EmailService emailService) {
         this.pedidoRepository = pedidoRepository;
         this.clienteRepository = clienteRepository;
         this.restauranteRepository = restauranteRepository;
@@ -48,6 +49,7 @@ public class PedidoService {
         this.cupomRepository = cupomRepository;
         this.itemPedidoRepository = itemPedidoRepository;
         this.adicionalRepository = adicionalRepository;
+        this.emailService = emailService;
     }
 
     @Transactional
@@ -128,6 +130,16 @@ public class PedidoService {
             pedido.setDtAceitacao(LocalDateTime.now());
             pedido.setStatus(StatusPedido.CONFIRMADO);
             pedido.setDtAtualizacao(LocalDateTime.now());
+
+            emailService.enviarEmailConfirmacaoPedido(
+                    pedido.getCliente().getEmailCliente(),
+                    pedido.getIdPedido(),
+                    pedido.getRestaurante().getNmRestaurante()
+            ).exceptionally(ex -> {
+                System.err.println("Falha ao enviar email de confirmação: " + ex.getMessage());
+                return false;
+            });
+
         } else {
             if (dto.motivoRecusa() == null || dto.motivoRecusa().isBlank()) {
                 throw new PedidoException("Motivo de recusa é obrigatório");
@@ -136,6 +148,12 @@ public class PedidoService {
             pedido.setMotivoRecusa(dto.motivoRecusa());
             pedido.setStatus(StatusPedido.CANCELADO);
             pedido.setDtAtualizacao(LocalDateTime.now());
+
+            emailService.enviarEmailPedidoCancelado(
+                    pedido.getCliente().getEmailCliente(),
+                    pedido.getIdPedido(),
+                    dto.motivoRecusa()
+            );
         }
 
         pedido = pedidoRepository.save(pedido);
