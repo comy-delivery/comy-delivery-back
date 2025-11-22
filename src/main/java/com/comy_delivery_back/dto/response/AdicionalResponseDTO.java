@@ -10,7 +10,7 @@ public record AdicionalResponseDTO(
         String nmAdicional,
         String dsAdicional,
         BigDecimal vlPrecoAdicional,
-        ProdutoResponseDTO produto,
+        Long produtoId,
         boolean isDisponivel
 ) {
 
@@ -20,7 +20,7 @@ public record AdicionalResponseDTO(
                 a.getNmAdicional(),
                 a.getDsAdicional(),
                 a.getVlPrecoAdicional(),
-                new ProdutoResponseDTO(a.getProduto()),
+                a.getProduto().getIdProduto(),
                 a.isDisponivel()
         );
     }

@@ -335,6 +335,10 @@ public class PedidoService {
         Cupom cupom = cupomRepository.findById(cupomId)
                 .orElseThrow(() -> new CupomNaoEncontradoException(cupomId));
 
+        if (!cupom.getRestaurante().getId().equals(pedido.getRestaurante().getId())) {
+            throw new CupomInvalidoException("Cupom não pertence a este restaurante");
+        }
+
         validarCupom(cupom, pedido.getVlSubtotal());
 
         pedido.setCupom(cupom);

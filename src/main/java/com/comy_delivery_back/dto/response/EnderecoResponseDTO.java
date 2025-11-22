@@ -20,8 +20,8 @@ public record EnderecoResponseDTO(
         boolean isPadrao,
         Double latitude,
         Double longitude,
-        ClienteResponseDTO cliente,
-        RestauranteResponseDTO restaurante
+        Long clienteId,
+        Long restauranteId
 ) {
 
     public EnderecoResponseDTO (Endereco e){
@@ -39,8 +39,8 @@ public record EnderecoResponseDTO(
                 e.isPadrao(),
                 e.getLatitude(),
                 e.getLongitude(),
-                new ClienteResponseDTO(e.getCliente()),
-                new RestauranteResponseDTO(e.getRestaurante())
+                e.getCliente().getId(),
+                e.getRestaurante().getId()
         );
     }
 }
