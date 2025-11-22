@@ -11,7 +11,7 @@ import java.util.List;
 public interface AvaliacaoRepository extends JpaRepository<Avaliacao,Long> {
 
     List<Avaliacao> findByRestaurante_Id(Long restauranteId);
-    List<Avaliacao> findByUsuario_Id(Long usuarioId);
+    List<Avaliacao> findByCliente_Id(Long clienteId);
     List<Avaliacao> findByEntregador_Id(Long entregadorId);
 
     @Query("SELECT AVG(a.nuNota) FROM Avaliacao a WHERE a.restaurante.id = :restauranteId")

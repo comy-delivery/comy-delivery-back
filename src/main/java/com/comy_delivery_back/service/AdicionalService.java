@@ -73,8 +73,7 @@ public class AdicionalService {
                 .orElseThrow(() -> new ProdutoNaoEncontradoException(dto.produtoId()));
 
 
-        BeanUtils.copyProperties(dto, adicional);
-
+        adicional.setNmAdicional(dto.nmAdicional());
         adicional.setDsAdicional(dto.dsAdicional());
         adicional.setVlPrecoAdicional(dto.vlPrecoAdicional());
         adicional.setProduto(produto);

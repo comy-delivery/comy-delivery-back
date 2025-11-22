@@ -20,7 +20,7 @@ public interface RestauranteRepository extends JpaRepository<Restaurante, Long> 
     List<Restaurante> findAllByIsAbertoTrue();
     List<Restaurante> findByIsDisponivelTrue();
     List<Restaurante> findByCategoria(CategoriaRestaurante categoriaRestaurante);
-    Optional<Restaurante> findByTokenRecuperacao(String token);
+    Optional<Restaurante> findByTokenRecuperacaoSenha(String token);
 
     @Query("SELECT r FROM Restaurante r WHERE :dia MEMBER OF r.diasFuncionamento")
     List<Restaurante> findByDiaFuncionamento(@Param("dia") DiasSemana dia);

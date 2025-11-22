@@ -6,6 +6,7 @@ import com.comy_delivery_back.exception.RegistrosDuplicadosException;
 import com.comy_delivery_back.model.Admin;
 import com.comy_delivery_back.repository.AdminRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class AdminService {
@@ -16,6 +17,7 @@ public class AdminService {
         this.adminRepository = adminRepository;
     }
 
+    @Transactional
     public AdminResponseDTO cadastrarAdmin(AdminRequestDTO adminRequestDTO){
         if(adminRepository.findByCpfAdmin(adminRequestDTO.cpfAdmin()).isPresent()){
             throw new RegistrosDuplicadosException("CPF já foi cadastrado");
@@ -45,6 +47,7 @@ public class AdminService {
         return new AdminResponseDTO(admin);
     }
 
+    @Transactional
     //metodo extra apenas para teste
     public void deletarAdmin(Long idAdmin){
         Admin admin = adminRepository.findById(idAdmin)

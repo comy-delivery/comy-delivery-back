@@ -1,13 +1,16 @@
 package com.comy_delivery_back.exception;
 
 import feign.FeignException;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.sql.SQLException;
+import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -192,5 +195,52 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(httpStatus).body(problemDetail);
     }
+
+    @ExceptionHandler(ItemPedidoNaoEncontradoException.class)
+    public ResponseEntity<ProblemDetail> handleItemPedidoNaoEncontradoException(ItemPedidoNaoEncontradoException exception){
+        HttpStatus httpStatus = HttpStatus.NOT_FOUND;
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(httpStatus, exception.getMessage() );
+        problemDetail.setTitle(httpStatus.name());
+
+        return ResponseEntity.status(httpStatus).body(problemDetail);
+    }
+
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<ProblemDetail> handleRuntimeException(RuntimeException exception) {
+        HttpStatus httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+                httpStatus, "Erro inesperado no servidor");
+        problemDetail.setTitle(httpStatus.name());
+        return ResponseEntity.status(httpStatus).body(problemDetail);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ProblemDetail> handleValidationException(
+            MethodArgumentNotValidException ex) {
+        HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
+        ProblemDetail detail = ProblemDetail.forStatusAndDetail(
+                httpStatus,
+                "Validação falhou"
+        );
+        detail.setProperty("errors",
+                ex.getBindingResult().getFieldErrors().stream()
+                        .map(e -> e.getField() + ": " + e.getDefaultMessage())
+                        .collect(Collectors.toList())
+        );
+        return ResponseEntity.status(httpStatus).body(detail);
+    }
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<ProblemDetail> handleEntityNotFoundException(
+            EntityNotFoundException ex) {
+        HttpStatus httpStatus = HttpStatus.NOT_FOUND;
+        ProblemDetail detail = ProblemDetail.forStatusAndDetail(
+                httpStatus,
+                ex.getMessage()
+        );
+        return ResponseEntity.status(httpStatus).body(detail);
+    }
+
+
 
 }

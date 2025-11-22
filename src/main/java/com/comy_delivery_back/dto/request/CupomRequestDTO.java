@@ -15,7 +15,7 @@ public record CupomRequestDTO(
         @Size(max=100, message = "A descrição do cupom não pode ter mais que 100 caracteres")
         String dsCupom,
 
-        @NotBlank(message = "O tipo do cupom precisa ser preenchido")
+        @NotNull(message = "O tipo do cupom precisa ser preenchido")
         TipoCupom tipoCupom,
 
         Double vlDesconto,
