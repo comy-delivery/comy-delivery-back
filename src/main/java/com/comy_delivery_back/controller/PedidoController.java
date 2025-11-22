@@ -152,4 +152,36 @@ public class PedidoController {
         Boolean finalizado = pedidoService.finalizarPedido(id);
         return ResponseEntity.ok(finalizado);
     }
+
+    @Operation(summary = "Aplicar cupom ao pedido")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Cupom aplicado com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Cupom inválido"),
+            @ApiResponse(responseCode = "404", description = "Pedido ou cupom não encontrado")
+    })
+    @PatchMapping("/{id}/cupom")
+    public ResponseEntity<PedidoResponseDTO> aplicarCupom(
+            @PathVariable Long id,
+            @RequestParam Long cupomId) {
+        PedidoResponseDTO response = pedidoService.aplicarCupom(id, cupomId);
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "Remover cupom do pedido")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Cupom removido com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Pedido não encontrado")
+    })
+    @DeleteMapping("/{id}/cupom")
+    public ResponseEntity<PedidoResponseDTO> removerCupom(@PathVariable Long id) {
+        PedidoResponseDTO response = pedidoService.removerCupom(id);
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "Calcular desconto do cupom para um pedido")
+    @GetMapping("/{id}/desconto")
+    public ResponseEntity<Double> calcularDesconto(@PathVariable Long id) {
+        Double desconto = pedidoService.calcularDesconto(id);
+        return ResponseEntity.ok(desconto);
+    }
 }

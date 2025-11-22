@@ -97,6 +97,14 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(httpStatus).body(problemDetail);
     }
 
+    @ExceptionHandler(AdminNaoEncontradoException.class)
+    public ResponseEntity<ProblemDetail> handleAdminNaoEncontradoException(AdminNaoEncontradoException exception) {
+        HttpStatus httpStatus = HttpStatus.NOT_FOUND;
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(httpStatus, exception.getMessage());
+        problemDetail.setTitle(httpStatus.name());
+        return ResponseEntity.status(httpStatus).body(problemDetail);
+    }
+
     @ExceptionHandler(CepNaoEncontradoException.class)
     public ResponseEntity<ProblemDetail> handleCepNaoEncontradoException(CepNaoEncontradoException exception){
         HttpStatus httpStatus = HttpStatus.NOT_FOUND;

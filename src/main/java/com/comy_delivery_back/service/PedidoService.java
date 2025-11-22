@@ -8,7 +8,6 @@ import com.comy_delivery_back.enums.StatusPedido;
 import com.comy_delivery_back.exception.*;
 import com.comy_delivery_back.model.*;
 import com.comy_delivery_back.repository.*;
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,7 +27,14 @@ public class PedidoService {
     private final ItemPedidoRepository itemPedidoRepository;
     private final AdicionalRepository adicionalRepository;
 
-    public PedidoService(PedidoRepository pedidoRepository, ClienteRepository clienteRepository, RestauranteRepository restauranteRepository, EnderecoRepository enderecoRepository, ProdutoRepository produtoRepository, CupomRepository cupomRepository, ItemPedidoRepository itemPedidoRepository, AdicionalRepository adicionalRepository) {
+    public PedidoService(PedidoRepository pedidoRepository,
+                         ClienteRepository clienteRepository,
+                         RestauranteRepository restauranteRepository,
+                         EnderecoRepository enderecoRepository,
+                         ProdutoRepository produtoRepository,
+                         CupomRepository cupomRepository,
+                         ItemPedidoRepository itemPedidoRepository,
+                         AdicionalRepository adicionalRepository) {
         this.pedidoRepository = pedidoRepository;
         this.clienteRepository = clienteRepository;
         this.restauranteRepository = restauranteRepository;
@@ -39,7 +45,6 @@ public class PedidoService {
         this.adicionalRepository = adicionalRepository;
     }
 
-
     @Transactional
     public PedidoResponseDTO criarPedido(PedidoRequestDTO dto) {
         Cliente cliente = clienteRepository.findById(dto.cliente())
@@ -48,28 +53,29 @@ public class PedidoService {
         Restaurante restaurante = restauranteRepository.findById(dto.restaurante())
                 .orElseThrow(() -> new RestauranteNaoEncontradoException(dto.restaurante()));
 
+        validarRestauranteDisponivel(restaurante);
+
         Endereco enderecoEntrega = enderecoRepository.findById(dto.enderecoEntregaId())
                 .orElseThrow(() -> new EnderecoNaoEncontradoException(dto.enderecoEntregaId()));
 
         Endereco enderecoOrigem = enderecoRepository.findById(dto.enderecoOrigemId())
                 .orElseThrow(() -> new EnderecoNaoEncontradoException(dto.enderecoOrigemId()));
 
-        if (!enderecoEntrega.getCliente().getId().equals(dto.cliente())) {
-            throw new PedidoException("O endereço de entrega não pertence ao cliente informado");
-        }
+        validarEnderecosPertencem(enderecoEntrega, enderecoOrigem, dto.cliente(), dto.restaurante());
 
-        if (!enderecoOrigem.getRestaurante().getId().equals(dto.restaurante())) {
-            throw new PedidoException("O endereço de origem não pertence ao restaurante informado");
+        if (dto.itensPedido() == null || dto.itensPedido().isEmpty()) {
+            throw new PedidoException("Pedido deve conter pelo menos um item");
         }
 
         Pedido pedido = new Pedido();
-        BeanUtils.copyProperties(dto, pedido);
         pedido.setCliente(cliente);
         pedido.setRestaurante(restaurante);
         pedido.setEnderecoEntrega(enderecoEntrega);
         pedido.setEnderecoOrigem(enderecoOrigem);
         pedido.setFormaPagamento(dto.formaPagamento());
         pedido.setDsObservacoes(dto.dsObservacoes());
+        pedido.setVlFrete(calcularFrete(enderecoOrigem, enderecoEntrega));
+        pedido.setTempoEstimadoEntrega(restaurante.getTempoMediaEntrega());
 
         if (dto.cupomId() != null) {
             Cupom cupom = cupomRepository.findById(dto.cupomId())
@@ -79,50 +85,18 @@ public class PedidoService {
 
         pedido = pedidoRepository.save(pedido);
 
-        Double subtotal = 0.00;
-
-        for (ItemPedidoRequestDTO itemDTO : dto.itensPedido()) {
-            Produto produto = produtoRepository.findById(itemDTO.produtoId())
-                    .orElseThrow(() -> new ProdutoNaoEncontradoException(itemDTO.produtoId()));
-
-            ItemPedido item = new ItemPedido();
-            item.setPedido(pedido);
-            item.setProduto(produto);
-            item.setQtQuantidade(itemDTO.qtQuantidade());
-            item.setVlPrecoUnitario(produto.getVlPreco());
-            item.setDsObservacao(itemDTO.dsObservacao());
-
-            Double subtotalItem = produto.getVlPreco() * itemDTO.qtQuantidade();
-
-            if (itemDTO.adicionaisIds() != null && !itemDTO.adicionaisIds().isEmpty()) {
-                List<Adicional> adicionais = adicionalRepository.findAllById(itemDTO.adicionaisIds());
-                item.setAdicionais(adicionais);
-
-                Double valorTotalAdicionais = adicionais.stream()
-                        .mapToDouble(Adicional::getVlPrecoAdicional)
-                        .sum();
-
-                Double valorAdicionaisComQuantidade = valorTotalAdicionais * itemDTO.qtQuantidade();
-                subtotalItem = subtotalItem + valorAdicionaisComQuantidade;
-            }
-
-            item.setVlSubtotal(subtotalItem);
-            subtotal = subtotal + subtotalItem;
-
-            itemPedidoRepository.save(item);
-        }
+        Double subtotal = processarItensPedido(pedido, dto.itensPedido());
 
         pedido.setVlSubtotal(subtotal);
 
-        Double desconto = 0.00;
+        double desconto = 0.00;
         if (pedido.getCupom() != null) {
-            desconto = calcularDesconto(pedido.getCupom(), subtotal);
+            desconto = calcularDescontoCupom(pedido.getCupom(), subtotal);
+            pedido.setVlDesconto(desconto);
         }
-        pedido.setVlDesconto(desconto);
 
-        Double total = subtotal + pedido.getVlFrete() - desconto;
-        pedido.setVlTotal(total);
-        pedido.setTempoEstimadoEntrega(restaurante.getTempoMediaEntrega());
+        double total = subtotal + pedido.getVlFrete() - desconto;
+        pedido.setVlTotal(Math.max(total, 0.0));
 
         pedido = pedidoRepository.save(pedido);
 
@@ -183,43 +157,60 @@ public class PedidoService {
         return new PedidoResponseDTO(pedido);
     }
 
+    @Transactional(readOnly = true)
     public PedidoResponseDTO buscarPorId(Long id) {
-        return this.pedidoRepository.findById(id).map(PedidoResponseDTO::new)
+        return pedidoRepository.findById(id)
+                .map(PedidoResponseDTO::new)
                 .orElseThrow(() -> new PedidoNaoEncontradoException(id));
-
     }
 
+    @Transactional(readOnly = true)
     public List<PedidoResponseDTO> listarPorCliente(Long clienteId) {
+        if (!clienteRepository.existsById(clienteId)) {
+            throw new ClienteNaoEncontradoException(clienteId);
+        }
         return pedidoRepository.findByCliente_Id(clienteId).stream()
                 .map(PedidoResponseDTO::new)
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public List<PedidoResponseDTO> listarPorRestaurante(Long restauranteId) {
+        if (!restauranteRepository.existsById(restauranteId)) {
+            throw new RestauranteNaoEncontradoException(restauranteId);
+        }
         return pedidoRepository.findByRestaurante_Id(restauranteId).stream()
                 .map(PedidoResponseDTO::new)
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public List<PedidoResponseDTO> listarPedidosPendentes(Long restauranteId) {
+        if (!restauranteRepository.existsById(restauranteId)) {
+            throw new RestauranteNaoEncontradoException(restauranteId);
+        }
         return pedidoRepository.findByRestaurante_IdAndStatus(restauranteId, StatusPedido.PENDENTE)
                 .stream()
                 .map(PedidoResponseDTO::new)
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public List<PedidoResponseDTO> listarPedidosAceitos(Long restauranteId) {
-        List<Pedido> pedidos = pedidoRepository.findByRestaurante_Id(restauranteId);
-        return pedidos.stream()
-                .filter(Pedido::isAceito)
+        if (!restauranteRepository.existsById(restauranteId)) {
+            throw new RestauranteNaoEncontradoException(restauranteId);
+        }
+        return pedidoRepository.findPedidosAceitosByRestaurante(restauranteId).stream()
                 .map(PedidoResponseDTO::new)
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public List<PedidoResponseDTO> listarPedidosRecusados(Long restauranteId) {
-        List<Pedido> pedidos = pedidoRepository.findByRestaurante_Id(restauranteId);
-        return pedidos.stream()
-                .filter(p -> !p.isAceito() && p.getMotivoRecusa() != null)
+        if (!restauranteRepository.existsById(restauranteId)) {
+            throw new RestauranteNaoEncontradoException(restauranteId);
+        }
+        return pedidoRepository.findPedidosRecusadosByRestaurante(restauranteId).stream()
                 .map(PedidoResponseDTO::new)
                 .collect(Collectors.toList());
     }
@@ -232,6 +223,8 @@ public class PedidoService {
         if (!pedido.isAceito() && novoStatus != StatusPedido.CANCELADO) {
             throw new PedidoException("Apenas pedidos aceitos podem ter o status atualizado");
         }
+
+        validarTransicaoStatus(pedido.getStatus(), novoStatus);
 
         pedido.setStatus(novoStatus);
         pedido.setDtAtualizacao(LocalDateTime.now());
@@ -251,22 +244,26 @@ public class PedidoService {
         }
 
         pedido.setStatus(StatusPedido.CANCELADO);
+        pedido.setMotivoRecusa(motivo);
         pedido.setDtAtualizacao(LocalDateTime.now());
         pedidoRepository.save(pedido);
     }
 
+    @Transactional(readOnly = true)
     public Double calcularSubtotal(Long id) {
         Pedido pedido = pedidoRepository.findById(id)
                 .orElseThrow(() -> new PedidoNaoEncontradoException(id));
         return pedido.getVlSubtotal();
     }
 
+    @Transactional(readOnly = true)
     public Double calcularTotal(Long id) {
         Pedido pedido = pedidoRepository.findById(id)
                 .orElseThrow(() -> new PedidoNaoEncontradoException(id));
         return pedido.getVlTotal();
     }
 
+    @Transactional(readOnly = true)
     public Integer calcularTempoEstimado(Long id) {
         Pedido pedido = pedidoRepository.findById(id)
                 .orElseThrow(() -> new PedidoNaoEncontradoException(id));
@@ -277,13 +274,143 @@ public class PedidoService {
     public Boolean finalizarPedido(Long id) {
         Pedido pedido = pedidoRepository.findById(id)
                 .orElseThrow(() -> new PedidoNaoEncontradoException(id));
+
+        if (pedido.getStatus() != StatusPedido.SAIU_PARA_ENTREGA) {
+            throw new PedidoException("Apenas pedidos em rota podem ser finalizados");
+        }
+
         pedido.setStatus(StatusPedido.ENTREGUE);
         pedido.setDtAtualizacao(LocalDateTime.now());
         pedidoRepository.save(pedido);
         return true;
     }
 
-    private Double calcularDesconto(Cupom cupom, Double valorPedido) {
+    @Transactional
+    public PedidoResponseDTO aplicarCupom(Long idPedido, Long cupomId) {
+        Pedido pedido = pedidoRepository.findById(idPedido)
+                .orElseThrow(() -> new PedidoNaoEncontradoException(idPedido));
+
+        if (pedido.getStatus() != StatusPedido.PENDENTE) {
+            throw new PedidoException("Cupom só pode ser aplicado em pedidos pendentes");
+        }
+
+        Cupom cupom = cupomRepository.findById(cupomId)
+                .orElseThrow(() -> new CupomNaoEncontradoException(cupomId));
+
+        validarCupom(cupom, pedido.getVlSubtotal());
+
+        pedido.setCupom(cupom);
+        Double desconto = calcularDescontoCupom(cupom, pedido.getVlSubtotal());
+        pedido.setVlDesconto(desconto);
+
+        double total = pedido.getVlSubtotal() + pedido.getVlFrete() - desconto;
+        pedido.setVlTotal(Math.max(total, 0.0));
+
+        pedido.setDtAtualizacao(LocalDateTime.now());
+        pedido = pedidoRepository.save(pedido);
+
+        return new PedidoResponseDTO(pedido);
+    }
+
+    @Transactional
+    public PedidoResponseDTO removerCupom(Long idPedido) {
+        Pedido pedido = pedidoRepository.findById(idPedido)
+                .orElseThrow(() -> new PedidoNaoEncontradoException(idPedido));
+
+        if (pedido.getStatus() != StatusPedido.PENDENTE) {
+            throw new PedidoException("Cupom só pode ser removido de pedidos pendentes");
+        }
+
+        pedido.setCupom(null);
+        pedido.setVlDesconto(0.0);
+
+        Double total = pedido.getVlSubtotal() + pedido.getVlFrete();
+        pedido.setVlTotal(total);
+
+        pedido.setDtAtualizacao(LocalDateTime.now());
+        pedido = pedidoRepository.save(pedido);
+
+        return new PedidoResponseDTO(pedido);
+    }
+
+    @Transactional(readOnly = true)
+    public Double calcularDesconto(Long idPedido) {
+        Pedido pedido = pedidoRepository.findById(idPedido)
+                .orElseThrow(() -> new PedidoNaoEncontradoException(idPedido));
+        return pedido.getVlDesconto() != null ? pedido.getVlDesconto() : 0.0;
+    }
+
+
+    private Double processarItensPedido(Pedido pedido, List<ItemPedidoRequestDTO> itensDTO) {
+        double subtotal = 0.0;
+
+        for (ItemPedidoRequestDTO itemDTO : itensDTO) {
+            Produto produto = produtoRepository.findById(itemDTO.produtoId())
+                    .orElseThrow(() -> new ProdutoNaoEncontradoException(itemDTO.produtoId()));
+
+            if (!produto.isAtivo()) {
+                throw new RegraDeNegocioException("Produto " + produto.getNmProduto() + " não está disponível");
+            }
+
+            ItemPedido item = new ItemPedido();
+            item.setPedido(pedido);
+            item.setProduto(produto);
+            item.setQtQuantidade(itemDTO.qtQuantidade());
+            item.setVlPrecoUnitario(produto.getVlPreco());
+            item.setDsObservacao(itemDTO.dsObservacao());
+
+            double subtotalItem = produto.getVlPreco() * itemDTO.qtQuantidade();
+
+            if (itemDTO.adicionaisIds() != null && !itemDTO.adicionaisIds().isEmpty()) {
+                List<Adicional> adicionais = adicionalRepository.findAllById(itemDTO.adicionaisIds());
+
+                for (Adicional adicional : adicionais) {
+                    if (!adicional.isDisponivel()) {
+                        throw new RegraDeNegocioException("Adicional " + adicional.getNmAdicional() + " não está disponível");
+                    }
+                }
+
+                item.setAdicionais(adicionais);
+
+                double valorAdicionais = adicionais.stream()
+                        .mapToDouble(Adicional::getVlPrecoAdicional)
+                        .sum() * itemDTO.qtQuantidade();
+
+                subtotalItem += valorAdicionais;
+            }
+
+            item.setVlSubtotal(subtotalItem);
+            itemPedidoRepository.save(item);
+
+            subtotal += subtotalItem;
+        }
+
+        return subtotal;
+    }
+
+    private void validarRestauranteDisponivel(Restaurante restaurante) {
+        if (!restaurante.isAberto()) {
+            throw new RegraDeNegocioException("Restaurante está fechado no momento");
+        }
+        if (!restaurante.isDisponivel()) {
+            throw new RegraDeNegocioException("Restaurante indisponível para pedidos");
+        }
+    }
+
+    private void validarEnderecosPertencem(Endereco enderecoEntrega, Endereco enderecoOrigem,
+                                           Long clienteId, Long restauranteId) {
+        if (enderecoEntrega.getCliente() == null ||
+                !enderecoEntrega.getCliente().getId().equals(clienteId)) {
+            throw new PedidoException("O endereço de entrega não pertence ao cliente informado");
+        }
+
+        if (enderecoOrigem.getRestaurante() == null ||
+                !enderecoOrigem.getRestaurante().getId().equals(restauranteId)) {
+            throw new PedidoException("O endereço de origem não pertence ao restaurante informado");
+        }
+    }
+
+    private void validarCupom(Cupom cupom, Double valorPedido) {
         if (!cupom.isAtivo()) {
             throw new CupomInvalidoException("Cupom inativo");
         }
@@ -292,16 +419,34 @@ public class PedidoService {
             throw new CupomInvalidoException("Cupom expirado");
         }
 
-        if (cupom.getVlMinimoPedido() != null &&
-                valorPedido.compareTo(cupom.getVlMinimoPedido()) < 0) {
-            throw new CupomInvalidoException("Valor mínimo não atingido");
+        if (cupom.getQtdUsoMaximo() != null && cupom.getQtdUsado() >= cupom.getQtdUsoMaximo()) {
+            throw new CupomInvalidoException("Cupom atingiu o limite de uso");
         }
 
-        return switch (cupom.getTipoCupom()) {
+        if (cupom.getVlMinimoPedido() != null && valorPedido.compareTo(cupom.getVlMinimoPedido()) < 0) {
+            throw new CupomInvalidoException("Valor mínimo do pedido não atingido");
+        }
+    }
+
+    private Double calcularDescontoCupom(Cupom cupom, Double valorPedido) {
+        Double desconto = switch (cupom.getTipoCupom()) {
             case VALOR_FIXO -> cupom.getVlDesconto();
             case PERCENTUAL -> valorPedido * (cupom.getPercentualDesconto() / 100);
-            default -> 0.00;
         };
+
+        return Math.min(desconto, valorPedido);
     }
+
+    private Double calcularFrete(Endereco origem, Endereco destino) {
+        // Implementar cálculo de frete baseado em distância
+        // Por enquanto, valor fixo
+        return 5.0;
+    }
+
+    private void validarTransicaoStatus(StatusPedido statusAtual, StatusPedido novoStatus) {
+        // Validar transições permitidas
+        // Ex: PENDENTE -> CONFIRMADO -> EM_PREPARO -> PRONTO -> SAIU_PARA_ENTREGA -> ENTREGUE
+    }
+
 
 }
