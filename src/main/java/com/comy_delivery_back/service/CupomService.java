@@ -74,7 +74,7 @@ public class CupomService {
 
     @Transactional
     public List<CupomResponseDTO> listarPorRestaurante(Long restauranteId) {
-        return cupomRepository.findByRestaurante_IdRestaurante(restauranteId).stream()
+        return cupomRepository.findByRestaurante_Id(restauranteId).stream()
                 .map(CupomResponseDTO:: new)
                 .collect(Collectors.toList());
     }

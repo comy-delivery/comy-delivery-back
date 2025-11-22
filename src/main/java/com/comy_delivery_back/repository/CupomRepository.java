@@ -12,6 +12,6 @@ public interface CupomRepository extends JpaRepository<Cupom, Long> {
 
     Optional<Cupom> findByCodigoCupom(String codigoCupom);
     List<Cupom> findByIsAtivoTrue();
-    List<Cupom> findByRestaurante_IdRestaurante(Long restauranteId);
+    List<Cupom> findByRestaurante_Id(Long restauranteId);
 
 }

@@ -238,7 +238,7 @@ public class ClienteService {
 
     @Transactional
     public boolean redefinirSenha(String token, String novaSenha){
-        Cliente cliente = clienteRepository.findByTokenRecuperacao(token)
+        Cliente cliente = clienteRepository.findByTokenRecuperacaoSenha(token)
                 .orElseThrow(() -> new IllegalArgumentException("Token não encontrado"));
 
         if (cliente.getExpiracaoToken() != null && cliente.getExpiracaoToken().isBefore(LocalDateTime.now())){

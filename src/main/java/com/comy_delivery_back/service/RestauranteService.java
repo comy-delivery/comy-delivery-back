@@ -13,8 +13,6 @@ import com.comy_delivery_back.model.Restaurante;
 import com.comy_delivery_back.repository.EnderecoRepository;
 import com.comy_delivery_back.repository.RestauranteRepository;
 import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cglib.core.Local;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -298,7 +296,7 @@ public class RestauranteService {
             if (restaurante.isAtivo() && restaurante.isDisponivel()){
                 boolean deveEstarAberto = false;
 
-                if(restaurante.getDiasFuncionamento().contains(diaAtualEnum.name())){
+                if(restaurante.getDiasFuncionamento().contains(diaAtualEnum)){
                     LocalTime abertura = restaurante.getHorarioAbertura();
                     LocalTime fechamento = restaurante.getHorarioFechamento();
 
@@ -373,7 +371,7 @@ public class RestauranteService {
 
     @Transactional
     public boolean redefinirSenha(String token, String novaSenha){
-        Restaurante restaurante = restauranteRepository.findByTokenRecuperacao(token)
+        Restaurante restaurante = restauranteRepository.findByTokenRecuperacaoSenha(token)
                 .orElseThrow(() -> new IllegalArgumentException("Token de recuperação inválido ou não encontrado."));
 
         if (restaurante.getExpiracaoToken() != null && restaurante.getExpiracaoToken().isBefore(LocalDateTime.now())){

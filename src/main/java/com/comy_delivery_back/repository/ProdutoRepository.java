@@ -10,7 +10,7 @@ import java.util.List;
 public interface ProdutoRepository extends JpaRepository<Produto,Long> {
 
     List<Produto> findByRestaurante_Id(Long restauranteId);
-    List<Produto> findByCategoria(String categoria);
+    List<Produto> findByCategoriaProduto(String categoria);
     List<Produto> findByIsAtivoTrue();
     List<Produto> findByIsPromocaoTrue();
     List<Produto> findByRestaurante_IdAndIsAtivoTrue(Long restauranteId);
