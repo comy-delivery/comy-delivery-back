@@ -8,6 +8,9 @@ import com.comy_delivery_back.enums.StatusPedido;
 import com.comy_delivery_back.exception.*;
 import com.comy_delivery_back.model.*;
 import com.comy_delivery_back.repository.*;
+import com.comy_delivery_back.utils.DistanciaUtils;
+import com.comy_delivery_back.utils.FreteUtils;
+import com.comy_delivery_back.utils.StatusPedidoValidator;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -451,14 +454,35 @@ public class PedidoService {
     }
 
     private BigDecimal calcularFrete(Endereco origem, Endereco destino) {
-        // Implementar cálculo de frete baseado em distância
-        // Por enquanto, valor fixo
-        return new BigDecimal("5.00");
+        try {
+            if (origem.getLatitude() == null || origem.getLongitude() == null ||
+                    destino.getLatitude() == null || destino.getLongitude() == null) {
+                return new BigDecimal("5.00");
+            }
+
+            double distanciaKm = DistanciaUtils.calcularDistancia(
+                    origem.getLatitude(),
+                    origem.getLongitude(),
+                    destino.getLatitude(),
+                    destino.getLongitude()
+            );
+
+            if (distanciaKm > 50.0) {
+                throw new RegraDeNegocioException(
+                        String.format("Distância de %.2f km excede o limite de entrega (50 km)", distanciaKm)
+                );
+            }
+
+            return FreteUtils.calcularFrete(distanciaKm);
+
+        } catch (IllegalArgumentException e) {
+            throw new RegraDeNegocioException("Erro ao calcular frete: " + e.getMessage());
+        }
+
     }
 
     private void validarTransicaoStatus(StatusPedido statusAtual, StatusPedido novoStatus) {
-        // Validar transições permitidas
-        // Ex: PENDENTE -> CONFIRMADO -> EM_PREPARO -> PRONTO -> SAIU_PARA_ENTREGA -> ENTREGUE
+        StatusPedidoValidator.validarTransicao(statusAtual, novoStatus);
     }
 
 
