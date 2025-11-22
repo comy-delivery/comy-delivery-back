@@ -5,9 +5,11 @@ import com.comy_delivery_back.dto.response.AdminResponseDTO;
 import com.comy_delivery_back.exception.RegistrosDuplicadosException;
 import com.comy_delivery_back.model.Admin;
 import com.comy_delivery_back.repository.AdminRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 public class AdminService {
 
@@ -19,6 +21,7 @@ public class AdminService {
 
     @Transactional
     public AdminResponseDTO cadastrarAdmin(AdminRequestDTO adminRequestDTO){
+        log.warn("Criação de novo ADMINISTRADOR solicitada. Username: {}", adminRequestDTO.username());
         if(adminRepository.findByCpfAdmin(adminRequestDTO.cpfAdmin()).isPresent()){
             throw new RegistrosDuplicadosException("CPF já foi cadastrado");
         }

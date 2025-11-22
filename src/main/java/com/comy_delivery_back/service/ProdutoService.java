@@ -8,6 +8,7 @@ import com.comy_delivery_back.model.Produto;
 import com.comy_delivery_back.model.Restaurante;
 import com.comy_delivery_back.repository.ProdutoRepository;
 import com.comy_delivery_back.repository.RestauranteRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +18,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class ProdutoService {
 
@@ -30,6 +32,7 @@ public class ProdutoService {
 
     @Transactional
     public ProdutoResponseDTO criarProduto(ProdutoRequestDTO dto, MultipartFile imagemFile) throws IOException {
+        log.info("A criar produto '{}' para o restaurante ID: {}", dto.nmProduto(), dto.restauranteId());
         Restaurante restaurante = restauranteRepository.findById(dto.restauranteId())
                 .orElseThrow(() -> new RestauranteNaoEncontradoException(dto.restauranteId()));
 
@@ -91,6 +94,7 @@ public class ProdutoService {
 
     @Transactional
     public void deletarProduto(Long id) {
+        log.info("A inativar (soft delete) produto ID: {}", id);
         Produto produto = produtoRepository.findById(id)
                 .orElseThrow(() -> new ProdutoNaoEncontradoException(id));
         produto.setAtivo(false);

@@ -14,6 +14,7 @@ import com.comy_delivery_back.model.Endereco;
 import com.comy_delivery_back.repository.ClienteRepository;
 import com.comy_delivery_back.repository.EnderecoRepository;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +22,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @Service
 public class ClienteService {
 
@@ -40,6 +42,7 @@ public class ClienteService {
 
     @Transactional
     public ClienteResponseDTO cadastrarCliente(ClienteRequestDTO clienteRequestDTO) {
+        log.info("A iniciar cadastro de novo cliente: {}", clienteRequestDTO.emailCliente());
         if (clienteRepository.findByCpfCliente(clienteRequestDTO.cpfCliente()).isPresent()) {
             throw new IllegalArgumentException("CPF já cadastrado!");
         }
@@ -76,9 +79,10 @@ public class ClienteService {
 
         enderecos.forEach(endereco -> endereco.setCliente(novoCliente)); //endereco recebe o cliente que pertence
 
-        clienteRepository.save(novoCliente);
+        Cliente clienteSalvo = clienteRepository.save(novoCliente);
+        log.info("Cliente cadastrado com sucesso. ID: {}", clienteSalvo.getId());
 
-        return new ClienteResponseDTO(novoCliente);
+        return new ClienteResponseDTO(clienteSalvo);
     }
 
     @Transactional
@@ -215,6 +219,7 @@ public class ClienteService {
 
     @Transactional
     public boolean iniciarRecuperacaoSenha(String email){
+        log.info("Solicitação de recuperação de senha para: {}", email);
         Cliente cliente = clienteRepository.findByEmailCliente(email)
                 .orElseThrow(() -> new ClienteNaoEncontradoException(email));
 
@@ -231,7 +236,7 @@ public class ClienteService {
 
             emailService.enviarEmailRecuperacao(cliente.getEmailCliente(), linkRecuperacao)
                     .exceptionally(ex ->{
-                        System.err.println("Falha ao enviar e-mail de recuperação: " + ex.getMessage());
+                        log.error("Falha ao enviar e-mail de recuperação: " + ex.getMessage());
                         return false;
                     });
             return true;
