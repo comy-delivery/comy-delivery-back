@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,10 +31,10 @@ public class ItemPedido {
     private Integer qtQuantidade;
 
     @Column(precision = 10, scale = 2, nullable = false)
-    private Double vlPrecoUnitario;
+    private BigDecimal vlPrecoUnitario;
 
     @Column(precision = 10, scale = 2, nullable = false)
-    private Double vlSubtotal;
+    private BigDecimal vlSubtotal;
 
     @Column(length = 300)
     private String dsObservacao;

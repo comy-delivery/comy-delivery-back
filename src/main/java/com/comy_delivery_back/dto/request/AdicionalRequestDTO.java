@@ -5,6 +5,8 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 
+import java.math.BigDecimal;
+
 public record AdicionalRequestDTO(
 
         @NotBlank(message = "Nome do adicional é obrigatório")
@@ -15,7 +17,7 @@ public record AdicionalRequestDTO(
 
         @NotNull(message = "Preço é obrigatório")
         @Positive(message = "Preço deve ser positivo")
-        Double vlPrecoAdicional,
+        BigDecimal vlPrecoAdicional,
 
         @NotNull(message = "O id do produto é obrigatório")
         Long produtoId

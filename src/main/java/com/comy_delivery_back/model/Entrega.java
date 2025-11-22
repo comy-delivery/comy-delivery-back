@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -43,7 +44,7 @@ public class Entrega {
 
     private LocalDateTime dataHoraConclusao;
 
-    private Double vlEntrega;
+    private BigDecimal vlEntrega;
 
     private Double avaliacaoCliente;
 }

@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -51,16 +52,16 @@ public class Pedido {
     private LocalDateTime dtAtualizacao;
 
     @Column(precision = 10, scale = 2)
-    private Double vlSubtotal = 0.00;
+    private BigDecimal vlSubtotal = BigDecimal.ZERO;
 
     @Column(precision = 10, scale = 2)
-    private Double vlFrete = 0.00;
+    private BigDecimal vlFrete = BigDecimal.ZERO;
 
     @Column(precision = 10, scale = 2)
-    private Double vlDesconto = 0.00;
+    private BigDecimal vlDesconto = BigDecimal.ZERO;
 
     @Column(precision = 10, scale = 2)
-    private Double vlTotal = 0.00;
+    private BigDecimal vlTotal = BigDecimal.ZERO;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

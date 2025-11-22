@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -53,7 +54,7 @@ public class CupomController {
     }
 
     @PostMapping("/{codigo}/validar")
-    public ResponseEntity<Boolean> validar(@PathVariable String codigo, @RequestParam Double valorPedido) {
+    public ResponseEntity<Boolean> validar(@PathVariable String codigo, @RequestParam BigDecimal valorPedido) {
         Boolean valido = cupomService.validarCupom(codigo, valorPedido);
         return ResponseEntity.status(HttpStatus.OK).body(valido);
     }
@@ -65,10 +66,10 @@ public class CupomController {
     }
 
     @PostMapping("/{id}/aplicar-desconto")
-    public ResponseEntity<Double> aplicarDesconto(
+    public ResponseEntity<BigDecimal> aplicarDesconto(
             @PathVariable Long id,
-            @RequestParam Double valorPedido) {
-        Double response = cupomService.aplicarDesconto(id, valorPedido);
+            @RequestParam BigDecimal valorPedido) {
+        BigDecimal response = cupomService.aplicarDesconto(id, valorPedido);
         return ResponseEntity.ok(response);
     }
 

@@ -6,6 +6,8 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 
+import java.math.BigDecimal;
+
 @Schema(description = "Classe para criar um novo produto")
 public record ProdutoRequestDTO(
         @Schema(description = "Nome do produto", example = "Pizza Calabresa")
@@ -19,7 +21,7 @@ public record ProdutoRequestDTO(
         @Schema(description = "Preço do produto", example = "35,00")
         @NotNull(message = "Preço é obrigatório")
         @Positive(message = "Preço deve ser positivo")
-        Double vlPreco,
+        BigDecimal vlPreco,
 
         @Schema(description = "Código de Id do Restaurante", example = "1")
         @NotNull(message = "ID do restaurante é obrigatório")
@@ -35,7 +37,7 @@ public record ProdutoRequestDTO(
 
         @Schema(description = "Valor do preço promocional", example = "25,00")
         @Positive(message = "Preço promocional deve ser positivo")
-        Double vlPrecoPromocional
+        BigDecimal vlPrecoPromocional
 
 
 ) {

@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -127,15 +128,15 @@ public class PedidoController {
 
     @Operation(summary = "Calcular subtotal do pedido")
     @GetMapping("/{id}/subtotal")
-    public ResponseEntity<Double> calcularSubtotal(@PathVariable Long id) {
-        Double subtotal = pedidoService.calcularSubtotal(id);
+    public ResponseEntity<BigDecimal> calcularSubtotal(@PathVariable Long id) {
+        BigDecimal subtotal = pedidoService.calcularSubtotal(id);
         return ResponseEntity.ok(subtotal);
     }
 
     @Operation(summary = "Calcular total do pedido")
     @GetMapping("/{id}/total")
-    public ResponseEntity<Double> calcularTotal(@PathVariable Long id) {
-        Double total = pedidoService.calcularTotal(id);
+    public ResponseEntity<BigDecimal> calcularTotal(@PathVariable Long id) {
+        BigDecimal total = pedidoService.calcularTotal(id);
         return ResponseEntity.ok(total);
     }
 
@@ -180,8 +181,8 @@ public class PedidoController {
 
     @Operation(summary = "Calcular desconto do cupom para um pedido")
     @GetMapping("/{id}/desconto")
-    public ResponseEntity<Double> calcularDesconto(@PathVariable Long id) {
-        Double desconto = pedidoService.calcularDesconto(id);
+    public ResponseEntity<BigDecimal> calcularDesconto(@PathVariable Long id) {
+        BigDecimal desconto = pedidoService.calcularDesconto(id);
         return ResponseEntity.ok(desconto);
     }
 }

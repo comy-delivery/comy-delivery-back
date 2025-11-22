@@ -1,6 +1,8 @@
 package com.comy_delivery_back.dto.response;
 
 import com.comy_delivery_back.model.ItemPedido;
+
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -14,9 +16,9 @@ public record ItemPedidoResponseDTO(
 
         Integer qtQuantidade,
 
-        Double vlPrecoUnitario,
+        BigDecimal vlPrecoUnitario,
 
-        Double vlSubtotal,
+        BigDecimal vlSubtotal,
 
         String dsObservacao,
 

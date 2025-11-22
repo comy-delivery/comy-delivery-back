@@ -14,6 +14,8 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -80,7 +82,7 @@ public class CupomService {
     }
 
     @Transactional
-    public boolean validarCupom(String codigo, Double valorPedido) {
+    public boolean validarCupom(String codigo, BigDecimal valorPedido) {
         Cupom cupom = cupomRepository.findByCodigoCupom(codigo.toUpperCase())
                 .orElseThrow(() -> new CupomNaoEncontradoException(codigo));
 
@@ -112,7 +114,7 @@ public class CupomService {
     }
 
     @Transactional
-    public Double aplicarDesconto(Long id, Double valorPedido) {
+    public BigDecimal aplicarDesconto(Long id, BigDecimal valorPedido) {
         Cupom cupom = cupomRepository.findById(id)
                 .orElseThrow(() -> new CupomNaoEncontradoException(id));
 
@@ -132,11 +134,15 @@ public class CupomService {
             throw new CupomInvalidoException("Valor do pedido é menor que o mínimo necessário para usar este cupom");
         }
 
-        Double desconto = switch (cupom.getTipoCupom()) {
+
+        BigDecimal desconto = switch (cupom.getTipoCupom()) {
             case VALOR_FIXO -> cupom.getVlDesconto();
-            case PERCENTUAL -> valorPedido*(cupom.getPercentualDesconto()/100);
-            default -> 0.00;
+            case PERCENTUAL -> valorPedido
+                    .multiply(cupom.getPercentualDesconto())
+                    .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+            default -> BigDecimal.ZERO;
         };
+
 
         if (desconto.compareTo(valorPedido) > 0) {
             desconto = valorPedido;
