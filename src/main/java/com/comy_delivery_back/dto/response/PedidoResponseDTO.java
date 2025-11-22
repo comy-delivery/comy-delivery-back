@@ -4,6 +4,7 @@ import com.comy_delivery_back.enums.FormaPagamento;
 import com.comy_delivery_back.enums.StatusPedido;
 import com.comy_delivery_back.model.Pedido;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -18,10 +19,10 @@ public record PedidoResponseDTO(
         List<ItemPedidoResponseDTO> itensPedido,
         LocalDateTime dtCriacao,
         LocalDateTime dtAtualizacao,
-        Double vlSubtotal,
-        Double vlFrete,
-        Double vlDesconto,
-        Double vlTotal,
+        BigDecimal vlSubtotal,
+        BigDecimal vlFrete,
+        BigDecimal vlDesconto,
+        BigDecimal vlTotal,
         StatusPedido status,
         FormaPagamento formaPagamento,
         Integer tempoEstimadoEntrega,

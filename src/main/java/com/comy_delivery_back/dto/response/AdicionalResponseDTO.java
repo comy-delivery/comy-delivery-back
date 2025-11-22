@@ -2,12 +2,14 @@ package com.comy_delivery_back.dto.response;
 
 import com.comy_delivery_back.model.Adicional;
 
+import java.math.BigDecimal;
+
 public record AdicionalResponseDTO(
 
         Long idAdicional,
         String nmAdicional,
         String dsAdicional,
-        Double vlPrecoAdicional,
+        BigDecimal vlPrecoAdicional,
         ProdutoResponseDTO produto,
         boolean isDisponivel
 ) {

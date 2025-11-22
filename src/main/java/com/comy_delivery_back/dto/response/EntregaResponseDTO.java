@@ -3,6 +3,7 @@ package com.comy_delivery_back.dto.response;
 import com.comy_delivery_back.enums.StatusEntrega;
 import com.comy_delivery_back.model.Entrega;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public record EntregaResponseDTO (
@@ -15,7 +16,7 @@ public record EntregaResponseDTO (
         LocalDateTime dataHoraInicio,
         LocalDateTime dataHoraConclusao,
         Integer tempoEstimadoMinutos,
-        Double valorEntrega,
+        BigDecimal valorEntrega,
         Double avaliacaoCliente
 ){
     public EntregaResponseDTO(Entrega entrega){

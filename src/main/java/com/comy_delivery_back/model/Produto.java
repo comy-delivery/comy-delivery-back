@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
@@ -24,10 +25,10 @@ public class Produto {
     private String dsProduto;
 
     @Column(precision = 10, scale = 2, nullable = false)
-    private Double vlPreco;
+    private BigDecimal vlPreco;
 
     @Lob
-    @Column(columnDefinition = "BLOB")
+    @Column(columnDefinition = "BYTEA")
     private byte[] imagemProduto;
 
     @ManyToOne
@@ -44,7 +45,7 @@ public class Produto {
     private Boolean isPromocao = false;
 
     @Column(precision = 10, scale = 2)
-    private Double vlPrecoPromocional;
+    private BigDecimal vlPrecoPromocional;
 
     @Column(columnDefinition = "boolean default true")
     private boolean isAtivo;

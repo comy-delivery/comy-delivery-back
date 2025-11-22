@@ -11,6 +11,8 @@ import com.comy_delivery_back.repository.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -85,18 +87,20 @@ public class PedidoService {
 
         pedido = pedidoRepository.save(pedido);
 
-        Double subtotal = processarItensPedido(pedido, dto.itensPedido());
+        BigDecimal subtotal = processarItensPedido(pedido, dto.itensPedido());
 
         pedido.setVlSubtotal(subtotal);
 
-        double desconto = 0.00;
+        BigDecimal desconto = BigDecimal.ZERO;
         if (pedido.getCupom() != null) {
             desconto = calcularDescontoCupom(pedido.getCupom(), subtotal);
             pedido.setVlDesconto(desconto);
+        } else {
+            pedido.setVlDesconto(BigDecimal.ZERO);
         }
 
-        double total = subtotal + pedido.getVlFrete() - desconto;
-        pedido.setVlTotal(Math.max(total, 0.0));
+        BigDecimal total = subtotal.add(pedido.getVlFrete()).subtract(desconto);
+        pedido.setVlTotal(total.max(BigDecimal.ZERO));
 
         pedido = pedidoRepository.save(pedido);
 
@@ -250,14 +254,14 @@ public class PedidoService {
     }
 
     @Transactional(readOnly = true)
-    public Double calcularSubtotal(Long id) {
+    public BigDecimal calcularSubtotal(Long id) {
         Pedido pedido = pedidoRepository.findById(id)
                 .orElseThrow(() -> new PedidoNaoEncontradoException(id));
         return pedido.getVlSubtotal();
     }
 
     @Transactional(readOnly = true)
-    public Double calcularTotal(Long id) {
+    public BigDecimal calcularTotal(Long id) {
         Pedido pedido = pedidoRepository.findById(id)
                 .orElseThrow(() -> new PedidoNaoEncontradoException(id));
         return pedido.getVlTotal();
@@ -300,11 +304,13 @@ public class PedidoService {
         validarCupom(cupom, pedido.getVlSubtotal());
 
         pedido.setCupom(cupom);
-        Double desconto = calcularDescontoCupom(cupom, pedido.getVlSubtotal());
+        BigDecimal desconto = calcularDescontoCupom(cupom, pedido.getVlSubtotal());
         pedido.setVlDesconto(desconto);
 
-        double total = pedido.getVlSubtotal() + pedido.getVlFrete() - desconto;
-        pedido.setVlTotal(Math.max(total, 0.0));
+        BigDecimal total = pedido.getVlSubtotal()
+                .add(pedido.getVlFrete())
+                .subtract(desconto);
+        pedido.setVlTotal(total.max(BigDecimal.ZERO));
 
         pedido.setDtAtualizacao(LocalDateTime.now());
         pedido = pedidoRepository.save(pedido);
@@ -322,9 +328,9 @@ public class PedidoService {
         }
 
         pedido.setCupom(null);
-        pedido.setVlDesconto(0.0);
+        pedido.setVlDesconto(BigDecimal.ZERO);
 
-        Double total = pedido.getVlSubtotal() + pedido.getVlFrete();
+        BigDecimal total = pedido.getVlSubtotal().add(pedido.getVlFrete());
         pedido.setVlTotal(total);
 
         pedido.setDtAtualizacao(LocalDateTime.now());
@@ -334,15 +340,15 @@ public class PedidoService {
     }
 
     @Transactional(readOnly = true)
-    public Double calcularDesconto(Long idPedido) {
+    public BigDecimal calcularDesconto(Long idPedido) {
         Pedido pedido = pedidoRepository.findById(idPedido)
                 .orElseThrow(() -> new PedidoNaoEncontradoException(idPedido));
-        return pedido.getVlDesconto() != null ? pedido.getVlDesconto() : 0.0;
+        return pedido.getVlDesconto() != null ? pedido.getVlDesconto() : BigDecimal.ZERO;
     }
 
 
-    private Double processarItensPedido(Pedido pedido, List<ItemPedidoRequestDTO> itensDTO) {
-        double subtotal = 0.0;
+    private BigDecimal processarItensPedido(Pedido pedido, List<ItemPedidoRequestDTO> itensDTO) {
+        BigDecimal subtotal = BigDecimal.ZERO;
 
         for (ItemPedidoRequestDTO itemDTO : itensDTO) {
             Produto produto = produtoRepository.findById(itemDTO.produtoId())
@@ -359,7 +365,7 @@ public class PedidoService {
             item.setVlPrecoUnitario(produto.getVlPreco());
             item.setDsObservacao(itemDTO.dsObservacao());
 
-            double subtotalItem = produto.getVlPreco() * itemDTO.qtQuantidade();
+            BigDecimal subtotalItem = produto.getVlPreco().multiply(BigDecimal.valueOf(itemDTO.qtQuantidade()));
 
             if (itemDTO.adicionaisIds() != null && !itemDTO.adicionaisIds().isEmpty()) {
                 List<Adicional> adicionais = adicionalRepository.findAllById(itemDTO.adicionaisIds());
@@ -372,17 +378,19 @@ public class PedidoService {
 
                 item.setAdicionais(adicionais);
 
-                double valorAdicionais = adicionais.stream()
-                        .mapToDouble(Adicional::getVlPrecoAdicional)
-                        .sum() * itemDTO.qtQuantidade();
+                BigDecimal somaAdicionais = adicionais.stream()
+                        .map(Adicional::getVlPrecoAdicional)
+                        .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-                subtotalItem += valorAdicionais;
+                BigDecimal valorTotalAdicionais = somaAdicionais.multiply(BigDecimal.valueOf(itemDTO.qtQuantidade()));
+
+                subtotalItem = subtotalItem.add(valorTotalAdicionais);
             }
 
             item.setVlSubtotal(subtotalItem);
             itemPedidoRepository.save(item);
 
-            subtotal += subtotalItem;
+            subtotal = subtotal.add(subtotalItem);
         }
 
         return subtotal;
@@ -410,7 +418,7 @@ public class PedidoService {
         }
     }
 
-    private void validarCupom(Cupom cupom, Double valorPedido) {
+    private void validarCupom(Cupom cupom, BigDecimal valorPedido) {
         if (!cupom.isAtivo()) {
             throw new CupomInvalidoException("Cupom inativo");
         }
@@ -428,19 +436,24 @@ public class PedidoService {
         }
     }
 
-    private Double calcularDescontoCupom(Cupom cupom, Double valorPedido) {
-        Double desconto = switch (cupom.getTipoCupom()) {
-            case VALOR_FIXO -> cupom.getVlDesconto();
-            case PERCENTUAL -> valorPedido * (cupom.getPercentualDesconto() / 100);
-        };
+    private BigDecimal calcularDescontoCupom(Cupom cupom, BigDecimal valorPedido) {
+        BigDecimal desconto;
+        switch (cupom.getTipoCupom()) {
+            case VALOR_FIXO -> desconto = cupom.getVlDesconto();
+            case PERCENTUAL -> {
+                desconto = valorPedido.multiply(cupom.getPercentualDesconto())
+                        .divide(new BigDecimal("100"), 2, RoundingMode.HALF_EVEN);
+            }
+            default -> desconto = BigDecimal.ZERO;
+        }
 
-        return Math.min(desconto, valorPedido);
+        return desconto.min(valorPedido);
     }
 
-    private Double calcularFrete(Endereco origem, Endereco destino) {
+    private BigDecimal calcularFrete(Endereco origem, Endereco destino) {
         // Implementar cálculo de frete baseado em distância
         // Por enquanto, valor fixo
-        return 5.0;
+        return new BigDecimal("5.00");
     }
 
     private void validarTransicaoStatus(StatusPedido statusAtual, StatusPedido novoStatus) {

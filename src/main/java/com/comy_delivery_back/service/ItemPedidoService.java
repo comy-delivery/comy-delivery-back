@@ -15,6 +15,7 @@ import com.comy_delivery_back.repository.ProdutoRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -58,7 +59,7 @@ public class ItemPedidoService {
         item.setVlPrecoUnitario(produto.getVlPreco());
         item.setDsObservacao(dto.dsObservacao());
 
-        double subtotal = produto.getVlPreco() * dto.qtQuantidade();
+        BigDecimal subtotal = produto.getVlPreco().multiply(BigDecimal.valueOf(dto.qtQuantidade()));
 
         if (dto.adicionaisIds() != null && !dto.adicionaisIds().isEmpty()) {
             List<Adicional> adicionais = adicionalRepository.findAllById(dto.adicionaisIds());
@@ -75,11 +76,13 @@ public class ItemPedidoService {
 
             item.setAdicionais(adicionais);
 
-            double valorAdicionais = adicionais.stream()
-                    .mapToDouble(Adicional::getVlPrecoAdicional)
-                    .sum() * dto.qtQuantidade();
+            BigDecimal somaUnitariosAdicionais = adicionais.stream()
+                    .map(Adicional::getVlPrecoAdicional)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-            subtotal += valorAdicionais;
+            BigDecimal valorTotalAdicionais = somaUnitariosAdicionais.multiply(BigDecimal.valueOf(dto.qtQuantidade()));
+
+            subtotal = subtotal.add(valorTotalAdicionais);
         }
 
         item.setVlSubtotal(subtotal);
@@ -122,13 +125,16 @@ public class ItemPedidoService {
 
         item.setQtQuantidade(novaQuantidade);
 
-        double subtotal = item.getVlPrecoUnitario() * novaQuantidade;
+        BigDecimal subtotal = item.getVlPrecoUnitario().multiply(BigDecimal.valueOf(novaQuantidade));
 
         if (item.getAdicionais() != null && !item.getAdicionais().isEmpty()) {
-            double valorAdicionais = item.getAdicionais().stream()
-                    .mapToDouble(Adicional::getVlPrecoAdicional)
-                    .sum() * novaQuantidade;
-            subtotal += valorAdicionais;
+            BigDecimal somaUnitariosAdicionais = item.getAdicionais().stream()
+                    .map(Adicional::getVlPrecoAdicional)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+            BigDecimal valorTotalAdicionais = somaUnitariosAdicionais.multiply(BigDecimal.valueOf(novaQuantidade));
+
+            subtotal = subtotal.add(valorTotalAdicionais);
         }
 
         item.setVlSubtotal(subtotal);
@@ -221,7 +227,7 @@ public class ItemPedidoService {
     }
 
     @Transactional(readOnly = true)
-    public Double calcularSubtotalItem(Long id) {
+    public BigDecimal calcularSubtotalItem(Long id) {
         ItemPedido item = itemPedidoRepository.findById(id)
                 .orElseThrow(() -> new ItemPedidoNaoEncontradoException(id));
 
@@ -268,8 +274,6 @@ public class ItemPedidoService {
         return new ItemPedidoResponseDTO(itemDuplicado);
     }
 
-    // ========== MÉTODOS AUXILIARES ==========
-
     private void validarPedidoPodeSerModificado(Pedido pedido) {
         if (pedido.getStatus() != StatusPedido.PENDENTE && pedido.getStatus() != StatusPedido.CONFIRMADO) {
             throw new PedidoException("Pedido não pode ser modificado no status atual: " + pedido.getStatus());
@@ -281,13 +285,16 @@ public class ItemPedidoService {
     }
 
     private void recalcularSubtotal(ItemPedido item) {
-        double subtotal = item.getVlPrecoUnitario() * item.getQtQuantidade();
+        BigDecimal subtotal = item.getVlPrecoUnitario().multiply(BigDecimal.valueOf(item.getQtQuantidade()));
 
         if (item.getAdicionais() != null && !item.getAdicionais().isEmpty()) {
-            double valorAdicionais = item.getAdicionais().stream()
-                    .mapToDouble(Adicional::getVlPrecoAdicional)
-                    .sum() * item.getQtQuantidade();
-            subtotal += valorAdicionais;
+            BigDecimal somaUnitariosAdicionais = item.getAdicionais().stream()
+                    .map(Adicional::getVlPrecoAdicional)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+            BigDecimal valorTotalAdicionais = somaUnitariosAdicionais.multiply(BigDecimal.valueOf(item.getQtQuantidade()));
+
+            subtotal = subtotal.add(valorTotalAdicionais);
         }
 
         item.setVlSubtotal(subtotal);
@@ -296,17 +303,18 @@ public class ItemPedidoService {
     private void atualizarValoresPedido(Pedido pedido) {
         List<ItemPedido> itens = itemPedidoRepository.findByPedido_IdPedido(pedido.getIdPedido());
 
-        Double subtotal = itens.stream()
-                .mapToDouble(ItemPedido::getVlSubtotal)
-                .sum();
+        BigDecimal subtotal = itens.stream()
+                .map(ItemPedido::getVlSubtotal)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         pedido.setVlSubtotal(subtotal);
 
-        double desconto = pedido.getVlDesconto() != null ? pedido.getVlDesconto() : 0.0;
-        Double frete = pedido.getVlFrete() != null ? pedido.getVlFrete() : 0.0;
+        BigDecimal desconto = pedido.getVlDesconto() != null ? pedido.getVlDesconto() : BigDecimal.ZERO;
+        BigDecimal frete = pedido.getVlFrete() != null ? pedido.getVlFrete() : BigDecimal.ZERO;
 
-        double total = subtotal + frete - desconto;
-        pedido.setVlTotal(Math.max(total, 0.0));
+        BigDecimal total = subtotal.add(frete).subtract(desconto);
+
+        pedido.setVlTotal(total.max(BigDecimal.ZERO));
 
         pedidoRepository.save(pedido);
     }

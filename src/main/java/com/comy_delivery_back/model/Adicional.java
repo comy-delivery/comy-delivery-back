@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -22,7 +24,7 @@ public class Adicional {
     private String dsAdicional;
 
     @Column(precision = 10, scale = 2, nullable = false)
-    private Double vlPrecoAdicional;
+    private BigDecimal vlPrecoAdicional;
 
     @ManyToOne
     @JoinColumn(name = "produto_id")

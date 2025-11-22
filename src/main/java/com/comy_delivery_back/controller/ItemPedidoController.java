@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -119,8 +120,8 @@ public class ItemPedidoController {
             @ApiResponse(responseCode = "404", description = "Item não encontrado")
     })
     @GetMapping("/{id}/subtotal")
-    public ResponseEntity<Double> calcularSubtotal(@PathVariable Long id) {
-        Double subtotal = itemPedidoService.calcularSubtotalItem(id);
+    public ResponseEntity<BigDecimal> calcularSubtotal(@PathVariable Long id) {
+        BigDecimal subtotal = itemPedidoService.calcularSubtotalItem(id);
         return ResponseEntity.ok(subtotal);
     }
 

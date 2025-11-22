@@ -3,6 +3,7 @@ package com.comy_delivery_back.dto.response;
 import com.comy_delivery_back.model.Produto;
 import io.swagger.v3.oas.annotations.media.Schema;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Schema(description = "Classe para armazenar as informações de um produto")
@@ -17,7 +18,7 @@ public record ProdutoResponseDTO(
         String dsProduto,
 
         @Schema(description = "Valor do preço do produto", example = "35,00")
-        Double vlPreco,
+        BigDecimal vlPreco,
 
         @Schema(description = "Imagem de apresentação do produto", format = "byte")
         byte[] imagemProduto,
@@ -35,7 +36,7 @@ public record ProdutoResponseDTO(
         Boolean isPromocao,
 
         @Schema(description = "Valor do preço do  quando promocional", example = "35,00")
-        Double vlPrecoPromocional,
+        BigDecimal vlPrecoPromocional,
 
         @Schema(description = "Flag de marcação para Promoção", example = "true", format = "boolean")
         boolean isAtivo,

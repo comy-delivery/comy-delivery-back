@@ -4,6 +4,7 @@ import com.comy_delivery_back.enums.TipoCupom;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public record CupomRequestDTO(
@@ -18,12 +19,12 @@ public record CupomRequestDTO(
         @NotNull(message = "O tipo do cupom precisa ser preenchido")
         TipoCupom tipoCupom,
 
-        Double vlDesconto,
+        BigDecimal vlDesconto,
 
-        Double percentualDesconto,
+        BigDecimal percentualDesconto,
 
         @Positive(message = "O pedido precisa ter um minimo positivo")
-        Double vlMinimoPedido,
+        BigDecimal vlMinimoPedido,
 
         @NotNull(message = "Data de validade é obrigatória")
         @FutureOrPresent
