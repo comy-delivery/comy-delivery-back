@@ -23,8 +23,8 @@ public record ProdutoResponseDTO(
         @Schema(description = "Imagem de apresentação do produto", format = "byte")
         byte[] imagemProduto,
 
-        @Schema(description = "Restaurante que cadastrou o produto", example = "id:1, nmRestaurante: Palácio da pizza...")
-        RestauranteResponseDTO restaurante,
+        @Schema(description = "Restaurante que cadastrou o produto", example = "id:1")
+        Long restauranteId,
 
         @Schema(description = "Categoria de produtos", example = "Pizzas")
         String categoriaProduto,
@@ -51,7 +51,7 @@ public record ProdutoResponseDTO(
                 p.getDsProduto(),
                 p.getVlPreco(),
                 p.getImagemProduto(),
-                new RestauranteResponseDTO(p.getRestaurante()),
+                p.getRestaurante().getId(),
                 p.getCategoriaProduto(),
                 p.getTempoPreparacao(),
                 p.getIsPromocao(),

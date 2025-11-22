@@ -2,7 +2,7 @@ package com.comy_delivery_back.dto.response;
 
 import com.comy_delivery_back.enums.TipoCupom;
 import com.comy_delivery_back.model.Cupom;
-import jakarta.validation.constraints.*;
+
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -19,7 +19,7 @@ public record CupomResponseDTO (
         Integer qtdUsoMaximo,
         Integer qtdUsado,
         boolean isAtivo,
-        RestauranteResponseDTO restauranteId,
+        Long restauranteId,
         LocalDateTime dataCriacao
 ){
 
@@ -36,7 +36,7 @@ public record CupomResponseDTO (
                 c.getQtdUsoMaximo(),
                 c.getQtdUsado(),
                 c.isAtivo(),
-                new RestauranteResponseDTO(c.getRestaurante()),
+                c.getRestaurante().getId(),
                 c.getDataCriacao()
         );
     }

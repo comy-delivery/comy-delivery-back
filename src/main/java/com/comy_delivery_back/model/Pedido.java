@@ -85,6 +85,14 @@ public class Pedido {
     @Column(length = 300)
     private String motivoRecusa;
 
+    @OneToOne(mappedBy = "pedido", cascade = CascadeType.ALL, optional = true)
+    private Entrega entrega;
+
+    @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL)
+    private List<Avaliacao> avaliacoes = new ArrayList<>();
+
+
+
 
 
 }
