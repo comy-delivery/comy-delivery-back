@@ -16,7 +16,10 @@ public record PedidoRequestDTO(
         Long restaurante,
 
         @NotNull(message = "ID do endereço de entrega é obrigatório")
-        Long endereco,
+        Long enderecoEntregaId,
+
+        @NotNull(message = "ID do endereço de origem (restaurante) é obrigatório")
+        Long enderecoOrigemId,
 
         Long cupomId,
 

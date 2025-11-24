@@ -6,12 +6,15 @@ import com.comy_delivery_back.dto.request.EnderecoRequestDTO;
 import com.comy_delivery_back.dto.response.ClienteResponseDTO;
 import com.comy_delivery_back.dto.response.EnderecoResponseDTO;
 import com.comy_delivery_back.dto.response.PedidoResponseDTO;
+import com.comy_delivery_back.exception.ClienteNaoEncontradoException;
 import com.comy_delivery_back.exception.EnderecoNaoEncontradoException;
+import com.comy_delivery_back.exception.RegistrosDuplicadosException;
 import com.comy_delivery_back.model.Cliente;
 import com.comy_delivery_back.model.Endereco;
 import com.comy_delivery_back.repository.ClienteRepository;
 import com.comy_delivery_back.repository.EnderecoRepository;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +22,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @Service
 public class ClienteService {
 
@@ -38,6 +42,7 @@ public class ClienteService {
 
     @Transactional
     public ClienteResponseDTO cadastrarCliente(ClienteRequestDTO clienteRequestDTO) {
+        log.info("A iniciar cadastro de novo cliente: {}", clienteRequestDTO.emailCliente());
         if (clienteRepository.findByCpfCliente(clienteRequestDTO.cpfCliente()).isPresent()) {
             throw new IllegalArgumentException("CPF já cadastrado!");
         }
@@ -74,9 +79,10 @@ public class ClienteService {
 
         enderecos.forEach(endereco -> endereco.setCliente(novoCliente)); //endereco recebe o cliente que pertence
 
-        clienteRepository.save(novoCliente);
+        Cliente clienteSalvo = clienteRepository.save(novoCliente);
+        log.info("Cliente cadastrado com sucesso. ID: {}", clienteSalvo.getId());
 
-        return new ClienteResponseDTO(novoCliente);
+        return new ClienteResponseDTO(clienteSalvo);
     }
 
     @Transactional
@@ -118,7 +124,7 @@ public class ClienteService {
     @Transactional
     public List<PedidoResponseDTO> listarPedidos(Long idCliente){
         Cliente cliente = clienteRepository.findById(idCliente)
-                .orElseThrow(() -> new IllegalArgumentException("id cliente não encontrado."));
+                .orElseThrow(() -> new ClienteNaoEncontradoException(idCliente));
 
         List<PedidoResponseDTO> pedidosCliente = cliente.getPedidos()
                 .stream()
@@ -131,7 +137,7 @@ public class ClienteService {
     @Transactional
     public ClienteResponseDTO atualizarDadosCliente(Long idCliente, AtualizarClienteRequestDTO requestDTO){
         Cliente cliente = clienteRepository.findById(idCliente)
-                .orElseThrow(()-> new IllegalArgumentException("Cliente não encontrado."));
+                .orElseThrow(()-> new ClienteNaoEncontradoException(idCliente));
 
         if(requestDTO.nmCliente() != null && !requestDTO.nmCliente().isBlank()){
             cliente.setNmCliente(requestDTO.nmCliente());
@@ -141,7 +147,7 @@ public class ClienteService {
                 !requestDTO.emailCliente().equalsIgnoreCase(cliente.getEmailCliente())) {
 
             if (clienteRepository.findByEmailCliente(requestDTO.emailCliente()).isPresent()) {
-                throw new IllegalArgumentException("E-mail já cadastrado para outro usuário.");
+                throw new RegistrosDuplicadosException("E-mail já cadastrado para outro usuário.");
             }
 
             cliente.setEmailCliente(requestDTO.emailCliente());
@@ -156,7 +162,7 @@ public class ClienteService {
     @Transactional
     public EnderecoResponseDTO atualizarEnderecoCliente(Long idCliente, Long idEndereco, EnderecoRequestDTO enderecoRequestDTO) {
         Cliente cliente = clienteRepository.findById(idCliente)
-                .orElseThrow(() -> new IllegalArgumentException("Cliente não encontrado."));
+                .orElseThrow(() -> new ClienteNaoEncontradoException(idCliente));
 
         Endereco endereco = enderecoRepository.findById(idEndereco)
                 .orElseThrow(()-> new EnderecoNaoEncontradoException(idEndereco));
@@ -206,15 +212,16 @@ public class ClienteService {
     @Transactional
     public void deletarCliente(Long idCliente){
         var cliente = clienteRepository.findById(idCliente)
-                .orElseThrow(()-> new IllegalArgumentException("Usuario não encontrado pelo ID fornecido."));
+                .orElseThrow(()-> new ClienteNaoEncontradoException(idCliente));
 
         cliente.setAtivo(false);
     }
 
     @Transactional
     public boolean iniciarRecuperacaoSenha(String email){
+        log.info("Solicitação de recuperação de senha para: {}", email);
         Cliente cliente = clienteRepository.findByEmailCliente(email)
-                .orElseThrow(() -> new IllegalArgumentException("Usuario não encontrado para o email: " + email));
+                .orElseThrow(() -> new ClienteNaoEncontradoException(email));
 
         String token = UUID.randomUUID().toString();
         LocalDateTime expiracao = LocalDateTime.now().plusMinutes(15);
@@ -226,17 +233,19 @@ public class ClienteService {
 
         String linkRecuperacao = "http://localhost/8084/reset-password?token=" + token;
 
-        try{
-            emailService.enviarEmailRecuperacao(cliente.getEmailCliente(), linkRecuperacao);
+
+            emailService.enviarEmailRecuperacao(cliente.getEmailCliente(), linkRecuperacao)
+                    .exceptionally(ex ->{
+                        log.error("Falha ao enviar e-mail de recuperação: " + ex.getMessage());
+                        return false;
+                    });
             return true;
-        } catch (Exception e) {
-            throw new RuntimeException("Falha ao enviar e-mail de recuperação ", e);
-        }
+
     }
 
     @Transactional
     public boolean redefinirSenha(String token, String novaSenha){
-        Cliente cliente = clienteRepository.findByTokenRecuperacao(token)
+        Cliente cliente = clienteRepository.findByTokenRecuperacaoSenha(token)
                 .orElseThrow(() -> new IllegalArgumentException("Token não encontrado"));
 
         if (cliente.getExpiracaoToken() != null && cliente.getExpiracaoToken().isBefore(LocalDateTime.now())){

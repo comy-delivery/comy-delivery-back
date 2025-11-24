@@ -6,8 +6,14 @@ import com.comy_delivery_back.exception.AdminNaoEncontradoException;
 import com.comy_delivery_back.model.Admin;
 import com.comy_delivery_back.repository.AdminRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import com.comy_delivery_back.exception.RegistrosDuplicadosException;
+import com.comy_delivery_back.model.Admin;
+import com.comy_delivery_back.repository.AdminRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 public class AdminService {
 
@@ -19,13 +25,15 @@ public class AdminService {
         this.passwordEncoder = passwordEncoder;
     }
 
+    @Transactional
     public AdminResponseDTO cadastrarAdmin(AdminRequestDTO adminRequestDTO){
+        log.warn("Criação de novo ADMINISTRADOR solicitada. Username: {}", adminRequestDTO.username());
         if(adminRepository.findByCpfAdmin(adminRequestDTO.cpfAdmin()).isPresent()){
-            throw new RuntimeException("CPF já foi cadastrado");
+            throw new RegistrosDuplicadosException("CPF já foi cadastrado");
         }
 
         if (adminRepository.findByEmailAdmin(adminRequestDTO.emailAdmin()).isPresent()){
-            throw new RuntimeException("Email já cadastrado.");
+            throw new RegistrosDuplicadosException("Email já cadastrado.");
         }
 
         Admin novoAdmin = new Admin();
@@ -48,6 +56,7 @@ public class AdminService {
         return new AdminResponseDTO(admin);
     }
 
+    @Transactional
     //metodo extra apenas para teste
     public void deletarAdmin(Long idAdmin){
         Admin admin = adminRepository.findById(idAdmin)

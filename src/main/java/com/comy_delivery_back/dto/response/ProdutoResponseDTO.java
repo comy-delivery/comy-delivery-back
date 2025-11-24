@@ -3,6 +3,7 @@ package com.comy_delivery_back.dto.response;
 import com.comy_delivery_back.model.Produto;
 import io.swagger.v3.oas.annotations.media.Schema;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Schema(description = "Classe para armazenar as informações de um produto")
@@ -17,13 +18,13 @@ public record ProdutoResponseDTO(
         String dsProduto,
 
         @Schema(description = "Valor do preço do produto", example = "35,00")
-        Double vlPreco,
+        BigDecimal vlPreco,
 
         @Schema(description = "Imagem de apresentação do produto", format = "byte")
         byte[] imagemProduto,
 
-        @Schema(description = "Restaurante que cadastrou o produto", example = "id:1, nmRestaurante: Palácio da pizza...")
-        RestauranteResponseDTO restaurante,
+        @Schema(description = "Restaurante que cadastrou o produto", example = "id:1")
+        Long restauranteId,
 
         @Schema(description = "Categoria de produtos", example = "Pizzas")
         String categoriaProduto,
@@ -35,7 +36,7 @@ public record ProdutoResponseDTO(
         Boolean isPromocao,
 
         @Schema(description = "Valor do preço do  quando promocional", example = "35,00")
-        Double vlPrecoPromocional,
+        BigDecimal vlPrecoPromocional,
 
         @Schema(description = "Flag de marcação para Promoção", example = "true", format = "boolean")
         boolean isAtivo,
@@ -50,7 +51,7 @@ public record ProdutoResponseDTO(
                 p.getDsProduto(),
                 p.getVlPreco(),
                 p.getImagemProduto(),
-                new RestauranteResponseDTO(p.getRestaurante()),
+                p.getRestaurante().getId(),
                 p.getCategoriaProduto(),
                 p.getTempoPreparacao(),
                 p.getIsPromocao(),

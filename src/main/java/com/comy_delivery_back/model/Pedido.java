@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,8 +31,13 @@ public class Pedido {
     private Restaurante restaurante;
 
     @ManyToOne
-    @JoinColumn(name = "endereco_id", nullable = false)
-    private Endereco endereco;
+    @JoinColumn(name = "endereco_entrega_id", nullable = false)
+    private Endereco enderecoEntrega;
+
+    @ManyToOne
+    @JoinColumn(name = "endereco_origem_id", nullable = false)
+    private Endereco enderecoOrigem;
+
 
     @ManyToOne
     @JoinColumn(name = "cupom_id")
@@ -46,16 +52,16 @@ public class Pedido {
     private LocalDateTime dtAtualizacao;
 
     @Column(precision = 10, scale = 2)
-    private Double vlSubtotal = 0.00;
+    private BigDecimal vlSubtotal = BigDecimal.ZERO;
 
     @Column(precision = 10, scale = 2)
-    private Double vlFrete = 0.00;
+    private BigDecimal vlFrete = BigDecimal.ZERO;
 
     @Column(precision = 10, scale = 2)
-    private Double vlDesconto = 0.00;
+    private BigDecimal vlDesconto = BigDecimal.ZERO;
 
     @Column(precision = 10, scale = 2)
-    private Double vlTotal = 0.00;
+    private BigDecimal vlTotal = BigDecimal.ZERO;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -70,6 +76,23 @@ public class Pedido {
 
     @Column(length = 500)
     private String dsObservacoes;
+
+    @Column(nullable = false, columnDefinition = "boolean default false")
+    private boolean isAceito = false;
+
+    private LocalDateTime dtAceitacao;
+
+    @Column(length = 300)
+    private String motivoRecusa;
+
+    @OneToOne(mappedBy = "pedido", cascade = CascadeType.ALL, optional = true)
+    private Entrega entrega;
+
+    @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL)
+    private List<Avaliacao> avaliacoes = new ArrayList<>();
+
+
+
 
 
 }

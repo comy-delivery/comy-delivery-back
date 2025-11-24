@@ -2,13 +2,15 @@ package com.comy_delivery_back.dto.response;
 
 import com.comy_delivery_back.model.Adicional;
 
+import java.math.BigDecimal;
+
 public record AdicionalResponseDTO(
 
         Long idAdicional,
         String nmAdicional,
         String dsAdicional,
-        Double vlPrecoAdicional,
-        ProdutoResponseDTO produto,
+        BigDecimal vlPrecoAdicional,
+        Long produtoId,
         boolean isDisponivel
 ) {
 
@@ -18,7 +20,7 @@ public record AdicionalResponseDTO(
                 a.getNmAdicional(),
                 a.getDsAdicional(),
                 a.getVlPrecoAdicional(),
-                new ProdutoResponseDTO(a.getProduto()),
+                a.getProduto().getIdProduto(),
                 a.isDisponivel()
         );
     }

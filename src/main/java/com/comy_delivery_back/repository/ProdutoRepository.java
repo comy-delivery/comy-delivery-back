@@ -9,10 +9,10 @@ import java.util.List;
 @Repository
 public interface ProdutoRepository extends JpaRepository<Produto,Long> {
 
-    List<Produto> findByRestaurante_IdRestaurante(Long restauranteId);
-    List<Produto> findByCategoria(String categoria);
+    List<Produto> findByRestaurante_Id(Long restauranteId);
+    List<Produto> findByCategoriaProduto(String categoria);
     List<Produto> findByIsAtivoTrue();
     List<Produto> findByIsPromocaoTrue();
-    List<Produto> findByRestaurante_IdRestauranteAndIsAtivoTrue(Long restauranteId);
+    List<Produto> findByRestaurante_IdAndIsAtivoTrue(Long restauranteId);
 
 }

@@ -12,7 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@CrossOrigin(origins = "*")
 @RequestMapping("/api/endereco")
 public class EnderecoController {
 
@@ -36,7 +35,7 @@ public class EnderecoController {
     }
 
     @PostMapping
-    public ResponseEntity<EnderecoResponseDTO> adicionarEndereco(@RequestBody@Valid EnderecoRequestDTO endereco) throws CepNaoEncontradoException {
+    public ResponseEntity<EnderecoResponseDTO> adicionarEndereco(@RequestBody@Valid EnderecoRequestDTO endereco) {
         EnderecoResponseDTO response = this.enderecoService.cadastrarEndereco(endereco);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -49,7 +48,7 @@ public class EnderecoController {
 
     @PutMapping("/alterar/{id}")
     public ResponseEntity<EnderecoResponseDTO> atualizarEndereco(@PathVariable("id") Long id,
-                                                               @RequestBody@Valid EnderecoRequestDTO enderecoDTO) throws CepNaoEncontradoException {
+                                                               @RequestBody@Valid EnderecoRequestDTO enderecoDTO) {
         var response = enderecoService.alterarEndereco(id, enderecoDTO);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }

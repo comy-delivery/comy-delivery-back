@@ -13,8 +13,7 @@ import com.comy_delivery_back.model.Restaurante;
 import com.comy_delivery_back.repository.EnderecoRepository;
 import com.comy_delivery_back.repository.RestauranteRepository;
 import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cglib.core.Local;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -26,6 +25,7 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @Service
 public class RestauranteService {
 
@@ -44,11 +44,13 @@ public class RestauranteService {
 
     @Transactional
     public RestauranteResponseDTO cadastrarRestaurante(RestauranteRequestDTO restauranteRequestDTO, MultipartFile imagemFile) throws IOException {
-        if (restauranteRepository.findByCpnj(restauranteRequestDTO.emailRestaurante()).isPresent()){
+        log.info("A registar novo restaurante: CNPJ {}", restauranteRequestDTO.cnpj());
+        if (restauranteRepository.findByCnpj(restauranteRequestDTO.cnpj()).isPresent()){
+            log.warn("Tentativa de cadastro com CNPJ já existente: {}", restauranteRequestDTO.cnpj());
             throw new IllegalArgumentException("CNPJ já cadastrado.");
         }
 
-        if (restauranteRepository.findByEmailRestaurante(restauranteRequestDTO.cnpj()).isPresent()){
+        if (restauranteRepository.findByEmailRestaurante(restauranteRequestDTO.emailRestaurante()).isPresent()){
             throw new IllegalArgumentException("E-mail já cadastrado.");
         }
 
@@ -100,6 +102,7 @@ public class RestauranteService {
         novoRestaurante.setDiasFuncionamento(restauranteRequestDTO.diasFuncionamento());
 
         Restaurante restauranteSalvo = restauranteRepository.save(novoRestaurante);
+        log.info("Restaurante registado com sucesso. ID: {}", restauranteSalvo.getId());
 
 
         return new RestauranteResponseDTO(restauranteSalvo);
@@ -232,7 +235,7 @@ public class RestauranteService {
     }
     @Transactional
     public RestauranteResponseDTO buscarRestaurantePorCnpj(String cnpj){
-        Restaurante restaurante = restauranteRepository.findByCpnj(cnpj)
+        Restaurante restaurante = restauranteRepository.findByCnpj(cnpj)
                 .orElseThrow(() -> new IllegalArgumentException("Cnpj Restaurante não encontrado"));
 
         List<EnderecoResponseDTO> enderecoResponseDTOS = restaurante.getEnderecos()
@@ -286,6 +289,7 @@ public class RestauranteService {
 
     @Transactional
     public void atualizarStatusAberturaFechamento(){
+        log.info("A executar rotina de verificação de horário de funcionamento dos restaurantes.");
         LocalTime horaAtual = LocalTime.now();
         DayOfWeek diaAtualDayOfWeek = LocalDateTime.now().getDayOfWeek();
 
@@ -298,7 +302,7 @@ public class RestauranteService {
             if (restaurante.isAtivo() && restaurante.isDisponivel()){
                 boolean deveEstarAberto = false;
 
-                if(restaurante.getDiasFuncionamento().contains(diaAtualEnum.name())){
+                if(restaurante.getDiasFuncionamento().contains(diaAtualEnum)){
                     LocalTime abertura = restaurante.getHorarioAbertura();
                     LocalTime fechamento = restaurante.getHorarioFechamento();
 
@@ -312,6 +316,7 @@ public class RestauranteService {
                         // Aberto se for DEPOIS da abertura (22:00) OU ANTES do fechamento (02:00)
                         if (horaAtual.isAfter(abertura) || horaAtual.isBefore(fechamento)) {
                             deveEstarAberto = true;
+                            log.info("Restaurante {} (ID: {}) teve status de abertura alterado para: {}", restaurante.getNmRestaurante(), restaurante.getId(), deveEstarAberto);
                         }
                     }
                 }
@@ -363,17 +368,17 @@ public class RestauranteService {
 
         String linkRecuperacao = "http://localhost/8084/reset-password?token=" + token;
 
-        try{
-            emailService.enviarEmailRecuperacao(restaurante.getEmailRestaurante(), linkRecuperacao);
-            return true;
-        } catch (Exception e) {
-            throw new RuntimeException("Falha ao enviar e-mail de recuperação ", e);
-        }
+        emailService.enviarEmailRecuperacao(restaurante.getEmailRestaurante(), linkRecuperacao)
+                .exceptionally(ex ->{
+                    log.error("Falha ao enviar e-mail de recuperação: " + ex.getMessage());
+                    return false;
+                });
+        return true;
     }
 
     @Transactional
     public boolean redefinirSenha(String token, String novaSenha){
-        Restaurante restaurante = restauranteRepository.findByTokenRecuperacao(token)
+        Restaurante restaurante = restauranteRepository.findByTokenRecuperacaoSenha(token)
                 .orElseThrow(() -> new IllegalArgumentException("Token de recuperação inválido ou não encontrado."));
 
         if (restaurante.getExpiracaoToken() != null && restaurante.getExpiracaoToken().isBefore(LocalDateTime.now())){

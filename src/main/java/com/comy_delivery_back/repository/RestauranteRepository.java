@@ -14,13 +14,13 @@ import java.util.Optional;
 
 @Repository
 public interface RestauranteRepository extends JpaRepository<Restaurante, Long> {
-    Optional<Restaurante> findByCpnj(String cnpj);
+    Optional<Restaurante> findByCnpj(String cnpj);
     Optional<Restaurante> findByEmailRestaurante(String email);
     Optional<Restaurante> findByUsername(String username);
     List<Restaurante> findAllByIsAbertoTrue();
     List<Restaurante> findByIsDisponivelTrue();
     List<Restaurante> findByCategoria(CategoriaRestaurante categoriaRestaurante);
-    Optional<Restaurante> findByTokenRecuperacao(String token);
+    Optional<Restaurante> findByTokenRecuperacaoSenha(String token);
 
     @Query("SELECT r FROM Restaurante r WHERE :dia MEMBER OF r.diasFuncionamento")
     List<Restaurante> findByDiaFuncionamento(@Param("dia") DiasSemana dia);

@@ -16,12 +16,12 @@ public record EnderecoResponseDTO(
         String cep,
         String estado,
         TipoEndereco tipoEndereco,
-        String pontoDeReferecia,
+        String pontoDeReferencia,
         boolean isPadrao,
         Double latitude,
-        Double longitude
-//        CLienteDTO cliente,
-//        RestauranDTO restaurante
+        Double longitude,
+        Long clienteId,
+        Long restauranteId
 ) {
 
     public EnderecoResponseDTO (Endereco e){
@@ -35,12 +35,12 @@ public record EnderecoResponseDTO(
                 e.getCep(),
                 e.getEstado(),
                 e.getTipoEndereco(),
-                e.getPontoDeReferecia(),
+                e.getPontoDeReferencia(),
                 e.isPadrao(),
                 e.getLatitude(),
-                e.getLongitude()
-//                new Cliente  ResponseDTO(p.getIdCliente),
-//                new RestauranteResponseDTO(p.getIdRestaurante),
+                e.getLongitude(),
+                e.getCliente().getId(),
+                e.getRestaurante().getId()
         );
     }
 }

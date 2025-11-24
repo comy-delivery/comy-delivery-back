@@ -8,6 +8,7 @@ import com.comy_delivery_back.exception.CepNaoEncontradoException;
 import com.comy_delivery_back.exception.EnderecoNaoEncontradoException;
 import com.comy_delivery_back.model.Endereco;
 import com.comy_delivery_back.repository.EnderecoRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +17,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class EnderecoService {
 
@@ -31,13 +33,16 @@ public class EnderecoService {
     @Transactional
     public EnderecoResponseDTO cadastrarEndereco(EnderecoRequestDTO enderecoDTO)
             throws CepNaoEncontradoException {
+        log.info("A buscar dados para o CEP: {}", enderecoDTO.cep());
 
         ApiCepDTO endereco = this.apiCepClient.buscarCep(enderecoDTO.cep()).getBody();
 
         if (endereco == null || endereco.cep() == null) {
+            log.warn("CEP não encontrado na API externa: {}", enderecoDTO.cep());
             throw new CepNaoEncontradoException(enderecoDTO.cep());
         }
 
+        log.debug("Endereço encontrado: {}, {}", endereco.address(), endereco.city());
         var novo = new Endereco();
         novo.setCep(endereco.cep().replace("-", ""));
         novo.setBairro(endereco.district());
@@ -50,7 +55,7 @@ public class EnderecoService {
         novo.setNumero(enderecoDTO.numero());
         novo.setComplemento(enderecoDTO.complemento());
         novo.setTipoEndereco(enderecoDTO.tipoEndereco());
-        novo.setPontoDeReferecia(enderecoDTO.pontoDeReferecia());
+        novo.setPontoDeReferencia(enderecoDTO.pontoDeReferencia());
 
         Endereco enderecoSalvo = enderecoRepository.save(novo);
         return new EnderecoResponseDTO(enderecoSalvo);
@@ -65,7 +70,7 @@ public class EnderecoService {
 
     @Transactional
     public List<EnderecoResponseDTO> listarPorCliente(Long clienteId) {
-        return enderecoRepository.findByCliente_IdUsuario(clienteId).stream()
+        return enderecoRepository.findByCliente_Id(clienteId).stream()
                 .map(EnderecoResponseDTO::new)
                 .collect(Collectors.toList());
     }

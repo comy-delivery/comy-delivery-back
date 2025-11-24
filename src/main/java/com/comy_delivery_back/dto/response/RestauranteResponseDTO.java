@@ -49,8 +49,8 @@ public record RestauranteResponseDTO(
                 restaurante.getDescricaoRestaurante(),
                 restaurante.getEnderecos().stream().map(EnderecoResponseDTO::new).toList(),
                 restaurante.getCategoria(),
-                restaurante.getHorarioFechamento(),
                 restaurante.getHorarioAbertura(),
+                restaurante.getHorarioFechamento(),
                 restaurante.getDiasFuncionamento(),
                 restaurante.getProdutos() != null
                         ? restaurante.getProdutos().stream().map(Produto::getIdProduto).toList() : List.of(),

@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
@@ -29,12 +30,12 @@ public class Cupom {
     private TipoCupom tipoCupom;
 
     @Column(precision = 10, scale = 2)
-    private Double vlDesconto;
+    private BigDecimal vlDesconto;
 
-    private Double percentualDesconto;
+    private BigDecimal percentualDesconto;
 
     @Column(precision = 10, scale = 2)
-    private Double vlMinimoPedido;
+    private BigDecimal vlMinimoPedido;
 
     @Column(nullable = false)
     private LocalDateTime dtValidade;
