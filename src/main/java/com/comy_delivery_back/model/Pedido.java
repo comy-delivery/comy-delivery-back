@@ -55,7 +55,7 @@ public class Pedido {
     private BigDecimal vlSubtotal = BigDecimal.ZERO;
 
     @Column(precision = 10, scale = 2)
-    private BigDecimal vlFrete = BigDecimal.ZERO;
+    private BigDecimal vlEntrega = BigDecimal.ZERO;
 
     @Column(precision = 10, scale = 2)
     private BigDecimal vlDesconto = BigDecimal.ZERO;

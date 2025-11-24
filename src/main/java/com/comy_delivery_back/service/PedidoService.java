@@ -1,6 +1,7 @@
 package com.comy_delivery_back.service;
 
 import com.comy_delivery_back.dto.request.AceitarPedidoRequestDTO;
+import com.comy_delivery_back.dto.request.EntregaRequestDTO;
 import com.comy_delivery_back.dto.request.ItemPedidoRequestDTO;
 import com.comy_delivery_back.dto.request.PedidoRequestDTO;
 import com.comy_delivery_back.dto.response.PedidoResponseDTO;
@@ -34,6 +35,7 @@ public class PedidoService {
     private final ItemPedidoRepository itemPedidoRepository;
     private final AdicionalRepository adicionalRepository;
     private final EmailService emailService;
+    private final EntregaService entregaService;
 
     public PedidoService(PedidoRepository pedidoRepository,
                          ClienteRepository clienteRepository,
@@ -42,7 +44,7 @@ public class PedidoService {
                          ProdutoRepository produtoRepository,
                          CupomRepository cupomRepository,
                          ItemPedidoRepository itemPedidoRepository,
-                         AdicionalRepository adicionalRepository, EmailService emailService) {
+                         AdicionalRepository adicionalRepository, EmailService emailService, EntregaService entregaService) {
         this.pedidoRepository = pedidoRepository;
         this.clienteRepository = clienteRepository;
         this.restauranteRepository = restauranteRepository;
@@ -52,6 +54,7 @@ public class PedidoService {
         this.itemPedidoRepository = itemPedidoRepository;
         this.adicionalRepository = adicionalRepository;
         this.emailService = emailService;
+        this.entregaService = entregaService;
     }
 
     @Transactional
@@ -84,7 +87,7 @@ public class PedidoService {
         pedido.setEnderecoOrigem(enderecoOrigem);
         pedido.setFormaPagamento(dto.formaPagamento());
         pedido.setDsObservacoes(dto.dsObservacoes());
-        pedido.setVlFrete(calcularFrete(enderecoOrigem, enderecoEntrega));
+        pedido.setVlEntrega(calcularEntrega(enderecoOrigem, enderecoEntrega));
         pedido.setTempoEstimadoEntrega(restaurante.getTempoMediaEntrega());
 
         if (dto.cupomId() != null) {
@@ -108,10 +111,24 @@ public class PedidoService {
             pedido.setVlDesconto(BigDecimal.ZERO);
         }
 
-        BigDecimal total = subtotal.add(pedido.getVlFrete()).subtract(desconto);
+        BigDecimal total = subtotal.add(pedido.getVlEntrega()).subtract(desconto);
         pedido.setVlTotal(total.max(BigDecimal.ZERO));
 
         pedido = pedidoRepository.save(pedido);
+
+        try {
+            log.info("Iniciando criação automática da entrega para o pedido {}", pedido.getIdPedido());
+
+            EntregaRequestDTO entregaDTO = new EntregaRequestDTO(
+                    pedido.getIdPedido(),
+                    pedido.getTempoEstimadoEntrega()
+            );
+
+            entregaService.cadastrarEntrega(entregaDTO);
+
+        } catch (Exception e) {
+            log.error("Erro ao criar entrega automática para o pedido {}: {}", pedido.getIdPedido(), e.getMessage());
+        }
 
         log.info("Pedido criado com sucesso. ID: {}, Total: {}", pedido.getIdPedido(), pedido.getVlTotal());
         return new PedidoResponseDTO(pedido);
@@ -346,7 +363,7 @@ public class PedidoService {
         pedido.setVlDesconto(desconto);
 
         BigDecimal total = pedido.getVlSubtotal()
-                .add(pedido.getVlFrete())
+                .add(pedido.getVlEntrega())
                 .subtract(desconto);
         pedido.setVlTotal(total.max(BigDecimal.ZERO));
 
@@ -368,7 +385,7 @@ public class PedidoService {
         pedido.setCupom(null);
         pedido.setVlDesconto(BigDecimal.ZERO);
 
-        BigDecimal total = pedido.getVlSubtotal().add(pedido.getVlFrete());
+        BigDecimal total = pedido.getVlSubtotal().add(pedido.getVlEntrega());
         pedido.setVlTotal(total);
 
         pedido.setDtAtualizacao(LocalDateTime.now());
@@ -488,7 +505,7 @@ public class PedidoService {
         return desconto.min(valorPedido);
     }
 
-    private BigDecimal calcularFrete(Endereco origem, Endereco destino) {
+    private BigDecimal calcularEntrega(Endereco origem, Endereco destino) {
         try {
             if (origem.getLatitude() == null || origem.getLongitude() == null ||
                     destino.getLatitude() == null || destino.getLongitude() == null) {
