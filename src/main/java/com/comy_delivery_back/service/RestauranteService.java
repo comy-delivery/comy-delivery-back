@@ -287,7 +287,7 @@ public class RestauranteService {
     @Transactional
     public void atualizarStatusAberturaFechamento(){
         LocalTime horaAtual = LocalTime.now();
-        DayOfWeek diaAtualDayOfWeek = DayOfWeek.from(LocalDateTime.now().getDayOfWeek());
+        DayOfWeek diaAtualDayOfWeek = LocalDateTime.now().getDayOfWeek();
 
         //metodo static do enum DiasSemana
         DiasSemana diaAtualEnum = DiasSemana.fromDayOfWeek(diaAtualDayOfWeek);
