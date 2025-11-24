@@ -12,16 +12,17 @@ import com.comy_delivery_back.model.Endereco;
 import com.comy_delivery_back.model.Restaurante;
 import com.comy_delivery_back.repository.EnderecoRepository;
 import com.comy_delivery_back.repository.RestauranteRepository;
-import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -31,19 +32,21 @@ public class RestauranteService {
 
     private final RestauranteRepository restauranteRepository;
     private final EnderecoRepository enderecoRepository;
+    private final EnderecoService enderecoService;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
 
     public RestauranteService(RestauranteRepository restauranteRepository,
-                              EnderecoRepository enderecoRepository, PasswordEncoder passwordEncoder, EmailService emailService) {
+                              EnderecoRepository enderecoRepository, EnderecoService enderecoService, PasswordEncoder passwordEncoder, EmailService emailService) {
         this.restauranteRepository = restauranteRepository;
         this.enderecoRepository = enderecoRepository;
+        this.enderecoService = enderecoService;
         this.passwordEncoder = passwordEncoder;
         this.emailService = emailService;
     }
 
     @Transactional
-    public RestauranteResponseDTO cadastrarRestaurante(RestauranteRequestDTO restauranteRequestDTO, MultipartFile imagemFile) throws IOException {
+    public RestauranteResponseDTO cadastrarRestaurante(RestauranteRequestDTO restauranteRequestDTO, MultipartFile imagemLogo, MultipartFile imagemBanner) throws IOException {
 
         log.info("Iniciando cadastro do novo restaurante: {}", restauranteRequestDTO.nmRestaurante());
 
@@ -71,50 +74,73 @@ public class RestauranteService {
         novoRestaurante.setCnpj(restauranteRequestDTO.cnpj());
         novoRestaurante.setTelefoneRestaurante(restauranteRequestDTO.telefoneRestaurante());
 
-        if (imagemFile != null && !imagemFile.isEmpty()) {
+        if (imagemLogo != null && !imagemLogo.isEmpty()) {
             //converte o MultipartFile em byte
-            byte[] imagemBytes = imagemFile.getBytes();
+            byte[] imagemBytes = imagemLogo.getBytes();
+            novoRestaurante.setImagemLogo(imagemBytes);
+        } else {
+            novoRestaurante.setImagemLogo(null);
+        }
+
+        if (imagemBanner != null && !imagemBanner.isEmpty()) {
+            byte[] imagemBytes = imagemBanner.getBytes();
             novoRestaurante.setImagemLogo(imagemBytes);
         } else {
             novoRestaurante.setImagemLogo(null);
         }
 
         novoRestaurante.setDescricaoRestaurante(restauranteRequestDTO.descricaoRestaurante());
-
-        List<Endereco> enderecos = restauranteRequestDTO.enderecos().stream()
-                .map(enderecoRequestDTO -> {
-                    Endereco endereco = new Endereco();
-
-                    endereco.setLogradouro(enderecoRequestDTO.logradouro());
-                    endereco.setNumero(enderecoRequestDTO.numero());
-                    endereco.setComplemento(enderecoRequestDTO.complemento());
-                    endereco.setBairro(enderecoRequestDTO.bairro());
-                    endereco.setCidade(enderecoRequestDTO.cidade());
-                    endereco.setCep(enderecoRequestDTO.cep());
-                    endereco.setEstado(enderecoRequestDTO.estado());
-                    endereco.setTipoEndereco(enderecoRequestDTO.tipoEndereco());
-                    endereco.setRestaurante(novoRestaurante);
-
-                    return endereco;
-
-                }).toList();
-        novoRestaurante.setEnderecos(enderecos);
-
         novoRestaurante.setCategoria(restauranteRequestDTO.categoria());
         novoRestaurante.setHorarioAbertura(restauranteRequestDTO.horarioAbertura());
         novoRestaurante.setHorarioFechamento(restauranteRequestDTO.horarioFechamento());
         novoRestaurante.setDiasFuncionamento(restauranteRequestDTO.diasFuncionamento());
 
+        novoRestaurante.setEnderecos(new ArrayList<>());
         Restaurante restauranteSalvo = restauranteRepository.save(novoRestaurante);
+
+        if (restauranteRequestDTO.enderecos() != null && !restauranteRequestDTO.enderecos().isEmpty()) {
+            for (EnderecoRequestDTO enderecoDTO : restauranteRequestDTO.enderecos()) {
+
+                EnderecoResponseDTO enderecoSalvoDTO = enderecoService.cadastrarEndereco(enderecoDTO);
+
+                Endereco enderecoEntity = enderecoRepository.findByIdEndereco(enderecoSalvoDTO.idEndereco())
+                        .orElseThrow(() -> new EnderecoNaoEncontradoException(enderecoSalvoDTO.idEndereco()));
+
+                enderecoEntity.setRestaurante(restauranteSalvo);
+
+                enderecoRepository.save(enderecoEntity);
+            }
+        }
+
+
         log.info("Restaurante cadastrado com sucesso. ID: {}", restauranteSalvo.getId());
 
-        return new RestauranteResponseDTO(restauranteSalvo);
+        return buscarRestaurantePorId(restauranteSalvo.getId());
     }
+
+    @Transactional
+    public EnderecoResponseDTO adicionarEnderecoRestaurante(Long idRestaurante, EnderecoRequestDTO enderecoRequestDTO) {
+        log.info("Adicionando novo endereço ao restaurante ID: {}", idRestaurante);
+
+        Restaurante restaurante = restauranteRepository.findById(idRestaurante)
+                .orElseThrow(() -> new RestauranteNaoEncontradoException(idRestaurante));
+
+        EnderecoResponseDTO enderecoSalvoDTO = enderecoService.cadastrarEndereco(enderecoRequestDTO);
+
+        Endereco enderecoEntity = enderecoRepository.findByIdEndereco(enderecoSalvoDTO.idEndereco())
+                .orElseThrow(() -> new EnderecoNaoEncontradoException(enderecoSalvoDTO.idEndereco()));
+
+        enderecoEntity.setRestaurante(restaurante);
+        Endereco enderecoFinal = enderecoRepository.save(enderecoEntity);
+
+        return new EnderecoResponseDTO(enderecoFinal);
+    }
+
 
     @Transactional
     public RestauranteResponseDTO atualizarRestaurante(Long idRestaurante,
                                                        RestauranteRequestDTO restauranteRequestDTO,
-                                                       MultipartFile imagemLogo) throws IOException {
+                                                       MultipartFile imagemLogo, MultipartFile imagemBanner) throws IOException {
 
         log.info("Tentativa de atualização do restaurante ID: {}", idRestaurante);
 
@@ -148,6 +174,16 @@ public class RestauranteService {
                 restaurante.setImagemLogo(logoBytes);
             } catch (IOException e) {
                 log.error("Falha ao ler o arquivo de imagem durante o cadastro.", e);
+                throw new RuntimeException("Falha ao ler o arquivo de imagem.", e);
+            }
+        }
+
+        if (imagemBanner != null && !imagemBanner.isEmpty()){
+            try{
+                byte[] bannerBytes = imagemBanner.getBytes();
+                restaurante.setImagemLogo(bannerBytes);
+            } catch (IOException e) {
+                log.error("Falha ao ler o arquivo de imagem banner durante o cadastro.", e);
                 throw new RuntimeException("Falha ao ler o arquivo de imagem.", e);
             }
         }
@@ -426,6 +462,44 @@ public class RestauranteService {
         restauranteRepository.save(restaurante);
 
         return true;
+    }
+
+    @Transactional
+    public void atualizarImagemLogo(Long idRestaurante, MultipartFile imagem) throws IOException {
+        Restaurante restaurante = restauranteRepository.findById(idRestaurante)
+                .orElseThrow(() -> new RestauranteNaoEncontradoException(idRestaurante));
+
+        if (imagem != null && !imagem.isEmpty()) {
+            restaurante.setImagemLogo(imagem.getBytes());
+            restauranteRepository.save(restaurante);
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public byte[] buscarImagemLogo(Long idRestaurante) {
+        Restaurante restaurante = restauranteRepository.findById(idRestaurante)
+                .orElseThrow(() -> new RestauranteNaoEncontradoException(idRestaurante));
+        return restaurante.getImagemLogo();
+    }
+
+    // --- MÉTODOS ESPECÍFICOS DE IMAGEM (BANNER) ---
+
+    @Transactional
+    public void atualizarImagemBanner(Long idRestaurante, MultipartFile imagem) throws IOException {
+        Restaurante restaurante = restauranteRepository.findById(idRestaurante)
+                .orElseThrow(() -> new RestauranteNaoEncontradoException(idRestaurante));
+
+        if (imagem != null && !imagem.isEmpty()) {
+            restaurante.setImagemBanner(imagem.getBytes());
+            restauranteRepository.save(restaurante);
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public byte[] buscarImagemBanner(Long idRestaurante) {
+        Restaurante restaurante = restauranteRepository.findById(idRestaurante)
+                .orElseThrow(() -> new RestauranteNaoEncontradoException(idRestaurante));
+        return restaurante.getImagemBanner();
     }
 
 }

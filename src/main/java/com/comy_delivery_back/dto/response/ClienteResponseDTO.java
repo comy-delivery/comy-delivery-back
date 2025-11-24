@@ -14,7 +14,6 @@ public record ClienteResponseDTO(
         String telefoneCliente,
         LocalDate dataCadastroCliente,
         List<EnderecoResponseDTO> enderecos,
-        List<PedidoResponseDTO> pedidos,
         boolean isAtivo
 ) {
     public ClienteResponseDTO(Cliente cliente){
@@ -27,7 +26,6 @@ public record ClienteResponseDTO(
                 cliente.getTelefoneCliente(),
                 cliente.getDataCadastroCliente(),
                 cliente.getEnderecos().stream().map(EnderecoResponseDTO::new).toList(),
-                cliente.getPedidos().stream().map(PedidoResponseDTO::new).toList(),
                 cliente.isAtivo()
         );
 

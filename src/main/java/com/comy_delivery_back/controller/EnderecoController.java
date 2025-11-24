@@ -46,11 +46,17 @@ public class EnderecoController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    @PutMapping("/alterar/{id}")
+    @PatchMapping("/alterar/{id}")
     public ResponseEntity<EnderecoResponseDTO> atualizarEndereco(@PathVariable("id") Long id,
                                                                @RequestBody@Valid EnderecoRequestDTO enderecoDTO) {
         var response = enderecoService.alterarEndereco(id, enderecoDTO);
         return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @PatchMapping("/{id}/padrao")
+    public ResponseEntity<Void> definirComoPadrao(@PathVariable Long id) {
+        enderecoService.definirComoPadrao(id);
+        return ResponseEntity.ok().build();
     }
 
 }

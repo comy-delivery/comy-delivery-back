@@ -40,7 +40,8 @@ public class ProdutoService {
         BeanUtils.copyProperties(dto, produto);
 
         if (imagemFile != null && !imagemFile.isEmpty()) {
-            produto.setImagemProduto(imagemFile.getBytes());
+            byte[] imagemBytes = imagemFile.getBytes();
+            produto.setImagemProduto(imagemBytes);
         } else {
             produto.setImagemProduto(null);
         }
@@ -53,17 +54,20 @@ public class ProdutoService {
         return new ProdutoResponseDTO(produtoRepository.save(produto));
     }
 
+    @Transactional(readOnly = true)
     public ProdutoResponseDTO buscarPorId(Long id) {
         return this.produtoRepository.findById(id).map(ProdutoResponseDTO::new)
                 .orElseThrow(() -> new ProdutoNaoEncontradoException(id));
     }
 
+    @Transactional(readOnly = true)
     public List<ProdutoResponseDTO> listarPorRestaurante(Long restauranteId) {
         return produtoRepository.findByRestaurante_IdAndIsAtivoTrue(restauranteId).stream()
                 .map(ProdutoResponseDTO::new)
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public List<ProdutoResponseDTO> listarPromocoes() {
         return produtoRepository.findByIsPromocaoTrue().stream()
                 .map(ProdutoResponseDTO::new)
@@ -81,7 +85,10 @@ public class ProdutoService {
         BeanUtils.copyProperties(dto, produto);
 
         if (imagemFile != null && !imagemFile.isEmpty()) {
-            produto.setImagemProduto(imagemFile.getBytes());
+            byte[] imagemBytes = imagemFile.getBytes();
+            produto.setImagemProduto(imagemBytes);
+        } else {
+            produto.setImagemProduto(null);
         }
         produto.setDsProduto(dto.dsProduto());
         produto.setRestaurante(restaurante);
@@ -99,6 +106,24 @@ public class ProdutoService {
                 .orElseThrow(() -> new ProdutoNaoEncontradoException(id));
         produto.setAtivo(false);
         produtoRepository.save(produto);
+    }
+
+    @Transactional
+    public void atualizarImagemProduto(Long idProduto, MultipartFile imagem) throws IOException {
+        Produto produto = produtoRepository.findById(idProduto)
+                .orElseThrow(() -> new ProdutoNaoEncontradoException(idProduto));
+
+        if (imagem != null && !imagem.isEmpty()) {
+            produto.setImagemProduto(imagem.getBytes());
+            produtoRepository.save(produto);
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public byte[] buscarImagemProduto(Long idProduto) {
+        Produto produto = produtoRepository.findById(idProduto)
+                .orElseThrow(() -> new ProdutoNaoEncontradoException(idProduto));
+        return produto.getImagemProduto();
     }
 
 }

@@ -39,8 +39,8 @@ public record EnderecoResponseDTO(
                 e.isPadrao(),
                 e.getLatitude(),
                 e.getLongitude(),
-                e.getCliente().getId(),
-                e.getRestaurante().getId()
+                e.getCliente() != null ? e.getCliente().getId() : null,
+                e.getRestaurante() != null ? e.getRestaurante().getId() : null
         );
     }
 }

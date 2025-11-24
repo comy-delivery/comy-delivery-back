@@ -2,6 +2,7 @@ package com.comy_delivery_back.dto.request;
 
 import com.comy_delivery_back.enums.TipoEndereco;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 
 public record EnderecoRequestDTO(
@@ -24,7 +25,7 @@ public record EnderecoRequestDTO(
 
         String estado,
 
-        @NotBlank(message = "O tipo do endereço é necessário")
+        @NotNull(message = "O tipo do endereço é necessário")
         TipoEndereco tipoEndereco,
 
         String pontoDeReferencia,

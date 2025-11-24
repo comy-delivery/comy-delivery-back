@@ -6,6 +6,7 @@ import com.comy_delivery_back.dto.response.ApiCepDTO;
 import com.comy_delivery_back.dto.response.EnderecoResponseDTO;
 import com.comy_delivery_back.exception.CepNaoEncontradoException;
 import com.comy_delivery_back.exception.EnderecoNaoEncontradoException;
+import com.comy_delivery_back.exception.RegraDeNegocioException;
 import com.comy_delivery_back.model.Endereco;
 import com.comy_delivery_back.repository.EnderecoRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -51,6 +52,20 @@ public class EnderecoService {
         novo.setEstado(endereco.state());
         novo.setLatitude(Double.valueOf(endereco.lat()));
         novo.setLongitude(Double.valueOf(endereco.lng()));
+
+        if (enderecoDTO.logradouro() != null && !enderecoDTO.logradouro().isBlank()) {
+            novo.setLogradouro(enderecoDTO.logradouro());
+        }
+        if (enderecoDTO.bairro() != null && !enderecoDTO.bairro().isBlank()) {
+            novo.setBairro(enderecoDTO.bairro());
+        }
+        if (enderecoDTO.cidade() != null && !enderecoDTO.cidade().isBlank()) {
+            novo.setCidade(enderecoDTO.cidade());
+        }
+        if (enderecoDTO.estado() != null && !enderecoDTO.estado().isBlank()) {
+            novo.setEstado(enderecoDTO.estado());
+        }
+
 
         novo.setNumero(enderecoDTO.numero());
         novo.setComplemento(enderecoDTO.complemento());
@@ -100,7 +115,23 @@ public class EnderecoService {
             enderecoParaAtualizar.setLongitude(Double.valueOf(endereco.lng()));
         }
 
-        BeanUtils.copyProperties(enderecoDTO, enderecoParaAtualizar);
+        if (enderecoDTO.logradouro() != null && !enderecoDTO.logradouro().isBlank()) {
+            enderecoParaAtualizar.setLogradouro(enderecoDTO.logradouro());
+        }
+        if (enderecoDTO.bairro() != null && !enderecoDTO.bairro().isBlank()) {
+            enderecoParaAtualizar.setBairro(enderecoDTO.bairro());
+        }
+        if (enderecoDTO.cidade() != null && !enderecoDTO.cidade().isBlank()) {
+            enderecoParaAtualizar.setCidade(enderecoDTO.cidade());
+        }
+        if (enderecoDTO.estado() != null && !enderecoDTO.estado().isBlank()) {
+            enderecoParaAtualizar.setEstado(enderecoDTO.estado());
+        }
+
+       enderecoParaAtualizar.setTipoEndereco(enderecoDTO.tipoEndereco());
+        enderecoParaAtualizar.setPontoDeReferencia(enderecoDTO.pontoDeReferencia());
+        enderecoParaAtualizar.setComplemento(enderecoDTO.complemento());
+        enderecoParaAtualizar.setNumero(enderecoDTO.numero());
 
         Endereco enderecoSalvo = enderecoRepository.save(enderecoParaAtualizar);
         return new EnderecoResponseDTO(enderecoSalvo);
@@ -111,6 +142,30 @@ public class EnderecoService {
         Endereco endereco = enderecoRepository.findByIdEndereco(idEndereco)
                 .orElseThrow(() -> new EnderecoNaoEncontradoException(idEndereco));
         enderecoRepository.delete(endereco);
+    }
+
+    @Transactional
+    public void definirComoPadrao(Long idEndereco) {
+
+        Endereco enderecoAlvo = enderecoRepository.findByIdEndereco(idEndereco)
+                .orElseThrow(() -> new EnderecoNaoEncontradoException(idEndereco));
+
+        if (enderecoAlvo.getCliente() == null) {
+            throw new RegraDeNegocioException("Este método serve apenas para endereços de clientes.");
+        }
+
+        Long clienteId = enderecoAlvo.getCliente().getId();
+
+        List<Endereco> enderecosDoCliente = enderecoRepository.findByCliente_Id(clienteId);
+
+        for (Endereco endereco : enderecosDoCliente) {
+            if (endereco.getIdEndereco().equals(idEndereco)) {
+                endereco.setPadrao(true);
+            } else {
+                endereco.setPadrao(false);
+            }
+        }
+        enderecoRepository.saveAll(enderecosDoCliente);
     }
 
 

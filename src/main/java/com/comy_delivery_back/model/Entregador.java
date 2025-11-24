@@ -38,7 +38,7 @@ public class Entregador extends Usuario{
     @Enumerated(EnumType.STRING)
     private VeiculoEntregador veiculo;
 
-    @Column(unique = true, nullable = false, length = 7)
+    @Column(length = 7)
     private String placa;
 
     @JsonFormat(pattern = "dd-MM-yyyy")

@@ -18,7 +18,6 @@ public record RestauranteResponseDTO(
         String emailRestaurante,
         String cnpj,
         String telefoneRestaurante,
-        String imagemLogo,
         String descricaoRestaurante,
         List<EnderecoResponseDTO> enderecos,
         CategoriaRestaurante categoria,
@@ -44,8 +43,6 @@ public record RestauranteResponseDTO(
                 restaurante.getEmailRestaurante(),
                 restaurante.getCnpj(),
                 restaurante.getTelefoneRestaurante(),
-                restaurante.getImagemLogo() != null
-                        ? Base64.getEncoder().encodeToString(restaurante.getImagemLogo()) : null,
                 restaurante.getDescricaoRestaurante(),
                 restaurante.getEnderecos().stream().map(EnderecoResponseDTO::new).toList(),
                 restaurante.getCategoria(),

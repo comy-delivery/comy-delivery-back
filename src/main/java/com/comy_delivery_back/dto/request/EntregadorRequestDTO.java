@@ -32,7 +32,6 @@ public record EntregadorRequestDTO(
         @NotNull(message = "O tipo do veículo é obrigatório!")
         VeiculoEntregador veiculo,
 
-        @NotBlank
         @Size(max = 7, min = 7, message = "A placa deve conter 7 caracters")
         String placa
         ) {}

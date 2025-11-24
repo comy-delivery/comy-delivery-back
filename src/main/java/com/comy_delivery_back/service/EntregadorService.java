@@ -6,6 +6,7 @@ import com.comy_delivery_back.enums.StatusEntrega;
 import com.comy_delivery_back.exception.EntregaNaoEncontradaException;
 import com.comy_delivery_back.exception.EntregadorNaoEncontradoException;
 import com.comy_delivery_back.exception.RegistrosDuplicadosException;
+import com.comy_delivery_back.exception.RegraDeNegocioException;
 import com.comy_delivery_back.model.Entrega;
 import com.comy_delivery_back.model.Entregador;
 import com.comy_delivery_back.repository.EntregaRepository;
@@ -162,9 +163,16 @@ public class EntregadorService {
             throw new IllegalStateException("A entrega ID " + idEntrega + " não pode ser iniciada. Status atual: " + entrega.getStatusEntrega());
         }
 
-        entrega.setStatusEntrega(StatusEntrega.EM_ROTA);
+        if (entrega.getEntregador() == null) {
+            throw new RegraDeNegocioException("A entrega não possui um entregador atribuído.");
+        }
+        Entregador entregador = entrega.getEntregador();
+        entregador.setDisponivel(false);
 
+        entrega.setStatusEntrega(StatusEntrega.EM_ROTA);
+        entrega.setDataHoraInicio(LocalDateTime.now());
         entregaRepository.save(entrega);
+        log.info("Entrega {} iniciada (EM_ROTA).", idEntrega);
     }
 
     @Transactional
@@ -178,8 +186,15 @@ public class EntregadorService {
         }
 
         entrega.setStatusEntrega(StatusEntrega.CONCLUIDA);
-
+        entrega.setDataHoraConclusao(LocalDateTime.now());
         entregaRepository.save(entrega);
+
+        Entregador entregador = entrega.getEntregador();
+        if (entregador != null) {
+            entregador.setDisponivel(true);
+            entregadorRepository.save(entregador);
+            log.info("Entregador {} liberado (disponível) após finalizar entrega {}.", entregador.getId(), idEntrega);
+        }
     }
 
     @Transactional
@@ -194,6 +209,13 @@ public class EntregadorService {
         entrega.setStatusEntrega(StatusEntrega.CANCELADA);
 
         entregaRepository.save(entrega);
+
+        Entregador entregador = entrega.getEntregador();
+        if (entregador != null) {
+            entregador.setDisponivel(true);
+            entregadorRepository.save(entregador);
+            log.info("Entregador {} liberado (disponível) após cancelamento da entrega {}.", entregador.getId(), idEntrega);
+        }
     }
 
     @Transactional

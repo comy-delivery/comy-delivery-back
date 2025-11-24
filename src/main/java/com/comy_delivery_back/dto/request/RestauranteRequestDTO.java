@@ -38,6 +38,9 @@ public record RestauranteRequestDTO(
         @Size(max = 3000000, message = "O tamanho da imagem não deve exceder 3MB (após codificação base64).")
         String imagemLogo,
 
+        @Size(max = 3000000, message = "O tamanho da imagem não deve exceder 3MB (após codificação base64).")
+        String imagemBanner,
+
         @Size(max = 500, message = "A descrição não pode exceder 500 caracteres.")
         String descricaoRestaurante,
 

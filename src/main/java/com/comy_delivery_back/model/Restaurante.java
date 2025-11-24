@@ -41,6 +41,9 @@ public class Restaurante extends Usuario{
     @Lob
     private byte[] imagemLogo;
 
+    @Lob
+    private byte[] imagemBanner;
+
     @Column(length = 500)
     private String descricaoRestaurante;
 
@@ -51,6 +54,7 @@ public class Restaurante extends Usuario{
     private List<Endereco> enderecos;
 
     @Column
+    @Enumerated(EnumType.STRING)
     private CategoriaRestaurante categoria;
 
     @JsonFormat(pattern = "HH:mm")

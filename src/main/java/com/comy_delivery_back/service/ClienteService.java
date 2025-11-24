@@ -19,6 +19,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -28,14 +29,16 @@ public class ClienteService {
 
     private final ClienteRepository clienteRepository;
     private final EnderecoRepository enderecoRepository;
+    private final EnderecoService enderecoService;
     private final PasswordEncoder passwordEncoder;//usar depois
     private final EmailService emailService;
 
     public ClienteService(ClienteRepository clienteRepository,
-                          EnderecoRepository enderecoRepository, PasswordEncoder passwordEncoder,
+                          EnderecoRepository enderecoRepository, EnderecoService enderecoService, PasswordEncoder passwordEncoder,
                           EmailService emailService) {
         this.clienteRepository = clienteRepository;
         this.enderecoRepository = enderecoRepository;
+        this.enderecoService = enderecoService;
         this.passwordEncoder = passwordEncoder;
         this.emailService = emailService;
     }
@@ -60,49 +63,60 @@ public class ClienteService {
         novoCliente.setEmailCliente(clienteRequestDTO.emailCliente());
         novoCliente.setTelefoneCliente(clienteRequestDTO.telefoneCliente());
 
-        List<Endereco> enderecos = clienteRequestDTO.enderecos().stream()
-                        .map(enderecoRequestDTO -> {
-                            Endereco endereco = new Endereco();
-
-                            endereco.setLogradouro(enderecoRequestDTO.logradouro());
-                            endereco.setNumero(enderecoRequestDTO.numero());
-                            endereco.setComplemento(enderecoRequestDTO.complemento());
-                            endereco.setBairro(enderecoRequestDTO.bairro());
-                            endereco.setCidade(enderecoRequestDTO.cidade());
-                            endereco.setCep(enderecoRequestDTO.cep());
-                            endereco.setEstado(enderecoRequestDTO.estado());
-                            endereco.setTipoEndereco(enderecoRequestDTO.tipoEndereco());
-
-                            return endereco;
-                        }).toList();
-        novoCliente.setEnderecos(enderecos); //cliente recebe o endereco
-
-        enderecos.forEach(endereco -> endereco.setCliente(novoCliente)); //endereco recebe o cliente que pertence
-
+        novoCliente.setEnderecos(new ArrayList<>());
         Cliente clienteSalvo = clienteRepository.save(novoCliente);
+
+        if (clienteRequestDTO.enderecos() != null && !clienteRequestDTO.enderecos().isEmpty()) {
+            boolean primeiroEndereco = true;
+
+            for (EnderecoRequestDTO enderecoDTO : clienteRequestDTO.enderecos()) {
+                EnderecoResponseDTO enderecoSalvoDTO = enderecoService.cadastrarEndereco(enderecoDTO);
+
+                Endereco enderecoEntity = enderecoRepository.findByIdEndereco(enderecoSalvoDTO.idEndereco())
+                        .orElseThrow(() -> new EnderecoNaoEncontradoException(enderecoSalvoDTO.idEndereco()));
+
+                enderecoEntity.setCliente(clienteSalvo);
+                if (primeiroEndereco) {
+                    enderecoEntity.setPadrao(true);
+                    primeiroEndereco = false;
+                } else {
+                    enderecoEntity.setPadrao(false);
+                }
+
+                enderecoRepository.save(enderecoEntity);
+            }
+        }
+
         log.info("Cliente cadastrado com sucesso. ID: {}", clienteSalvo.getId());
-        return new ClienteResponseDTO(clienteSalvo);
+        return buscarClientePorId(clienteSalvo.getId());
     }
 
     @Transactional
     public EnderecoResponseDTO cadastrarNovoEndereco(Long idCliente, EnderecoRequestDTO enderecoRequestDTO){
+        log.info("Cadastrando novo endereço para Cliente ID: {}", idCliente);
+
         Cliente cliente = clienteRepository.findById(idCliente)
                 .orElseThrow(()-> new ClienteNaoEncontradoException(idCliente));
 
-        Endereco novoEndereco = new Endereco();
 
-        novoEndereco.setLogradouro(enderecoRequestDTO.logradouro());
-        novoEndereco.setNumero(enderecoRequestDTO.numero());
-        novoEndereco.setComplemento(enderecoRequestDTO.complemento());
-        novoEndereco.setBairro(enderecoRequestDTO.bairro());
-        novoEndereco.setCidade(enderecoRequestDTO.cidade());
-        novoEndereco.setEstado(enderecoRequestDTO.estado());
-        novoEndereco.setTipoEndereco(enderecoRequestDTO.tipoEndereco());
-        novoEndereco.setCliente(cliente);
+        EnderecoResponseDTO enderecoSalvoDTO = enderecoService.cadastrarEndereco(enderecoRequestDTO);
 
-        enderecoRepository.save(novoEndereco);
+        Endereco enderecoEntity = enderecoRepository.findByIdEndereco(enderecoSalvoDTO.idEndereco())
+                .orElseThrow(() -> new EnderecoNaoEncontradoException(enderecoSalvoDTO.idEndereco()));
 
-        return new EnderecoResponseDTO(novoEndereco);
+        enderecoEntity.setCliente(cliente);
+
+        boolean temOutrosEnderecos = enderecoRepository.findByCliente_Id(idCliente).size() > 1;
+
+        if (cliente.getEnderecos() == null || cliente.getEnderecos().isEmpty()) {
+            enderecoEntity.setPadrao(true);
+        } else {
+            enderecoEntity.setPadrao(false);
+        }
+
+        enderecoRepository.save(enderecoEntity);
+
+        return new EnderecoResponseDTO(enderecoEntity);
     }
 
     @Transactional

@@ -28,7 +28,6 @@ public class Produto {
     private BigDecimal vlPreco;
 
     @Lob
-    @Column(columnDefinition = "BYTEA")
     private byte[] imagemProduto;
 
     @ManyToOne
