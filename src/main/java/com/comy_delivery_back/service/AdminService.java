@@ -7,8 +7,6 @@ import com.comy_delivery_back.model.Admin;
 import com.comy_delivery_back.repository.AdminRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import com.comy_delivery_back.exception.RegistrosDuplicadosException;
-import com.comy_delivery_back.model.Admin;
-import com.comy_delivery_back.repository.AdminRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
