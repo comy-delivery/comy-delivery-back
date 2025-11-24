@@ -2,17 +2,21 @@ package com.comy_delivery_back.service;
 
 import com.comy_delivery_back.dto.request.AdminRequestDTO;
 import com.comy_delivery_back.dto.response.AdminResponseDTO;
+import com.comy_delivery_back.exception.AdminNaoEncontradoException;
 import com.comy_delivery_back.model.Admin;
 import com.comy_delivery_back.repository.AdminRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 public class AdminService {
 
     private final AdminRepository adminRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public AdminService(AdminRepository adminRepository){
+    public AdminService(AdminRepository adminRepository, PasswordEncoder passwordEncoder){
         this.adminRepository = adminRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public AdminResponseDTO cadastrarAdmin(AdminRequestDTO adminRequestDTO){
@@ -27,7 +31,7 @@ public class AdminService {
         Admin novoAdmin = new Admin();
 
         novoAdmin.setUsername(adminRequestDTO.username());
-        novoAdmin.setPassword(adminRequestDTO.password()); //criptografar aqui
+        novoAdmin.setPassword(passwordEncoder.encode(adminRequestDTO.password()));
         novoAdmin.setNmAdmin(adminRequestDTO.nmAdmin());
         novoAdmin.setEmailAdmin(adminRequestDTO.emailAdmin());
         novoAdmin.setCpfAdmin(adminRequestDTO.cpfAdmin());
@@ -39,7 +43,7 @@ public class AdminService {
 
     public AdminResponseDTO buscarAdminPorId(Long idAdmin){
         Admin admin = adminRepository.findById(idAdmin)
-                .orElseThrow(() -> new IllegalArgumentException("Id não pertence a um admin"));
+                .orElseThrow(() -> new AdminNaoEncontradoException(idAdmin));
 
         return new AdminResponseDTO(admin);
     }
@@ -50,6 +54,7 @@ public class AdminService {
                 .orElseThrow(() -> new IllegalArgumentException("Id não pertence a um admin"));
 
         admin.setAtivo(false);
+        adminRepository.save(admin);
 
     }
 
