@@ -44,11 +44,11 @@ public class ClienteService {
     public ClienteResponseDTO cadastrarCliente(ClienteRequestDTO clienteRequestDTO) {
         log.info("A iniciar cadastro de novo cliente: {}", clienteRequestDTO.emailCliente());
         if (clienteRepository.findByCpfCliente(clienteRequestDTO.cpfCliente()).isPresent()) {
-            throw new IllegalArgumentException("CPF já cadastrado!");
+            throw new RegistrosDuplicadosException("CPF já cadastrado!");
         }
 
         if (clienteRepository.findByEmailCliente(clienteRequestDTO.emailCliente()).isPresent()) {
-            throw new IllegalArgumentException("EMAIL já cadastrado!");
+            throw new RegistrosDuplicadosException("EMAIL já cadastrado!");
         }
 
         Cliente novoCliente = new Cliente();
@@ -80,7 +80,6 @@ public class ClienteService {
         enderecos.forEach(endereco -> endereco.setCliente(novoCliente)); //endereco recebe o cliente que pertence
 
         Cliente clienteSalvo = clienteRepository.save(novoCliente);
-        log.info("Cliente cadastrado com sucesso. ID: {}", clienteSalvo.getId());
 
         return new ClienteResponseDTO(clienteSalvo);
     }
@@ -88,7 +87,7 @@ public class ClienteService {
     @Transactional
     public EnderecoResponseDTO cadastrarNovoEndereco(Long idCliente, EnderecoRequestDTO enderecoRequestDTO){
         Cliente cliente = clienteRepository.findById(idCliente)
-                .orElseThrow(()-> new IllegalArgumentException("Cliente não encontrado"));
+                .orElseThrow(()-> new ClienteNaoEncontradoException(idCliente));
 
         Endereco novoEndereco = new Endereco();
 
@@ -109,7 +108,7 @@ public class ClienteService {
     @Transactional
     public ClienteResponseDTO buscarClientePorId (Long idCliente){
         var cliente = clienteRepository.findById(idCliente)
-                .orElseThrow(()-> new IllegalArgumentException("Id informado não corresponde a nenhum cliente"));
+                .orElseThrow(()-> new ClienteNaoEncontradoException(idCliente));
 
         return new ClienteResponseDTO(cliente);
     }
@@ -132,6 +131,14 @@ public class ClienteService {
                 .toList();
 
         return pedidosCliente;
+    }
+
+    @Transactional
+    public List<EnderecoResponseDTO> listarEnderecosDoCliente(Long idCliente){
+        Cliente cliente = clienteRepository.findById(idCliente)
+                .orElseThrow(()-> new ClienteNaoEncontradoException(idCliente));
+
+        return cliente.getEnderecos().stream().map(EnderecoResponseDTO::new).toList();
     }
 
     @Transactional

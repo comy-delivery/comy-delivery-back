@@ -13,7 +13,6 @@ import com.comy_delivery_back.model.Restaurante;
 import com.comy_delivery_back.repository.EnderecoRepository;
 import com.comy_delivery_back.repository.RestauranteRepository;
 import jakarta.transaction.Transactional;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -25,7 +24,6 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
 
-@Slf4j
 @Service
 public class RestauranteService {
 
@@ -44,9 +42,8 @@ public class RestauranteService {
 
     @Transactional
     public RestauranteResponseDTO cadastrarRestaurante(RestauranteRequestDTO restauranteRequestDTO, MultipartFile imagemFile) throws IOException {
-        log.info("A registar novo restaurante: CNPJ {}", restauranteRequestDTO.cnpj());
+
         if (restauranteRepository.findByCnpj(restauranteRequestDTO.cnpj()).isPresent()){
-            log.warn("Tentativa de cadastro com CNPJ já existente: {}", restauranteRequestDTO.cnpj());
             throw new IllegalArgumentException("CNPJ já cadastrado.");
         }
 
@@ -102,7 +99,6 @@ public class RestauranteService {
         novoRestaurante.setDiasFuncionamento(restauranteRequestDTO.diasFuncionamento());
 
         Restaurante restauranteSalvo = restauranteRepository.save(novoRestaurante);
-        log.info("Restaurante registado com sucesso. ID: {}", restauranteSalvo.getId());
 
 
         return new RestauranteResponseDTO(restauranteSalvo);
@@ -260,6 +256,14 @@ public class RestauranteService {
     }
 
     @Transactional
+    public List<EnderecoResponseDTO> listarEnderecosRestaurante(Long idRestaurante){
+        Restaurante restaurante = restauranteRepository.findById(idRestaurante)
+                .orElseThrow(()-> new RestauranteNaoEncontradoException(idRestaurante));
+
+        return restaurante.getEnderecos().stream().map(EnderecoResponseDTO::new).toList();
+    }
+
+    @Transactional
     public List<RestauranteResponseDTO> listarRestaurantesAbertos(){
         List<RestauranteResponseDTO> restaurantesAbertos = restauranteRepository.findAllByIsAbertoTrue()
                 .stream()
@@ -289,7 +293,6 @@ public class RestauranteService {
 
     @Transactional
     public void atualizarStatusAberturaFechamento(){
-        log.info("A executar rotina de verificação de horário de funcionamento dos restaurantes.");
         LocalTime horaAtual = LocalTime.now();
         DayOfWeek diaAtualDayOfWeek = LocalDateTime.now().getDayOfWeek();
 
@@ -316,7 +319,6 @@ public class RestauranteService {
                         // Aberto se for DEPOIS da abertura (22:00) OU ANTES do fechamento (02:00)
                         if (horaAtual.isAfter(abertura) || horaAtual.isBefore(fechamento)) {
                             deveEstarAberto = true;
-                            log.info("Restaurante {} (ID: {}) teve status de abertura alterado para: {}", restaurante.getNmRestaurante(), restaurante.getId(), deveEstarAberto);
                         }
                     }
                 }
@@ -370,7 +372,6 @@ public class RestauranteService {
 
         emailService.enviarEmailRecuperacao(restaurante.getEmailRestaurante(), linkRecuperacao)
                 .exceptionally(ex ->{
-                    log.error("Falha ao enviar e-mail de recuperação: " + ex.getMessage());
                     return false;
                 });
         return true;
