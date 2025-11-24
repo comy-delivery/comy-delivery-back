@@ -291,7 +291,7 @@ public class RestauranteService {
     public void atualizarStatusAberturaFechamento(){
         log.info("A executar rotina de verificação de horário de funcionamento dos restaurantes.");
         LocalTime horaAtual = LocalTime.now();
-        DayOfWeek diaAtualDayOfWeek = DayOfWeek.from(LocalDateTime.now().getDayOfWeek());
+        DayOfWeek diaAtualDayOfWeek = LocalDateTime.now().getDayOfWeek();
 
         //metodo static do enum DiasSemana
         DiasSemana diaAtualEnum = DiasSemana.fromDayOfWeek(diaAtualDayOfWeek);
