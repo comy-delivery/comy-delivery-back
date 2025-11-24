@@ -5,6 +5,8 @@ import jakarta.validation.constraints.NotNull;
 public record EntregaRequestDTO(
         @NotNull
         Long pedidoId,
-        Integer tempoEstimadoMinutos
+        Integer tempoEstimadoMinutos,
+        String enderecoOrigem,
+        String enderecoDestino
 ) {
 }

@@ -44,10 +44,10 @@ public class EntregaService {
         Entrega novaEntrega = new Entrega();
 
         novaEntrega.setPedido(pedido);
-        novaEntrega.setDataHoraInicio(LocalDateTime.now()); //acho que deveria ser na atualizacao
         novaEntrega.setTempoEstimadoMinutos(entregaRequestDTO.tempoEstimadoMinutos() != null ? entregaRequestDTO.tempoEstimadoMinutos() : 30);
         novaEntrega.setStatusEntrega(StatusEntrega.PENDENTE);
-        //pedido vai fornecer enderecos
+        novaEntrega.setEnderecoOrigem(pedido.getEnderecoOrigem());
+        novaEntrega.setEnderecoDestino(pedido.getEnderecoEntrega());
 
         Entrega entrega = entregaRepository.save(novaEntrega);
 
@@ -71,34 +71,45 @@ public class EntregaService {
 
         if (novoStatus == StatusEntrega.EM_ROTA){
             if (statusAtual != StatusEntrega.PENDENTE){
-                throw new IllegalArgumentException("Entrega só pode ser inciada se estiver pendente.");
+                throw new IllegalArgumentException("Entrega só pode ser iniciada se estiver PENDENTE. Status atual: " + statusAtual);
             }
 
             if (atualizarStatusEntregaDTO.entregadorId() == null){
-                throw new IllegalArgumentException("é obrigatorio o entregador aceitar a corrida.");
+                throw new IllegalArgumentException("É obrigatório informar o ID do entregador para iniciar a entrega (EM_ROTA).");
             }
+
+            entrega.setDataHoraInicio(LocalDateTime.now());
+
             log.info("Entrega {} iniciada pelo entregador {}", idEntrega, atualizarStatusEntregaDTO.entregadorId());
             Entregador entregador = entregadorRepository.findById(atualizarStatusEntregaDTO.entregadorId())
                     .orElseThrow(() -> new EntregadorNaoEncontradoException(atualizarStatusEntregaDTO.entregadorId()));
 
             entrega.setEntregador(entregador);
+
         } else if (novoStatus == StatusEntrega.CONCLUIDA) {
             if (statusAtual != StatusEntrega.EM_ROTA){
-                throw new IllegalArgumentException("Entrega so pode ser concluida se estiver me rota");
+                throw new IllegalArgumentException("Entrega só pode ser concluída se estiver EM ROTA. Status atual: " + statusAtual);
             }
 
             entrega.setDataHoraConclusao(LocalDateTime.now());
             if (atualizarStatusEntregaDTO.avaliacaoCliente() != null) {
                 if (atualizarStatusEntregaDTO.avaliacaoCliente() < 0 || atualizarStatusEntregaDTO.avaliacaoCliente() > 5) {
-                    throw new IllegalArgumentException("A avaliação deve estar entre 0 e 5."); //ver depois se vai a 5
+                    throw new IllegalArgumentException("A avaliação deve estar entre 0 e 5.");
                 }
                 log.info("Entrega {} concluída. Avaliação: {}", idEntrega, atualizarStatusEntregaDTO.avaliacaoCliente());
                 entrega.setAvaliacaoCliente(atualizarStatusEntregaDTO.avaliacaoCliente());
             } else {
                 throw new IllegalArgumentException("A avaliação do cliente é obrigatória na conclusão da entrega.");
             }
+
+        } else if (novoStatus == StatusEntrega.CANCELADA) {
+            if (statusAtual != StatusEntrega.PENDENTE) {
+                throw new IllegalArgumentException("Entrega só pode ser cancelada se estiver PENDENTE. Status atual: " + statusAtual);
+            }
+            log.warn("Entrega {} CANCELADA.", idEntrega);
+
         } else if (novoStatus == StatusEntrega.PENDENTE) {
-            throw new IllegalArgumentException("status pendente nao pode ser incluido manualmente");
+            throw new IllegalArgumentException("Não é permitido transicionar manualmente para o status PENDENTE.");
 
         }
 
@@ -146,6 +157,5 @@ public class EntregaService {
                 .stream()
                 .map(EntregaResponseDTO::new).toList();
     }
-
 
 }
