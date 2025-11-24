@@ -17,7 +17,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/entregador")
-@Tag(name = "Entregador", description = "Endpoints para gestão de entregadores e ações de entrega")
+@Tag(name = "Entregador", description = "Endpoints para gestão de entregadores e ações de entregador")
 public class EntregadorController {
 
     private final EntregadorService entregadorService;
