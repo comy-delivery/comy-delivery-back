@@ -1,6 +1,7 @@
 package com.comy_delivery_back.controller;
 
 import com.comy_delivery_back.dto.request.EnderecoRequestDTO;
+import com.comy_delivery_back.dto.request.RedefinirSenhaRequestDTO;
 import com.comy_delivery_back.dto.request.RestauranteRequestDTO;
 import com.comy_delivery_back.dto.response.EnderecoResponseDTO;
 import com.comy_delivery_back.dto.response.ProdutoResponseDTO;
@@ -180,45 +181,41 @@ public class RestauranteController {
         return ResponseEntity.noContent().build();
     }
 
-    @Operation(summary = "Inicia o processo de recuperação de senha por e-mail",
+    @Operation(
+            summary = "Inicia o processo de recuperação de senha por e-mail",
             responses = {
                     @ApiResponse(responseCode = "200", description = "E-mail de recuperação enviado (ou será enviado)"),
                     @ApiResponse(responseCode = "400", description = "E-mail não fornecido")
-            })
-    @io.swagger.v3.oas.annotations.parameters.RequestBody(
-            content = @Content(schema = @Schema(example = "{\"email\": \"restaurante@exemplo.com\"}")))
+            }
+    )
     @PostMapping("/recuperacao/iniciar")
-    public ResponseEntity<Void> iniciarRecuperacaoSenha(@RequestBody Map<String, String> request) {
+    public ResponseEntity<Map<String, String>> iniciarRecuperacaoSenha(@RequestBody Map<String, String> request) {
         String email = request.get("email");
+
         if (email == null || email.isBlank()) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(Map.of("message", "O campo 'email' é obrigatório."));
         }
 
         restauranteService.iniciarRecuperacaoSenha(email);
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(Map.of("message", "Se o email estiver cadastrado, um link de recuperação será enviado."));
     }
 
-    @Operation(summary = "Redefine a senha utilizando o token de recuperação",
+    @Operation(
+            summary = "Redefine a senha utilizando o token de recuperação",
+            description = "Recebe o token e a nova senha no corpo da requisição (mais seguro).",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Senha redefinida com sucesso"),
-                    @ApiResponse(responseCode = "400", description = "Token/Senha ausente"),
+                    @ApiResponse(responseCode = "400", description = "Dados da nova senha inválidos ou token ausente"),
                     @ApiResponse(responseCode = "404", description = "Token inválido ou expirado")
-            })
-    @io.swagger.v3.oas.annotations.parameters.RequestBody(
-            content = @Content(schema = @Schema(example = "{\"novaSenha\": \"SenhaSegura123\"}")))
+            }
+    )
     @PostMapping("/recuperacao/redefinir")
-    public ResponseEntity<Void> redefinirSenha(
-            @Parameter(in = ParameterIn.QUERY, description = "Token de recuperação") @RequestParam String token,
-            @RequestBody Map<String, String> request) {
+    public ResponseEntity<Map<String, String>> redefinirSenha(
+            @RequestBody @Valid RedefinirSenhaRequestDTO requestDTO) {
 
-        String novaSenha = request.get("novaSenha");
-        if (novaSenha == null || novaSenha.isBlank()) {
-            return ResponseEntity.badRequest().build();
-        }
+        restauranteService.redefinirSenha(requestDTO.token(), requestDTO.novaSenha());
 
-        restauranteService.redefinirSenha(token, novaSenha);
-
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(Map.of("message", "Senha redefinida com sucesso."));
     }
 }

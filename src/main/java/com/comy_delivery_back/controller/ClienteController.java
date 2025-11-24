@@ -3,6 +3,7 @@ package com.comy_delivery_back.controller;
 import com.comy_delivery_back.dto.request.AtualizarClienteRequestDTO;
 import com.comy_delivery_back.dto.request.ClienteRequestDTO;
 import com.comy_delivery_back.dto.request.EnderecoRequestDTO;
+import com.comy_delivery_back.dto.request.RedefinirSenhaRequestDTO;
 import com.comy_delivery_back.dto.response.ClienteResponseDTO;
 import com.comy_delivery_back.dto.response.EnderecoResponseDTO;
 import com.comy_delivery_back.dto.response.PedidoResponseDTO;
@@ -19,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @Tag(name = "Clientes", description = "Controller para as operações com o banco de dados para os produtos")
 @RestController
@@ -133,25 +135,40 @@ public class ClienteController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "Iniciar Recuperação de Senha",
+    @Operation(
+            summary = "Iniciar Recuperação de Senha",
+            description = "Recebe o email no corpo da requisição para iniciar o processo de recuperação.",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "Email de recuperação enviado (ou mensagem genérica de sucesso)")
-            })
+                    @ApiResponse(responseCode = "200", description = "Email de recuperação enviado (ou mensagem genérica de sucesso)"),
+                    @ApiResponse(responseCode = "400", description = "Corpo da requisição inválido")
+            }
+    )
     @PostMapping("/recuperar-senha")
-    public ResponseEntity<String> iniciarRecuperacaoSenha(@RequestParam String email) {
+    public ResponseEntity<String> iniciarRecuperacaoSenha(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
+
+        if (email == null || email.isBlank()) {
+            return ResponseEntity.badRequest().body("O campo 'email' é obrigatório.");
+        }
+
         clienteService.iniciarRecuperacaoSenha(email);
         return ResponseEntity.ok("Se o email estiver cadastrado, um link de recuperação será enviado.");
     }
 
-    @Operation(summary = "Redefinir Senha",
+    @Operation(
+            summary = "Redefinir Senha",
+            description = "Recebe o token e a nova senha no CORPO da requisição para redefinir a senha de forma segura.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Senha redefinida com sucesso"),
-                    @ApiResponse(responseCode = "400", description = "Token inválido ou expirado")
-            })
+                    @ApiResponse(responseCode = "400", description = "Token inválido, expirado ou nova senha com formato inválido")
+            }
+    )
     @PostMapping("/redefinir-senha")
-    public ResponseEntity<String> redefinirSenha(@RequestParam String token,
-                                                 @RequestParam String novaSenha) {
-        clienteService.redefinirSenha(token, novaSenha);
+    public ResponseEntity<String> redefinirSenha(@RequestBody @Valid RedefinirSenhaRequestDTO requestDTO) {
+
+        // Chamada do Service, usando os campos do DTO
+        clienteService.redefinirSenha(requestDTO.token(), requestDTO.novaSenha());
+
         return ResponseEntity.ok("Senha redefinida com sucesso.");
     }
 }
