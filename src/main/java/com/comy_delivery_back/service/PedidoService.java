@@ -121,7 +121,9 @@ public class PedidoService {
 
             EntregaRequestDTO entregaDTO = new EntregaRequestDTO(
                     pedido.getIdPedido(),
-                    pedido.getTempoEstimadoEntrega()
+                    pedido.getTempoEstimadoEntrega(),
+                    pedido.getEnderecoOrigem().getIdEndereco(),
+                    pedido.getEnderecoEntrega().getIdEndereco()
             );
 
             entregaService.cadastrarEntrega(entregaDTO);

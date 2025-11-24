@@ -23,5 +23,5 @@ public interface EntregadorRepository extends JpaRepository<Entregador, Long> {
     //revisar depois - botar no entrega repository ou usar query
 //    @Query("SELECT e FROM Entrega e WHERE e.entregador.id = :id")
 //    List<Entrega> buscarEntregasDoEntregador(Long id);
-    List<Entrega> findAllEntregasByEntregadorId(Long id);
+//    List<Entrega> findAllEntregasByEntregadorId(Long id);
 }

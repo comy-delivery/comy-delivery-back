@@ -6,7 +6,7 @@ public record EntregaRequestDTO(
         @NotNull
         Long pedidoId,
         Integer tempoEstimadoMinutos,
-        String enderecoOrigem,
-        String enderecoDestino
+        Long enderecoOrigem,
+        Long enderecoDestino
 ) {
 }
