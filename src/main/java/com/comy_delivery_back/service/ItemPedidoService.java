@@ -310,7 +310,7 @@ public class ItemPedidoService {
         pedido.setVlSubtotal(subtotal);
 
         BigDecimal desconto = pedido.getVlDesconto() != null ? pedido.getVlDesconto() : BigDecimal.ZERO;
-        BigDecimal frete = pedido.getVlFrete() != null ? pedido.getVlFrete() : BigDecimal.ZERO;
+        BigDecimal frete = pedido.getVlEntrega() != null ? pedido.getVlEntrega() : BigDecimal.ZERO;
 
         BigDecimal total = subtotal.add(frete).subtract(desconto);
 
