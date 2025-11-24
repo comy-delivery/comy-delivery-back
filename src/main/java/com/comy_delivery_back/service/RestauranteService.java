@@ -260,6 +260,14 @@ public class RestauranteService {
     }
 
     @Transactional
+    public List<EnderecoResponseDTO> listarEnderecosRestaurante(Long idRestaurante){
+        Restaurante restaurante = restauranteRepository.findById(idRestaurante)
+                .orElseThrow(()-> new RestauranteNaoEncontradoException(idRestaurante));
+
+        return restaurante.getEnderecos().stream().map(EnderecoResponseDTO::new).toList();
+    }
+
+    @Transactional
     public List<RestauranteResponseDTO> listarRestaurantesAbertos(){
         List<RestauranteResponseDTO> restaurantesAbertos = restauranteRepository.findAllByIsAbertoTrue()
                 .stream()

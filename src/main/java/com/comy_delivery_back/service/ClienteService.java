@@ -133,6 +133,7 @@ public class ClienteService {
         return pedidosCliente;
     }
 
+    @Transactional
     public List<EnderecoResponseDTO> listarEnderecosDoCliente(Long idCliente){
         Cliente cliente = clienteRepository.findById(idCliente)
                 .orElseThrow(()-> new ClienteNaoEncontradoException(idCliente));

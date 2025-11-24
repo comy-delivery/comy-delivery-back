@@ -85,7 +85,6 @@ public class ClienteController {
         return ResponseEntity.noContent().build();
     }
 
-    // --- Métodos para Endereços ---
 
     @Operation(summary = "Listar Endereços do Cliente",
             responses = {
