@@ -11,6 +11,7 @@ import com.comy_delivery_back.model.Entregador;
 import com.comy_delivery_back.repository.EntregaRepository;
 import com.comy_delivery_back.repository.EntregadorRepository;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +20,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @Service
 public class EntregadorService {
 
@@ -37,10 +39,12 @@ public class EntregadorService {
     @Transactional
     public EntregadorResponseDTO cadastrarEntregador(EntregadorRequestDTO entregadorRequestDTO){
         if (entregadorRepository.findByCpfEntregador(entregadorRequestDTO.cpfEntregador()).isPresent()){
+            log.error("Tentativa de cadastro com CPF duplicado: {}", entregadorRequestDTO.cpfEntregador());
             throw new RegistrosDuplicadosException("CPF vinculado a uma conta");
         }
 
         if (entregadorRepository.findByEmailEntregador(entregadorRequestDTO.emailEntregador()).isPresent()){
+            log.error("Tentativa de cadastro com EMAIL duplicado: {}", entregadorRequestDTO.emailEntregador());
             throw new RegistrosDuplicadosException("Email vinculado a uma conta");
         }
 
@@ -62,7 +66,10 @@ public class EntregadorService {
     @Transactional
     public EntregadorResponseDTO buscarEntregadorPorId(Long idEntregador){
         Entregador entregador = entregadorRepository.findById(idEntregador)
-                .orElseThrow(() -> new EntregadorNaoEncontradoException(idEntregador));
+                .orElseThrow(() -> {
+                    log.warn("Busca por entregador falhou. ID não encontrado: {}", idEntregador); // [AJUSTE] Log de Aviso
+                    return new EntregadorNaoEncontradoException(idEntregador);
+                });
 
         return new EntregadorResponseDTO(entregador);
     }
@@ -77,7 +84,10 @@ public class EntregadorService {
 
     public EntregadorResponseDTO atualizarDadosEntregador(Long idEntregador, EntregadorRequestDTO entregadorRequestDTO){
         Entregador entregador = entregadorRepository.findById(idEntregador)
-                .orElseThrow(() -> new EntregadorNaoEncontradoException(idEntregador));
+                .orElseThrow(() -> {
+                    log.error("Entregador não encontrado para atualização de dados. ID: {}", idEntregador); // [AJUSTE] Log de Erro
+                    return new EntregadorNaoEncontradoException(idEntregador);
+                });
 
         if (entregadorRequestDTO.nmEntregador() != null && !entregadorRequestDTO.nmEntregador().isBlank()){
             entregador.setNmEntregador(entregadorRequestDTO.nmEntregador());
@@ -199,10 +209,13 @@ public class EntregadorService {
 
     @Transactional
     public boolean iniciarRecuperacaoSenha(String email){
+        log.info("Solicitação de recuperação de senha para entregador: {}", email);
         Entregador entregador = entregadorRepository.findByEmailEntregador(email)
-                .orElseThrow(() -> new EntregadorNaoEncontradoException(email)); // Use sua exceção customizada
+                .orElseThrow(() -> {
+                    log.warn("Tentativa de recuperação de senha para e-mail de entregador não encontrado: {}", email);
+                    return new EntregadorNaoEncontradoException(email);
+                });
 
-        //gera o token e expiracao
         String token = UUID.randomUUID().toString();
         LocalDateTime expiracao = LocalDateTime.now().plusMinutes(15);
 
@@ -211,13 +224,11 @@ public class EntregadorService {
 
         entregadorRepository.save(entregador);
 
-        //monta o link de recuperacao
-        String linkRecuperacao = "http://localhost:8084/reset-password?token=" + token; // Ajuste a porta/rota conforme necessário
+        String linkRecuperacao = "http://localhost/8084/reset-password?token=" + token;
 
-        //envia o email
         emailService.enviarEmailRecuperacao(entregador.getEmailEntregador(), linkRecuperacao)
                 .exceptionally(ex ->{
-                    //log.error("Falha ao enviar e-mail de recuperação: " + ex.getMessage());
+                    log.error("Falha ao enviar e-mail de recuperação para {}: {}", entregador.getEmailEntregador(), ex.getMessage(), ex);
                     return false;
                 });
         return true;
@@ -225,28 +236,29 @@ public class EntregadorService {
 
     @Transactional
     public boolean redefinirSenha(String token, String novaSenha){
-        // busca o entregador pelo token
         Entregador entregador = entregadorRepository.findByTokenRecuperacaoSenha(token)
-                .orElseThrow(() -> new IllegalArgumentException("Token de recuperação inválido ou não encontrado."));
+                .orElseThrow(() -> {
+                    log.error("Tentativa de redefinição de senha com token inválido ou não encontrado: {}", token);
+                    return new IllegalArgumentException("Token não encontrado");
+                });
 
-        //verifica se o token expirou
         if (entregador.getExpiracaoToken() != null && entregador.getExpiracaoToken().isBefore(LocalDateTime.now())){
-
-            //Limpa o token expirado
+            // Limpeza de token e lançamento de exceção
             entregador.setTokenRecuperacaoSenha(null);
             entregador.setExpiracaoToken(null);
             entregadorRepository.save(entregador);
-
-            throw new RuntimeException("Token de recuperação expirado. Por favor, solicite a recuperação novamente.");
+            log.warn("Tentativa de redefinição de senha com token expirado: {}", token);
+            throw new RuntimeException("Token de recuperação expirado.");
         }
 
-        //codifica e define a nova senha
         entregador.setPassword(passwordEncoder.encode(novaSenha));
 
-        //limpa o token depois do uso
+        // Limpeza de token
         entregador.setTokenRecuperacaoSenha(null);
         entregador.setExpiracaoToken(null);
         entregadorRepository.save(entregador);
+
+        log.info("Senha do entregador ID {} redefinida com sucesso.", entregador.getId());
 
         return true;
     }

@@ -80,7 +80,7 @@ public class ClienteService {
         enderecos.forEach(endereco -> endereco.setCliente(novoCliente)); //endereco recebe o cliente que pertence
 
         Cliente clienteSalvo = clienteRepository.save(novoCliente);
-
+        log.info("Cliente cadastrado com sucesso. ID: {}", clienteSalvo.getId());
         return new ClienteResponseDTO(clienteSalvo);
     }
 
@@ -123,7 +123,10 @@ public class ClienteService {
     @Transactional
     public List<PedidoResponseDTO> listarPedidos(Long idCliente){
         Cliente cliente = clienteRepository.findById(idCliente)
-                .orElseThrow(() -> new ClienteNaoEncontradoException(idCliente));
+                .orElseThrow(() -> {
+                    log.warn("Tentativa de listar pedidos. Cliente não encontrado: {}", idCliente); // [AJUSTE] Log de Aviso
+                    return new ClienteNaoEncontradoException(idCliente);
+                });
 
         List<PedidoResponseDTO> pedidosCliente = cliente.getPedidos()
                 .stream()
@@ -143,9 +146,12 @@ public class ClienteService {
 
     @Transactional
     public ClienteResponseDTO atualizarDadosCliente(Long idCliente, AtualizarClienteRequestDTO requestDTO){
+        log.info("A iniciar atualização de dados para cliente ID: {}", idCliente);
         Cliente cliente = clienteRepository.findById(idCliente)
-                .orElseThrow(()-> new ClienteNaoEncontradoException(idCliente));
-
+                .orElseThrow(()-> {
+                    log.error("Cliente não encontrado para atualização de dados. ID: {}", idCliente);
+                    return new ClienteNaoEncontradoException(idCliente);
+                });
         if(requestDTO.nmCliente() != null && !requestDTO.nmCliente().isBlank()){
             cliente.setNmCliente(requestDTO.nmCliente());
         }
@@ -154,6 +160,7 @@ public class ClienteService {
                 !requestDTO.emailCliente().equalsIgnoreCase(cliente.getEmailCliente())) {
 
             if (clienteRepository.findByEmailCliente(requestDTO.emailCliente()).isPresent()) {
+                log.error("Tentativa de atualizar e-mail para um já cadastrado: {}", requestDTO.emailCliente());
                 throw new RegistrosDuplicadosException("E-mail já cadastrado para outro usuário.");
             }
 
@@ -169,7 +176,10 @@ public class ClienteService {
     @Transactional
     public EnderecoResponseDTO atualizarEnderecoCliente(Long idCliente, Long idEndereco, EnderecoRequestDTO enderecoRequestDTO) {
         Cliente cliente = clienteRepository.findById(idCliente)
-                .orElseThrow(() -> new ClienteNaoEncontradoException(idCliente));
+                .orElseThrow(() -> {
+                    log.error("Cliente não encontrado para atualização de endereço. ID: {}", idCliente); // [AJUSTE] Log de Erro
+                    return new ClienteNaoEncontradoException(idCliente);
+                });
 
         Endereco endereco = enderecoRepository.findById(idEndereco)
                 .orElseThrow(()-> new EnderecoNaoEncontradoException(idEndereco));
@@ -219,7 +229,10 @@ public class ClienteService {
     @Transactional
     public void deletarCliente(Long idCliente){
         var cliente = clienteRepository.findById(idCliente)
-                .orElseThrow(()-> new ClienteNaoEncontradoException(idCliente));
+                .orElseThrow(()-> {
+                    log.error("Tentativa de inativar cliente falhou. ID não encontrado: {}", idCliente);
+                    return new ClienteNaoEncontradoException(idCliente);
+                });
 
         cliente.setAtivo(false);
     }
@@ -228,7 +241,10 @@ public class ClienteService {
     public boolean iniciarRecuperacaoSenha(String email){
         log.info("Solicitação de recuperação de senha para: {}", email);
         Cliente cliente = clienteRepository.findByEmailCliente(email)
-                .orElseThrow(() -> new ClienteNaoEncontradoException(email));
+                .orElseThrow(() -> {
+                    log.warn("Tentativa de recuperação de senha para e-mail não encontrado: {}", email);
+                    return new ClienteNaoEncontradoException(email);
+                });
 
         String token = UUID.randomUUID().toString();
         LocalDateTime expiracao = LocalDateTime.now().plusMinutes(15);
@@ -253,13 +269,17 @@ public class ClienteService {
     @Transactional
     public boolean redefinirSenha(String token, String novaSenha){
         Cliente cliente = clienteRepository.findByTokenRecuperacaoSenha(token)
-                .orElseThrow(() -> new IllegalArgumentException("Token não encontrado"));
+                .orElseThrow(() -> {
+                    log.error("Tentativa de redefinição de senha com token inválido ou não encontrado: {}", token);
+                    return new IllegalArgumentException("Token não encontrado");
+                });
 
         if (cliente.getExpiracaoToken() != null && cliente.getExpiracaoToken().isBefore(LocalDateTime.now())){
             cliente.setTokenRecuperacaoSenha(null);
             cliente.setExpiracaoToken(null);
 
             clienteRepository.save(cliente);
+            log.warn("Tentativa de redefinição de senha com token expirado: {}", token); // [AJUSTE] Log de Aviso
             throw new RuntimeException("Token de recuperação expirado.");
         }
 
@@ -270,6 +290,7 @@ public class ClienteService {
         cliente.setExpiracaoToken(null);
         clienteRepository.save(cliente);
 
+        log.info("Senha do cliente ID {} redefinida com sucesso.", cliente.getId());
         return true;
     }
 }

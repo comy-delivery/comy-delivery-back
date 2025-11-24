@@ -26,11 +26,14 @@ public class AdminService {
     @Transactional
     public AdminResponseDTO cadastrarAdmin(AdminRequestDTO adminRequestDTO){
         log.warn("Criação de novo ADMINISTRADOR solicitada. Username: {}", adminRequestDTO.username());
+
         if(adminRepository.findByCpfAdmin(adminRequestDTO.cpfAdmin()).isPresent()){
+            log.error("Tentativa de cadastro com CPF duplicado para Admin: {}", adminRequestDTO.cpfAdmin()); // [AJUSTE] Log de Erro
             throw new RegistrosDuplicadosException("CPF já foi cadastrado");
         }
 
         if (adminRepository.findByEmailAdmin(adminRequestDTO.emailAdmin()).isPresent()){
+            log.error("Tentativa de cadastro com Email duplicado para Admin: {}", adminRequestDTO.emailAdmin()); // [AJUSTE] Log de Erro
             throw new RegistrosDuplicadosException("Email já cadastrado.");
         }
 
@@ -43,13 +46,17 @@ public class AdminService {
         novoAdmin.setCpfAdmin(adminRequestDTO.cpfAdmin());
 
         adminRepository.save(novoAdmin);
+        log.info("Novo Admin cadastrado com sucesso. ID: {}", novoAdmin.getId());
 
         return new AdminResponseDTO(novoAdmin);
     }
 
     public AdminResponseDTO buscarAdminPorId(Long idAdmin){
         Admin admin = adminRepository.findById(idAdmin)
-                .orElseThrow(() -> new AdminNaoEncontradoException(idAdmin));
+                .orElseThrow(() -> {
+                    log.warn("Busca por Admin falhou. ID não encontrado: {}", idAdmin); // [AJUSTE] Log de Aviso
+                    return new AdminNaoEncontradoException(idAdmin);
+                });
 
         return new AdminResponseDTO(admin);
     }
@@ -58,10 +65,14 @@ public class AdminService {
     //metodo extra apenas para teste
     public void deletarAdmin(Long idAdmin){
         Admin admin = adminRepository.findById(idAdmin)
-                .orElseThrow(() -> new IllegalArgumentException("Id não pertence a um admin"));
+                .orElseThrow(() -> {
+                    log.error("Tentativa de inativar Admin falhou. ID não encontrado: {}", idAdmin); // [AJUSTE] Log de Erro
+                    return new IllegalArgumentException("Id não pertence a um admin");
+                });
 
         admin.setAtivo(false);
         adminRepository.save(admin);
+        log.info("Admin ID {} inativado (soft delete).", idAdmin);
 
     }
 

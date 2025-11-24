@@ -13,6 +13,7 @@ import com.comy_delivery_back.model.Restaurante;
 import com.comy_delivery_back.repository.EnderecoRepository;
 import com.comy_delivery_back.repository.RestauranteRepository;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -24,6 +25,7 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @Service
 public class RestauranteService {
 
@@ -43,15 +45,20 @@ public class RestauranteService {
     @Transactional
     public RestauranteResponseDTO cadastrarRestaurante(RestauranteRequestDTO restauranteRequestDTO, MultipartFile imagemFile) throws IOException {
 
+        log.info("Iniciando cadastro do novo restaurante: {}", restauranteRequestDTO.nmRestaurante());
+
         if (restauranteRepository.findByCnpj(restauranteRequestDTO.cnpj()).isPresent()){
+            log.error("CNPJ duplicado detectado: {}", restauranteRequestDTO.cnpj());
             throw new IllegalArgumentException("CNPJ já cadastrado.");
         }
 
         if (restauranteRepository.findByEmailRestaurante(restauranteRequestDTO.emailRestaurante()).isPresent()){
+            log.error("E-mail duplicado detectado: {}", restauranteRequestDTO.emailRestaurante());
             throw new IllegalArgumentException("E-mail já cadastrado.");
         }
 
         if (restauranteRepository.findByUsername(restauranteRequestDTO.username()).isPresent()){
+            log.error("Username duplicado detectado: {}", restauranteRequestDTO.username());
             throw new IllegalArgumentException("Username já cadastrado.");
         }
 
@@ -99,7 +106,7 @@ public class RestauranteService {
         novoRestaurante.setDiasFuncionamento(restauranteRequestDTO.diasFuncionamento());
 
         Restaurante restauranteSalvo = restauranteRepository.save(novoRestaurante);
-
+        log.info("Restaurante cadastrado com sucesso. ID: {}", restauranteSalvo.getId());
 
         return new RestauranteResponseDTO(restauranteSalvo);
     }
@@ -108,8 +115,14 @@ public class RestauranteService {
     public RestauranteResponseDTO atualizarRestaurante(Long idRestaurante,
                                                        RestauranteRequestDTO restauranteRequestDTO,
                                                        MultipartFile imagemLogo) throws IOException {
+
+        log.info("Tentativa de atualização do restaurante ID: {}", idRestaurante);
+
         Restaurante restaurante = restauranteRepository.findById(idRestaurante)
-                .orElseThrow(() -> new IllegalArgumentException("Id restaurante não encontrado."));
+                .orElseThrow(() -> {
+                    log.error("Restaurante não encontrado para atualização, ID: {}", idRestaurante);
+                    return new RestauranteNaoEncontradoException(idRestaurante);
+                });
 
 
         if(restauranteRequestDTO.nmRestaurante() != null && !restauranteRequestDTO.nmRestaurante().isBlank()){
@@ -118,6 +131,7 @@ public class RestauranteService {
         if (restauranteRequestDTO.emailRestaurante() != null && !restauranteRequestDTO.emailRestaurante().isBlank() &&
                 !restauranteRequestDTO.emailRestaurante().equalsIgnoreCase(restaurante.getEmailRestaurante())){
             if (restauranteRepository.findByEmailRestaurante(restauranteRequestDTO.emailRestaurante()).isPresent()){
+                log.error("E-mail '{}' já está em uso por outro restaurante.", restauranteRequestDTO.emailRestaurante());
                 throw new IllegalArgumentException("E-mail já cadastrado para outro restaurante.");
             }
 
@@ -133,6 +147,7 @@ public class RestauranteService {
                 byte[] logoBytes = imagemLogo.getBytes();
                 restaurante.setImagemLogo(logoBytes);
             } catch (IOException e) {
+                log.error("Falha ao ler o arquivo de imagem durante o cadastro.", e);
                 throw new RuntimeException("Falha ao ler o arquivo de imagem.", e);
             }
         }
@@ -162,20 +177,29 @@ public class RestauranteService {
         }
 
         restauranteRepository.save(restaurante);
-
+        log.info("Restaurante ID {} atualizado com sucesso.", idRestaurante);
         return new RestauranteResponseDTO(restaurante);
     }
 
     @Transactional
     public EnderecoResponseDTO alterarEnderecoRestaurante(Long idRestaurante, Long idEndereco,
                                                           EnderecoRequestDTO enderecoRequestDTO){
+        log.info("Restaurante ID {} atualizado com sucesso.", idRestaurante);
+
         Restaurante restaurante = restauranteRepository.findById(idRestaurante)
-                .orElseThrow(() -> new IllegalArgumentException("Restaurante não encontrado."));
+                .orElseThrow(() -> {
+                    log.error("Restaurante não encontrado ao tentar alterar endereço. ID: {}", idRestaurante);
+                    return new IllegalArgumentException("Restaurante não encontrado.");
+                });
 
         Endereco endereco = enderecoRepository.findByIdEndereco(idEndereco)
-                .orElseThrow(() -> new EnderecoNaoEncontradoException(idEndereco));
+                .orElseThrow(() -> {
+                    log.error("Endereço não encontrado para alteração. ID: {}", idEndereco);
+                    return new EnderecoNaoEncontradoException(idEndereco);
+                });
 
         if (!endereco.getRestaurante().getId().equals(idRestaurante)){
+            log.error("Tentativa de alterar endereço ID {} que pertence ao restaurante, com o restaurante ID", idRestaurante);
             throw new IllegalArgumentException("Endereço não pertence ao restaurante informado.");
         }
 
@@ -219,7 +243,10 @@ public class RestauranteService {
     @Transactional
     public RestauranteResponseDTO buscarRestaurantePorId(Long idRestaurante){
         Restaurante restaurante = restauranteRepository.findById(idRestaurante)
-                .orElseThrow(() -> new IllegalArgumentException("Id Restaurante não encontrado"));
+                .orElseThrow(() -> {
+                    log.warn("Busca por restaurante falhou. ID não encontrado: {}", idRestaurante);
+                    return new IllegalArgumentException("Id Restaurante não encontrado");
+                } );
 
         List<EnderecoResponseDTO> enderecoResponseDTOS = restaurante.getEnderecos()
                 .stream()
@@ -276,7 +303,10 @@ public class RestauranteService {
     @Transactional
     public void fecharRestaurante(Long idRestaurante){
         Restaurante restaurante = restauranteRepository.findById(idRestaurante)
-                .orElseThrow(() -> new IllegalArgumentException("id restaurante não encontrado"));
+                .orElseThrow(() -> {
+                    log.error("Tentativa de fechar restaurante falhou. ID não encontrado: {}", idRestaurante);
+                    return new IllegalArgumentException("id restaurante não encontrado");
+                });
 
         restaurante.setAberto(false);
 
