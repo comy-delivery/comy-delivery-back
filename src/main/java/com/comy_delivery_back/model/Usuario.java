@@ -4,25 +4,42 @@ import com.comy_delivery_back.enums.RoleUsuario;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
+@Data
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Data
+@Inheritance(strategy = InheritanceType.JOINED)
 public class Usuario {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long idUsuario;
+    private Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true, length = 50)
     private String username;
 
     @Column(nullable = false)
     private String password;
 
+    @Enumerated(EnumType.STRING)
+    private RoleUsuario roleUsuario;
+
+    @Column(columnDefinition = "boolean default false")
     private boolean recuperar;
 
-    @Column(nullable = false)
-    private RoleUsuario roleUsuario;
+    @Column(columnDefinition = "boolean default true")
+    private boolean isAtivo;
+
+    private String tokenRecuperacaoSenha;
+    private LocalDateTime expiracaoToken;
+
+    @PrePersist
+    public void prePersist(){
+         isAtivo = true;
+    }
+
 }
