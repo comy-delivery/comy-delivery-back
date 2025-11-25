@@ -13,6 +13,7 @@ import com.comy_delivery_back.exception.RestauranteNaoEncontradoException;
 import com.comy_delivery_back.model.Endereco;
 import com.comy_delivery_back.model.Restaurante;
 import com.comy_delivery_back.repository.EnderecoRepository;
+import com.comy_delivery_back.repository.EntregaRepository;
 import com.comy_delivery_back.repository.RestauranteRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -36,14 +37,16 @@ public class RestauranteService {
     private final EnderecoRepository enderecoRepository;
     private final EnderecoService enderecoService;
     private final PasswordEncoder passwordEncoder;
+    private final EntregaRepository entregaRepository;
     private final EmailService emailService;
 
     public RestauranteService(RestauranteRepository restauranteRepository,
-                              EnderecoRepository enderecoRepository, EnderecoService enderecoService, PasswordEncoder passwordEncoder, EmailService emailService) {
+                              EnderecoRepository enderecoRepository, EnderecoService enderecoService, PasswordEncoder passwordEncoder, EntregaRepository entregaRepository, EmailService emailService) {
         this.restauranteRepository = restauranteRepository;
         this.enderecoRepository = enderecoRepository;
         this.enderecoService = enderecoService;
         this.passwordEncoder = passwordEncoder;
+        this.entregaRepository = entregaRepository;
         this.emailService = emailService;
     }
 
@@ -523,6 +526,33 @@ public class RestauranteService {
         enderecoRepository.save(endereco);
 
         return new EnderecoResponseDTO(endereco);
+    }
+
+    @Transactional
+    public RestauranteResponseDTO atualizarTempoMedioEntrega(Long idRestaurante) {
+        log.info("Recalculando tempo médio total (Pedido -> Entrega) para o restaurante ID: {}", idRestaurante);
+
+        Restaurante restaurante = restauranteRepository.findById(idRestaurante)
+                .orElseThrow(() -> new RestauranteNaoEncontradoException(idRestaurante));
+
+        // Chama a nova query que considera a data de criação do pedido
+        Double mediaMinutos = entregaRepository.calcularMediaTempoTotalPedido(idRestaurante);
+
+        if (mediaMinutos != null) {
+            int novoTempoMedio = (int) Math.round(mediaMinutos);
+
+            // Validação opcional: tempo mínimo de segurança
+            if (novoTempoMedio < 10) novoTempoMedio = 10;
+
+            restaurante.setTempoMediaEntrega(novoTempoMedio);
+            restauranteRepository.save(restaurante);
+
+            log.info("Tempo médio atualizado para {} minutos (baseado no histórico de pedidos concluídos).", novoTempoMedio);
+        } else {
+            log.warn("Não há dados suficientes de entregas concluídas para calcular a média.");
+        }
+
+        return new RestauranteResponseDTO(restaurante);
     }
 
 }

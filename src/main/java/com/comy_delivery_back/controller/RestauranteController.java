@@ -278,5 +278,17 @@ public class RestauranteController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    @Operation(summary = "Recalcular Tempo Médio de Entrega",
+            description = "Calcula a média histórica do tempo total (da criação do pedido até a entrega) e atualiza o cadastro do restaurante.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Tempo atualizado com sucesso"),
+                    @ApiResponse(responseCode = "404", description = "Restaurante não encontrado")
+            })
+    @PatchMapping("/{id}/calcular-tempo-medio")
+    public ResponseEntity<RestauranteResponseDTO> recalcularTempoMedio(@PathVariable Long id) {
+        RestauranteResponseDTO response = restauranteService.atualizarTempoMedioEntrega(id);
+        return ResponseEntity.ok(response);
+    }
+
 
 }

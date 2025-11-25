@@ -8,9 +8,11 @@ import com.comy_delivery_back.exception.*;
 import com.comy_delivery_back.model.Entrega;
 import com.comy_delivery_back.model.Entregador;
 import com.comy_delivery_back.model.Pedido;
+import com.comy_delivery_back.model.Restaurante;
 import com.comy_delivery_back.repository.EntregaRepository;
 import com.comy_delivery_back.repository.EntregadorRepository;
 import com.comy_delivery_back.repository.PedidoRepository;
+import com.comy_delivery_back.repository.RestauranteRepository;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -27,13 +29,17 @@ public class EntregadorService {
 
     private final EntregadorRepository entregadorRepository;
     private final EntregaRepository entregaRepository;
+    private final RestauranteRepository restauranteRepository;
+    private final RestauranteService restauranteService;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
     private final PedidoRepository pedidoRepository;
 
-    public EntregadorService(EntregadorRepository entregadorRepository, EntregaRepository entregaRepository, PasswordEncoder passwordEncoder, EmailService emailService, PedidoRepository pedidoRepository) {
+    public EntregadorService(EntregadorRepository entregadorRepository, EntregaRepository entregaRepository, RestauranteRepository restauranteRepository, RestauranteService restauranteService, PasswordEncoder passwordEncoder, EmailService emailService, PedidoRepository pedidoRepository) {
         this.entregadorRepository = entregadorRepository;
         this.entregaRepository = entregaRepository;
+        this.restauranteRepository = restauranteRepository;
+        this.restauranteService = restauranteService;
         this.passwordEncoder = passwordEncoder;
         this.emailService = emailService;
         this.pedidoRepository = pedidoRepository;
@@ -184,6 +190,8 @@ public class EntregadorService {
                 .orElseThrow(() -> new EntregaNaoEncontradaException(idEntrega));
         Pedido pedido = pedidoRepository.findById((entrega.getPedido().getIdPedido()))
                 .orElseThrow(() -> new PedidoNaoEncontradoException(entrega.getPedido().getIdPedido()));
+        Restaurante restaurante = restauranteRepository.findById(pedido.getRestaurante().getId())
+                .orElseThrow(() -> new RestauranteNaoEncontradoException(pedido.getRestaurante().getId()));
 
         if (entrega.getStatusEntrega() != StatusEntrega.EM_ROTA) {
             throw new IllegalStateException("A entrega ID " + idEntrega + " não pode ser finalizada. Status atual: " + entrega.getStatusEntrega());
@@ -192,6 +200,7 @@ public class EntregadorService {
         entrega.setStatusEntrega(StatusEntrega.CONCLUIDA);
         entrega.setDataHoraConclusao(LocalDateTime.now());
         pedido.setStatus(StatusPedido.ENTREGUE);
+        restauranteService.atualizarTempoMedioEntrega(restaurante.getId());
         entregaRepository.save(entrega);
 
         Entregador entregador = entrega.getEntregador();
