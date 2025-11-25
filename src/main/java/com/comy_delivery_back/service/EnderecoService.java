@@ -1,6 +1,7 @@
 package com.comy_delivery_back.service;
 
 import com.comy_delivery_back.client.ApiCepClient;
+import com.comy_delivery_back.dto.request.AtualizarEnderecoRequestDTO;
 import com.comy_delivery_back.dto.request.EnderecoRequestDTO;
 import com.comy_delivery_back.dto.response.ApiCepDTO;
 import com.comy_delivery_back.dto.response.EnderecoResponseDTO;
@@ -14,6 +15,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -77,7 +79,7 @@ public class EnderecoService {
     }
 
     @Transactional
-    public EnderecoResponseDTO buscarEnderecoPorId(Long idEndereco){
+    public EnderecoResponseDTO buscarEnderecoPorId(Long idEndereco) {
         return this.enderecoRepository.findByIdEndereco(idEndereco)
                 .map(EnderecoResponseDTO::new)
                 .orElseThrow(() -> new EnderecoNaoEncontradoException(idEndereco));
@@ -91,9 +93,8 @@ public class EnderecoService {
     }
 
 
-
     @Transactional
-    public EnderecoResponseDTO alterarEndereco(Long idEndereco, EnderecoRequestDTO enderecoDTO)
+    public EnderecoResponseDTO alterarEndereco(Long idEndereco, AtualizarEnderecoRequestDTO enderecoDTO)
             throws CepNaoEncontradoException {
 
         Endereco enderecoParaAtualizar = this.enderecoRepository.findByIdEndereco(idEndereco)
@@ -118,30 +119,72 @@ public class EnderecoService {
         if (enderecoDTO.logradouro() != null && !enderecoDTO.logradouro().isBlank()) {
             enderecoParaAtualizar.setLogradouro(enderecoDTO.logradouro());
         }
+
+        if (enderecoDTO.numero() != null && !enderecoDTO.numero().isBlank()) {
+            enderecoParaAtualizar.setNumero(enderecoDTO.numero());
+        }
+
+        if (enderecoDTO.complemento() != null && !enderecoDTO.complemento().isBlank()) {
+            enderecoParaAtualizar.setComplemento(enderecoDTO.complemento());
+        }
+
         if (enderecoDTO.bairro() != null && !enderecoDTO.bairro().isBlank()) {
             enderecoParaAtualizar.setBairro(enderecoDTO.bairro());
         }
+
         if (enderecoDTO.cidade() != null && !enderecoDTO.cidade().isBlank()) {
             enderecoParaAtualizar.setCidade(enderecoDTO.cidade());
         }
+
         if (enderecoDTO.estado() != null && !enderecoDTO.estado().isBlank()) {
             enderecoParaAtualizar.setEstado(enderecoDTO.estado());
         }
 
-       enderecoParaAtualizar.setTipoEndereco(enderecoDTO.tipoEndereco());
-        enderecoParaAtualizar.setPontoDeReferencia(enderecoDTO.pontoDeReferencia());
-        enderecoParaAtualizar.setComplemento(enderecoDTO.complemento());
-        enderecoParaAtualizar.setNumero(enderecoDTO.numero());
+        if (enderecoDTO.pontoDeReferencia() != null && !enderecoDTO.pontoDeReferencia().isBlank()) {
+            enderecoParaAtualizar.setPontoDeReferencia(enderecoDTO.pontoDeReferencia());
+        }
+
+        if (enderecoDTO.tipoEndereco() != null) {
+            enderecoParaAtualizar.setTipoEndereco(enderecoDTO.tipoEndereco());
+        }
+
 
         Endereco enderecoSalvo = enderecoRepository.save(enderecoParaAtualizar);
         return new EnderecoResponseDTO(enderecoSalvo);
     }
 
     @Transactional
-    public void deletarEndereco(Long idEndereco){
-        Endereco endereco = enderecoRepository.findByIdEndereco(idEndereco)
+    public void deletarEndereco(Long idEndereco) {
+        Endereco enderecoAlvo = enderecoRepository.findByIdEndereco(idEndereco)
                 .orElseThrow(() -> new EnderecoNaoEncontradoException(idEndereco));
-        enderecoRepository.delete(endereco);
+
+        List<Endereco> enderecosDoDono = new ArrayList<>();
+
+        if (enderecoAlvo.getCliente() != null) {
+            enderecosDoDono = enderecoRepository.findByCliente_Id(enderecoAlvo.getCliente().getId());
+        } else if (enderecoAlvo.getRestaurante() != null) {
+            enderecosDoDono = enderecoRepository.findByRestaurante_Id(enderecoAlvo.getRestaurante().getId());
+        }
+
+        if (!enderecosDoDono.isEmpty() && enderecosDoDono.size() <= 1) {
+            throw new RegraDeNegocioException("Não é possível remover o endereço. O usuário deve possuir pelo menos um endereço cadastrado.");
+        }
+
+        if (enderecoAlvo.getCliente() != null && enderecoAlvo.isPadrao()) {
+
+
+            Endereco novoPadrao = enderecosDoDono.stream()
+                    .filter(e -> !e.getIdEndereco().equals(idEndereco))
+                    .findFirst()
+                    .orElseThrow(() -> new RegraDeNegocioException("Erro inconsistente: Nenhum outro endereço disponível para definir como padrão."));
+
+            novoPadrao.setPadrao(true);
+            enderecoRepository.save(novoPadrao);
+
+            log.info("O endereço ID {} foi definido como novo padrão para o cliente.", novoPadrao.getIdEndereco());
+        }
+        enderecoRepository.delete(enderecoAlvo);
+        log.info("Endereço ID {} removido com sucesso.", idEndereco);
     }
 
     @Transactional
@@ -167,7 +210,6 @@ public class EnderecoService {
         }
         enderecoRepository.saveAll(enderecosDoCliente);
     }
-
 
 
 }

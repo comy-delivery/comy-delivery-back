@@ -1,5 +1,6 @@
 package com.comy_delivery_back.service;
 
+import com.comy_delivery_back.dto.request.AtualizarEnderecoRequestDTO;
 import com.comy_delivery_back.dto.request.EnderecoRequestDTO;
 import com.comy_delivery_back.dto.request.RestauranteRequestDTO;
 import com.comy_delivery_back.dto.response.EnderecoResponseDTO;
@@ -7,6 +8,7 @@ import com.comy_delivery_back.dto.response.ProdutoResponseDTO;
 import com.comy_delivery_back.dto.response.RestauranteResponseDTO;
 import com.comy_delivery_back.enums.DiasSemana;
 import com.comy_delivery_back.exception.EnderecoNaoEncontradoException;
+import com.comy_delivery_back.exception.RegraDeNegocioException;
 import com.comy_delivery_back.exception.RestauranteNaoEncontradoException;
 import com.comy_delivery_back.model.Endereco;
 import com.comy_delivery_back.model.Restaurante;
@@ -83,10 +85,10 @@ public class RestauranteService {
         }
 
         if (imagemBanner != null && !imagemBanner.isEmpty()) {
-            byte[] imagemBytes = imagemBanner.getBytes();
-            novoRestaurante.setImagemLogo(imagemBytes);
+            byte[] imagemBytes2 = imagemBanner.getBytes();
+            novoRestaurante.setImagemBanner(imagemBytes2);
         } else {
-            novoRestaurante.setImagemLogo(null);
+            novoRestaurante.setImagemBanner(null);
         }
 
         novoRestaurante.setDescricaoRestaurante(restauranteRequestDTO.descricaoRestaurante());
@@ -109,6 +111,7 @@ public class RestauranteService {
                 enderecoEntity.setRestaurante(restauranteSalvo);
 
                 enderecoRepository.save(enderecoEntity);
+                restauranteSalvo.getEnderecos().add(enderecoEntity);
             }
         }
 
@@ -181,7 +184,7 @@ public class RestauranteService {
         if (imagemBanner != null && !imagemBanner.isEmpty()){
             try{
                 byte[] bannerBytes = imagemBanner.getBytes();
-                restaurante.setImagemLogo(bannerBytes);
+                restaurante.setImagemBanner(bannerBytes);
             } catch (IOException e) {
                 log.error("Falha ao ler o arquivo de imagem banner durante o cadastro.", e);
                 throw new RuntimeException("Falha ao ler o arquivo de imagem.", e);
@@ -219,7 +222,7 @@ public class RestauranteService {
 
     @Transactional
     public EnderecoResponseDTO alterarEnderecoRestaurante(Long idRestaurante, Long idEndereco,
-                                                          EnderecoRequestDTO enderecoRequestDTO){
+                                                          AtualizarEnderecoRequestDTO enderecoRequestDTO){
         log.info("Restaurante ID {} atualizado com sucesso.", idRestaurante);
 
         Restaurante restaurante = restauranteRepository.findById(idRestaurante)
@@ -482,7 +485,7 @@ public class RestauranteService {
         return restaurante.getImagemLogo();
     }
 
-    // --- MÉTODOS ESPECÍFICOS DE IMAGEM (BANNER) ---
+
 
     @Transactional
     public void atualizarImagemBanner(Long idRestaurante, MultipartFile imagem) throws IOException {
@@ -500,6 +503,26 @@ public class RestauranteService {
         Restaurante restaurante = restauranteRepository.findById(idRestaurante)
                 .orElseThrow(() -> new RestauranteNaoEncontradoException(idRestaurante));
         return restaurante.getImagemBanner();
+    }
+
+    @Transactional
+    public EnderecoResponseDTO vincularEnderecoExistente(Long idRestaurante, Long idEndereco) {
+        Restaurante restaurante = restauranteRepository.findById(idRestaurante)
+                .orElseThrow(() -> new RestauranteNaoEncontradoException(idRestaurante));
+
+        Endereco endereco = enderecoRepository.findByIdEndereco(idEndereco)
+                .orElseThrow(() -> new EnderecoNaoEncontradoException(idEndereco));
+
+        if (endereco.getCliente() != null || endereco.getRestaurante() != null) {
+            throw new RegraDeNegocioException("Este endereço já está vinculado a outro usuário.");
+        }
+
+        endereco.setRestaurante(restaurante);
+
+        restaurante.getEnderecos().add(endereco);
+        enderecoRepository.save(endereco);
+
+        return new EnderecoResponseDTO(endereco);
     }
 
 }

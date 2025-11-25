@@ -1,5 +1,6 @@
 package com.comy_delivery_back.controller;
 
+import com.comy_delivery_back.dto.request.AtualizarEnderecoRequestDTO;
 import com.comy_delivery_back.dto.request.EnderecoRequestDTO;
 import com.comy_delivery_back.dto.request.RedefinirSenhaRequestDTO;
 import com.comy_delivery_back.dto.request.RestauranteRequestDTO;
@@ -111,7 +112,7 @@ public class RestauranteController {
     @PutMapping("/{idRestaurante}/enderecos/{idEndereco}")
     public ResponseEntity<EnderecoResponseDTO> alterarEnderecoRestaurante(@PathVariable Long idRestaurante,
                                                                           @PathVariable Long idEndereco,
-                                                                          @RequestBody @Valid EnderecoRequestDTO enderecoRequestDTO) {
+                                                                          @RequestBody @Valid AtualizarEnderecoRequestDTO enderecoRequestDTO) {
 
         EnderecoResponseDTO responseDTO = restauranteService.alterarEnderecoRestaurante(idRestaurante, idEndereco, enderecoRequestDTO);
         return ResponseEntity.ok(responseDTO);
@@ -257,6 +258,24 @@ public class RestauranteController {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(imagem);
+    }
+
+    @Operation(summary = "Adicionar novo endereço ao restaurante",
+            description = "Cria um novo endereço e o vincula ao restaurante informado.",
+            responses = {
+                    @ApiResponse(responseCode = "201", description = "Endereço criado com sucesso",
+                            content = @Content(schema = @Schema(implementation = EnderecoResponseDTO.class))),
+                    @ApiResponse(responseCode = "404", description = "Restaurante não encontrado"),
+                    @ApiResponse(responseCode = "400", description = "Dados do endereço inválidos")
+            })
+    @PostMapping("/{id}/enderecos")
+    public ResponseEntity<EnderecoResponseDTO> adicionarEndereco(
+            @PathVariable Long id,
+            @RequestBody @Valid EnderecoRequestDTO enderecoRequestDTO) {
+
+        EnderecoResponseDTO response = restauranteService.adicionarEnderecoRestaurante(id, enderecoRequestDTO);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
 

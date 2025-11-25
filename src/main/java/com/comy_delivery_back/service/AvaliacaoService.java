@@ -2,10 +2,9 @@ package com.comy_delivery_back.service;
 
 import com.comy_delivery_back.dto.request.AvaliacaoRequestDTO;
 import com.comy_delivery_back.dto.response.AvaliacaoResponseDTO;
-import com.comy_delivery_back.exception.ClienteNaoEncontradoException;
-import com.comy_delivery_back.exception.EntregadorNaoEncontradoException;
-import com.comy_delivery_back.exception.PedidoNaoEncontradoException;
-import com.comy_delivery_back.exception.RestauranteNaoEncontradoException;
+import com.comy_delivery_back.enums.StatusEntrega;
+import com.comy_delivery_back.enums.StatusPedido;
+import com.comy_delivery_back.exception.*;
 import com.comy_delivery_back.model.*;
 import com.comy_delivery_back.repository.*;
 import org.springframework.beans.BeanUtils;
@@ -45,6 +44,21 @@ public class AvaliacaoService {
 
         Entregador entregador = entregadorRepository.findById(dto.entregadorId())
                 .orElseThrow(() -> new EntregadorNaoEncontradoException(dto.entregadorId()));
+
+        if (pedido.getStatus() != StatusPedido.ENTREGUE) {
+            throw new RegraDeNegocioException("A avaliação só pode ser realizada em pedidos com status ENTREGUE.");
+        }
+
+        // 2. Verifica se a entrega existe e está concluída
+        Entrega entrega = pedido.getEntrega(); // Acessa via relacionamento OneToOne
+
+        if (entrega == null) {
+            throw new RegraDeNegocioException("Não foi encontrada uma entrega vinculada a este pedido.");
+        }
+
+        if (entrega.getStatusEntrega() != StatusEntrega.CONCLUIDA) {
+            throw new RegraDeNegocioException("A entrega ainda não foi finalizada pelo entregador.");
+        }
 
         Avaliacao avaliacao = new Avaliacao();
 

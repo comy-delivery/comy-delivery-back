@@ -41,6 +41,7 @@ public class CupomService {
 
         Cupom cupom = new Cupom();
         BeanUtils.copyProperties(dto, cupom);
+        cupom.setDtValidade(dto.dtValidade().atTime(23, 59, 59));
 
         cupom.setCodigoCupom(dto.codigoCupom().toUpperCase());
         cupom.setVlDesconto(dto.vlDesconto());
@@ -181,6 +182,9 @@ public class CupomService {
                 .orElseThrow(() -> new CupomNaoEncontradoException(id));
 
         BeanUtils.copyProperties(dto, cupom);
+        if (dto.dtValidade() != null) {
+            cupom.setDtValidade(dto.dtValidade().atTime(23, 59, 59));
+        }
         return new CupomResponseDTO(cupomRepository.save(cupom));
     }
 
@@ -189,6 +193,14 @@ public class CupomService {
         Cupom cupom = cupomRepository.findById(id)
                 .orElseThrow(() -> new CupomNaoEncontradoException(id));
         cupom.setAtivo(false);
+        cupomRepository.save(cupom);
+    }
+
+    @Transactional
+    public void ativarCupom(Long id) {
+        Cupom cupom = cupomRepository.findById(id)
+                .orElseThrow(() -> new CupomNaoEncontradoException(id));
+        cupom.setAtivo(true);
         cupomRepository.save(cupom);
     }
 

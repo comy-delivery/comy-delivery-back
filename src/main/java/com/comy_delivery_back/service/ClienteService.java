@@ -1,22 +1,24 @@
 package com.comy_delivery_back.service;
 
 import com.comy_delivery_back.dto.request.AtualizarClienteRequestDTO;
+import com.comy_delivery_back.dto.request.AtualizarEnderecoRequestDTO;
 import com.comy_delivery_back.dto.request.ClienteRequestDTO;
 import com.comy_delivery_back.dto.request.EnderecoRequestDTO;
 import com.comy_delivery_back.dto.response.ClienteResponseDTO;
 import com.comy_delivery_back.dto.response.EnderecoResponseDTO;
-import com.comy_delivery_back.dto.response.PedidoResponseDTO;
+import com.comy_delivery_back.dto.response.PedidoResumoDTO;
 import com.comy_delivery_back.exception.ClienteNaoEncontradoException;
 import com.comy_delivery_back.exception.EnderecoNaoEncontradoException;
 import com.comy_delivery_back.exception.RegistrosDuplicadosException;
+import com.comy_delivery_back.exception.RegraDeNegocioException;
 import com.comy_delivery_back.model.Cliente;
 import com.comy_delivery_back.model.Endereco;
 import com.comy_delivery_back.repository.ClienteRepository;
 import com.comy_delivery_back.repository.EnderecoRepository;
-import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -84,6 +86,7 @@ public class ClienteService {
                 }
 
                 enderecoRepository.save(enderecoEntity);
+                clienteSalvo.getEnderecos().add(enderecoEntity);
             }
         }
 
@@ -134,17 +137,17 @@ public class ClienteService {
                 .map(ClienteResponseDTO::new).toList();
     }
 
-    @Transactional
-    public List<PedidoResponseDTO> listarPedidos(Long idCliente){
+    @Transactional(readOnly = true)
+    public List<PedidoResumoDTO> listarPedidos(Long idCliente){
         Cliente cliente = clienteRepository.findById(idCliente)
                 .orElseThrow(() -> {
                     log.warn("Tentativa de listar pedidos. Cliente não encontrado: {}", idCliente); // [AJUSTE] Log de Aviso
                     return new ClienteNaoEncontradoException(idCliente);
                 });
 
-        List<PedidoResponseDTO> pedidosCliente = cliente.getPedidos()
+        List<PedidoResumoDTO> pedidosCliente = cliente.getPedidos()
                 .stream()
-                .map(PedidoResponseDTO::new)
+                .map(PedidoResumoDTO::new)
                 .toList();
 
         return pedidosCliente;
@@ -188,7 +191,7 @@ public class ClienteService {
     }
 
     @Transactional
-    public EnderecoResponseDTO atualizarEnderecoCliente(Long idCliente, Long idEndereco, EnderecoRequestDTO enderecoRequestDTO) {
+    public EnderecoResponseDTO atualizarEnderecoCliente(Long idCliente, Long idEndereco, AtualizarEnderecoRequestDTO enderecoRequestDTO) {
         Cliente cliente = clienteRepository.findById(idCliente)
                 .orElseThrow(() -> {
                     log.error("Cliente não encontrado para atualização de endereço. ID: {}", idCliente); // [AJUSTE] Log de Erro
@@ -306,5 +309,31 @@ public class ClienteService {
 
         log.info("Senha do cliente ID {} redefinida com sucesso.", cliente.getId());
         return true;
+    }
+
+    @Transactional
+    public EnderecoResponseDTO vincularEnderecoExistente(Long idCliente, Long idEndereco) {
+        Cliente cliente = clienteRepository.findById(idCliente)
+                .orElseThrow(() -> new ClienteNaoEncontradoException(idCliente));
+
+        Endereco endereco = enderecoRepository.findByIdEndereco(idEndereco)
+                .orElseThrow(() -> new EnderecoNaoEncontradoException(idEndereco));
+
+        if (endereco.getCliente() != null || endereco.getRestaurante() != null) {
+            throw new RegraDeNegocioException("Este endereço já está vinculado a outro usuário.");
+        }
+
+        endereco.setCliente(cliente);
+
+        if (cliente.getEnderecos().isEmpty()) {
+            endereco.setPadrao(true);
+        } else {
+            endereco.setPadrao(false);
+        }
+
+        cliente.getEnderecos().add(endereco);
+        enderecoRepository.save(endereco);
+
+        return new EnderecoResponseDTO(endereco);
     }
 }

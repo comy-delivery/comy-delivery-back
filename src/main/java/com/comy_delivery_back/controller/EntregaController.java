@@ -89,4 +89,20 @@ public class EntregaController {
         return ResponseEntity.ok(entregas);
     }
 
+    @Operation(summary = "Vincular Avaliação à Entrega",
+            description = "Atualiza a nota da entrega com base em uma avaliação já cadastrada. Valida se ambos pertencem ao mesmo pedido.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Vínculo realizado com sucesso"),
+                    @ApiResponse(responseCode = "404", description = "Entrega ou Avaliação não encontrada"),
+                    @ApiResponse(responseCode = "400", description = "Avaliação não pertence ao pedido da entrega")
+            })
+    @PatchMapping("/{idEntrega}/avaliacao/{idAvaliacao}")
+    public ResponseEntity<EntregaResponseDTO> vincularAvaliacao(
+            @PathVariable Long idEntrega,
+            @PathVariable Long idAvaliacao) {
+
+        EntregaResponseDTO response = entregaService.vincularAvaliacao(idEntrega, idAvaliacao);
+        return ResponseEntity.ok(response);
+    }
+
 }

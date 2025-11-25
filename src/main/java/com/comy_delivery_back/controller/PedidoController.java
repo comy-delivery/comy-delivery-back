@@ -2,10 +2,13 @@ package com.comy_delivery_back.controller;
 
 import com.comy_delivery_back.dto.request.AceitarPedidoRequestDTO;
 import com.comy_delivery_back.dto.request.PedidoRequestDTO;
+import com.comy_delivery_back.dto.response.DashboardRestauranteDTO;
 import com.comy_delivery_back.dto.response.PedidoResponseDTO;
 import com.comy_delivery_back.enums.StatusPedido;
 import com.comy_delivery_back.service.PedidoService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -137,6 +140,24 @@ public class PedidoController {
     public ResponseEntity<BigDecimal> calcularTotal(@PathVariable Long id) {
         BigDecimal total = pedidoService.calcularTotal(id);
         return ResponseEntity.ok(total);
+    }
+
+    @Operation(summary = "Calcular valor da entrega do pedido")
+    @GetMapping("/{id}/valor-entrega")
+    public ResponseEntity<BigDecimal> calcularValorEntrega(@PathVariable Long id) {
+        BigDecimal total = pedidoService.calcularValorEntrega(id);
+        return ResponseEntity.ok(total);
+    }
+
+    @Operation(summary = "Obter métricas completas do restaurante",
+            description = "Retorna o total de pedidos histórico e o faturamento diário.",
+            responses = {
+                    @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = DashboardRestauranteDTO.class)))
+            })
+    @GetMapping("/restaurante/{restauranteId}/dashboard")
+    public ResponseEntity<DashboardRestauranteDTO> obterDashboard(@PathVariable Long restauranteId) {
+        DashboardRestauranteDTO dashboard = pedidoService.obterDashboardCompleto(restauranteId);
+        return ResponseEntity.ok(dashboard);
     }
 
     @Operation(summary = "Calcular tempo estimado de entrega")

@@ -3,14 +3,14 @@ package com.comy_delivery_back.service;
 import com.comy_delivery_back.dto.request.EntregadorRequestDTO;
 import com.comy_delivery_back.dto.response.EntregadorResponseDTO;
 import com.comy_delivery_back.enums.StatusEntrega;
-import com.comy_delivery_back.exception.EntregaNaoEncontradaException;
-import com.comy_delivery_back.exception.EntregadorNaoEncontradoException;
-import com.comy_delivery_back.exception.RegistrosDuplicadosException;
-import com.comy_delivery_back.exception.RegraDeNegocioException;
+import com.comy_delivery_back.enums.StatusPedido;
+import com.comy_delivery_back.exception.*;
 import com.comy_delivery_back.model.Entrega;
 import com.comy_delivery_back.model.Entregador;
+import com.comy_delivery_back.model.Pedido;
 import com.comy_delivery_back.repository.EntregaRepository;
 import com.comy_delivery_back.repository.EntregadorRepository;
+import com.comy_delivery_back.repository.PedidoRepository;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -29,12 +29,14 @@ public class EntregadorService {
     private final EntregaRepository entregaRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
+    private final PedidoRepository pedidoRepository;
 
-    public EntregadorService(EntregadorRepository entregadorRepository, EntregaRepository entregaRepository, PasswordEncoder passwordEncoder, EmailService emailService) {
+    public EntregadorService(EntregadorRepository entregadorRepository, EntregaRepository entregaRepository, PasswordEncoder passwordEncoder, EmailService emailService, PedidoRepository pedidoRepository) {
         this.entregadorRepository = entregadorRepository;
         this.entregaRepository = entregaRepository;
         this.passwordEncoder = passwordEncoder;
         this.emailService = emailService;
+        this.pedidoRepository = pedidoRepository;
     }
 
     @Transactional
@@ -180,6 +182,8 @@ public class EntregadorService {
 
         Entrega entrega = entregaRepository.findById(idEntrega)
                 .orElseThrow(() -> new EntregaNaoEncontradaException(idEntrega));
+        Pedido pedido = pedidoRepository.findById((entrega.getPedido().getIdPedido()))
+                .orElseThrow(() -> new PedidoNaoEncontradoException(entrega.getPedido().getIdPedido()));
 
         if (entrega.getStatusEntrega() != StatusEntrega.EM_ROTA) {
             throw new IllegalStateException("A entrega ID " + idEntrega + " não pode ser finalizada. Status atual: " + entrega.getStatusEntrega());
@@ -187,6 +191,7 @@ public class EntregadorService {
 
         entrega.setStatusEntrega(StatusEntrega.CONCLUIDA);
         entrega.setDataHoraConclusao(LocalDateTime.now());
+        pedido.setStatus(StatusPedido.ENTREGUE);
         entregaRepository.save(entrega);
 
         Entregador entregador = entrega.getEntregador();

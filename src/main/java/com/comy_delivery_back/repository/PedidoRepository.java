@@ -1,5 +1,6 @@
 package com.comy_delivery_back.repository;
 
+import com.comy_delivery_back.dto.response.FaturamentoDiarioDTO;
 import com.comy_delivery_back.enums.StatusPedido;
 import com.comy_delivery_back.model.Pedido;
 import feign.Param;
@@ -23,6 +24,16 @@ public interface PedidoRepository extends JpaRepository<Pedido,Long> {
     @Query("SELECT p FROM Pedido p WHERE p.restaurante.id = :restauranteId AND p.isAceito = true")
     List<Pedido> findPedidosAceitosByRestaurante(@Param("restauranteId") Long restauranteId);
 
+    Long countByRestaurante_Id(Long restauranteId);
+
+    @Query("SELECT new com.comy_delivery_back.dto.response.FaturamentoDiarioDTO(CAST(p.dtCriacao AS LocalDate), SUM(p.vlTotal)) " +
+            "FROM Pedido p " +
+            "WHERE p.restaurante.id = :restauranteId " +
+            "AND p.status != 'CANCELADO' " +
+            "GROUP BY CAST(p.dtCriacao AS LocalDate) " +
+            "ORDER BY CAST(p.dtCriacao AS LocalDate) DESC")
+    List<FaturamentoDiarioDTO> findFaturamentoAgrupadoPorDia(@Param("restauranteId") Long restauranteId);
+
     // Buscar pedidos recusados por restaurante
     @Query("SELECT p FROM Pedido p WHERE p.restaurante.id = :restauranteId AND p.isAceito = false AND p.motivoRecusa IS NOT NULL")
     List<Pedido> findPedidosRecusadosByRestaurante(@Param("restauranteId") Long restauranteId);
@@ -44,4 +55,6 @@ public interface PedidoRepository extends JpaRepository<Pedido,Long> {
     // Contar pedidos recusados por restaurante
     @Query("SELECT COUNT(p) FROM Pedido p WHERE p.restaurante.id = :restauranteId AND p.isAceito = false AND p.motivoRecusa IS NOT NULL")
     Long countPedidosRecusadosByRestaurante(@Param("restauranteId") Long restauranteId);
+
+
 }

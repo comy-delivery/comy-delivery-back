@@ -1,12 +1,10 @@
 package com.comy_delivery_back.controller;
 
-import com.comy_delivery_back.dto.request.AtualizarClienteRequestDTO;
-import com.comy_delivery_back.dto.request.ClienteRequestDTO;
-import com.comy_delivery_back.dto.request.EnderecoRequestDTO;
-import com.comy_delivery_back.dto.request.RedefinirSenhaRequestDTO;
+import com.comy_delivery_back.dto.request.*;
 import com.comy_delivery_back.dto.response.ClienteResponseDTO;
 import com.comy_delivery_back.dto.response.EnderecoResponseDTO;
 import com.comy_delivery_back.dto.response.PedidoResponseDTO;
+import com.comy_delivery_back.dto.response.PedidoResumoDTO;
 import com.comy_delivery_back.service.ClienteService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -119,7 +117,7 @@ public class ClienteController {
     @PutMapping("/{idCliente}/enderecos/{idEndereco}")
     public ResponseEntity<EnderecoResponseDTO> atualizarEnderecoCliente(@PathVariable Long idCliente,
                                                                         @PathVariable Long idEndereco,
-                                                                        @RequestBody EnderecoRequestDTO requestDTO) {
+                                                                        @RequestBody AtualizarEnderecoRequestDTO requestDTO) {
         EnderecoResponseDTO response = clienteService.atualizarEnderecoCliente(idCliente, idEndereco, requestDTO);
         return ResponseEntity.ok(response);
     }
@@ -130,8 +128,8 @@ public class ClienteController {
                     @ApiResponse(responseCode = "404", description = "Cliente não encontrado")
             })
     @GetMapping("/{idCliente}/pedidos")
-    public ResponseEntity<List<PedidoResponseDTO>> listarPedidos(@PathVariable Long idCliente) {
-        List<PedidoResponseDTO> response = clienteService.listarPedidos(idCliente);
+    public ResponseEntity<List<PedidoResumoDTO>> listarPedidos(@PathVariable Long idCliente) {
+        List<PedidoResumoDTO> response = clienteService.listarPedidos(idCliente);
         return ResponseEntity.ok(response);
     }
 
