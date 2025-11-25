@@ -39,7 +39,7 @@ public class TokenService {
                 .compact();
     }
 
-    public String getSubject(String token) {
+    public String getUsernameFromToken(String token) {
         try {
             return Jwts.parser()
                     .verifyWith(getSecretKey())
