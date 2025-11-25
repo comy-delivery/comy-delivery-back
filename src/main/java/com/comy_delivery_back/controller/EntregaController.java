@@ -2,10 +2,13 @@ package com.comy_delivery_back.controller;
 
 import com.comy_delivery_back.dto.request.AtualizarStatusEntregaDTO;
 import com.comy_delivery_back.dto.request.EntregaRequestDTO;
+import com.comy_delivery_back.dto.response.DashboardEntregadorDTO;
 import com.comy_delivery_back.dto.response.EntregaResponseDTO;
 import com.comy_delivery_back.enums.StatusEntrega;
 import com.comy_delivery_back.service.EntregaService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -103,6 +106,18 @@ public class EntregaController {
 
         EntregaResponseDTO response = entregaService.vincularAvaliacao(idEntrega, idAvaliacao);
         return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "Obter dashboard do entregador",
+            description = "Retorna o total de entregas realizadas e o valor faturado no dia atual.",
+            responses = {
+                    @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = DashboardEntregadorDTO.class))),
+                    @ApiResponse(responseCode = "404", description = "Entregador não encontrado")
+            })
+    @GetMapping("/entregador/{id}/dashboard")
+    public ResponseEntity<DashboardEntregadorDTO> obterDashboardEntregador(@PathVariable Long id) {
+        DashboardEntregadorDTO dashboard = entregaService.obterDashboardEntregador(id);
+        return ResponseEntity.ok(dashboard);
     }
 
 }
