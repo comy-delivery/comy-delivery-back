@@ -1,10 +1,7 @@
 package com.comy_delivery_back.controller;
 
 import com.comy_delivery_back.dto.request.*;
-import com.comy_delivery_back.dto.response.ClienteResponseDTO;
-import com.comy_delivery_back.dto.response.EnderecoResponseDTO;
-import com.comy_delivery_back.dto.response.PedidoResponseDTO;
-import com.comy_delivery_back.dto.response.PedidoResumoDTO;
+import com.comy_delivery_back.dto.response.*;
 import com.comy_delivery_back.service.ClienteService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -169,4 +166,19 @@ public class ClienteController {
 
         return ResponseEntity.ok("Senha redefinida com sucesso.");
     }
+
+    @Operation(summary = "Listar restaurantes próximos",
+            description = "Retorna a lista de restaurantes ordenada pela distância em relação ao endereço padrão do cliente.",
+            responses = {
+                    @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = RestauranteDistanciaDTO.class))),
+                    @ApiResponse(responseCode = "404", description = "Cliente não encontrado"),
+                    @ApiResponse(responseCode = "400", description = "Cliente sem endereço cadastrado")
+            })
+    @GetMapping("/{idCliente}/restaurantes-distancia")
+    public ResponseEntity<List<RestauranteDistanciaDTO>> listarRestaurantesProximos(@PathVariable Long idCliente) {
+        List<RestauranteDistanciaDTO> response = clienteService.listarRestaurantesProximos(idCliente);
+        return ResponseEntity.ok(response);
+    }
+
+
 }

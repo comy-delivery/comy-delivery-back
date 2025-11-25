@@ -67,6 +67,7 @@ public class EntregadorService {
         novoEntregador.setTelefoneEntregador(entregadorRequestDTO.telefoneEntregador());
         novoEntregador.setVeiculo(entregadorRequestDTO.veiculo());
         novoEntregador.setPlaca(entregadorRequestDTO.placa());
+        novoEntregador.setAvaliacaoMediaEntregador(0.0);
 
         entregadorRepository.save(novoEntregador);
         return new EntregadorResponseDTO(novoEntregador);

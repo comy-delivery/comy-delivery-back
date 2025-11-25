@@ -2,6 +2,7 @@ package com.comy_delivery_back.service;
 
 import com.comy_delivery_back.dto.request.AtualizarStatusEntregaDTO;
 import com.comy_delivery_back.dto.request.EntregaRequestDTO;
+import com.comy_delivery_back.dto.response.DashboardEntregadorDTO;
 import com.comy_delivery_back.dto.response.EntregaResponseDTO;
 import com.comy_delivery_back.enums.StatusEntrega;
 import com.comy_delivery_back.exception.*;
@@ -13,11 +14,14 @@ import com.comy_delivery_back.repository.AvaliacaoRepository;
 import com.comy_delivery_back.repository.EntregaRepository;
 import com.comy_delivery_back.repository.EntregadorRepository;
 import com.comy_delivery_back.repository.PedidoRepository;
-import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 @Slf4j
@@ -184,6 +188,20 @@ public class EntregaService {
         return entregaRepository.findByEntregadorId(idEntregador)
                 .stream()
                 .map(EntregaResponseDTO::new).toList();
+    }
+
+
+    @Transactional(readOnly = true)
+    public DashboardEntregadorDTO obterDashboardEntregador(Long entregadorId) {
+        if (!entregadorRepository.existsById(entregadorId)) {
+            throw new EntregadorNaoEncontradoException(entregadorId);
+        }
+
+        Long totalEntregas = entregaRepository.countTotalEntregasConcluidas(entregadorId);
+
+        BigDecimal valorTotal = entregaRepository.sumValorTotalEntregas(entregadorId);
+
+        return new DashboardEntregadorDTO(totalEntregas, valorTotal, LocalDate.now());
     }
 
 }

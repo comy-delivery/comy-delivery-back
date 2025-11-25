@@ -99,6 +99,7 @@ public class RestauranteService {
         novoRestaurante.setHorarioAbertura(restauranteRequestDTO.horarioAbertura());
         novoRestaurante.setHorarioFechamento(restauranteRequestDTO.horarioFechamento());
         novoRestaurante.setDiasFuncionamento(restauranteRequestDTO.diasFuncionamento());
+        novoRestaurante.setAvaliacaoMediaRestaurante(0.0);
 
         novoRestaurante.setEnderecos(new ArrayList<>());
         Restaurante restauranteSalvo = restauranteRepository.save(novoRestaurante);

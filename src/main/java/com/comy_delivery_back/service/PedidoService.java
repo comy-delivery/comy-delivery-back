@@ -574,7 +574,7 @@ public class PedidoService {
 
     public Integer calcularTempoEntrega(Restaurante restaurante, double distanciaKm) {
         return TempoUtils.calcularTempoEntrega(
-                restaurante.getTempoMediaEntrega(),
+                30,
                 distanciaKm
         );
 

@@ -4,26 +4,32 @@ import com.comy_delivery_back.dto.request.AtualizarClienteRequestDTO;
 import com.comy_delivery_back.dto.request.AtualizarEnderecoRequestDTO;
 import com.comy_delivery_back.dto.request.ClienteRequestDTO;
 import com.comy_delivery_back.dto.request.EnderecoRequestDTO;
-import com.comy_delivery_back.dto.response.ClienteResponseDTO;
-import com.comy_delivery_back.dto.response.EnderecoResponseDTO;
-import com.comy_delivery_back.dto.response.PedidoResumoDTO;
+import com.comy_delivery_back.dto.response.*;
+import com.comy_delivery_back.enums.TipoEndereco;
 import com.comy_delivery_back.exception.ClienteNaoEncontradoException;
 import com.comy_delivery_back.exception.EnderecoNaoEncontradoException;
 import com.comy_delivery_back.exception.RegistrosDuplicadosException;
 import com.comy_delivery_back.exception.RegraDeNegocioException;
 import com.comy_delivery_back.model.Cliente;
 import com.comy_delivery_back.model.Endereco;
+import com.comy_delivery_back.model.Restaurante;
 import com.comy_delivery_back.repository.ClienteRepository;
 import com.comy_delivery_back.repository.EnderecoRepository;
+import com.comy_delivery_back.repository.ProdutoRepository;
+import com.comy_delivery_back.repository.RestauranteRepository;
+import com.comy_delivery_back.utils.DistanciaUtils;
+import com.comy_delivery_back.utils.FreteUtils;
+import com.comy_delivery_back.utils.TempoUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -34,15 +40,19 @@ public class ClienteService {
     private final EnderecoService enderecoService;
     private final PasswordEncoder passwordEncoder;//usar depois
     private final EmailService emailService;
+    private final RestauranteRepository restauranteRepository;
+    private final ProdutoRepository produtoRepository;
 
     public ClienteService(ClienteRepository clienteRepository,
                           EnderecoRepository enderecoRepository, EnderecoService enderecoService, PasswordEncoder passwordEncoder,
-                          EmailService emailService) {
+                          EmailService emailService, RestauranteRepository restauranteRepository, ProdutoRepository produtoRepository) {
         this.clienteRepository = clienteRepository;
         this.enderecoRepository = enderecoRepository;
         this.enderecoService = enderecoService;
         this.passwordEncoder = passwordEncoder;
         this.emailService = emailService;
+        this.restauranteRepository = restauranteRepository;
+        this.produtoRepository = produtoRepository;
     }
 
     @Transactional
@@ -335,5 +345,63 @@ public class ClienteService {
         enderecoRepository.save(endereco);
 
         return new EnderecoResponseDTO(endereco);
+    }
+
+    @Transactional(readOnly = true)
+    public List<RestauranteDistanciaDTO> listarRestaurantesProximos(Long idCliente) {
+
+        Cliente cliente = clienteRepository.findById(idCliente)
+                .orElseThrow(() -> new ClienteNaoEncontradoException(idCliente));
+
+        Endereco enderecoCliente = cliente.getEnderecos().stream()
+                .filter(Endereco::isPadrao)
+                .findFirst()
+                .orElse(cliente.getEnderecos().stream().findFirst().orElse(null));
+
+        if (enderecoCliente == null || enderecoCliente.getLatitude() == null || enderecoCliente.getLongitude() == null) {
+            throw new RegraDeNegocioException("O cliente não possui endereço válido (com coordenadas) para calcular distância.");
+        }
+
+        List<Restaurante> restaurantes = restauranteRepository.findByIsDisponivelTrue();
+
+        return restaurantes.stream()
+                .map(restaurante -> {
+
+                    Endereco origem = restaurante.getEnderecos().stream()
+                            .filter(e -> e.getTipoEndereco() == TipoEndereco.MATRIZ)
+                            .findFirst()
+                            .orElse(restaurante.getEnderecos().stream().findFirst().orElse(null));
+
+                    if (origem != null && origem.getLatitude() != null && origem.getLongitude() != null) {
+
+                        double distancia = DistanciaUtils.calcularDistancia(
+                                origem.getLatitude(),
+                                origem.getLongitude(),
+                                enderecoCliente.getLatitude(),
+                                enderecoCliente.getLongitude()
+                        );
+
+                        BigDecimal frete = FreteUtils.calcularFrete(distancia);
+                        Integer tempo = TempoUtils.calcularTempoEntrega(30, distancia);
+
+                        Double mediaPreco = produtoRepository.calcularMediaPrecoPorRestaurante(restaurante.getId());
+                        BigDecimal mediaPrecoBigDecimal = BigDecimal.ZERO;
+
+                        if (mediaPreco != null) {
+                            mediaPrecoBigDecimal = BigDecimal.valueOf(mediaPreco).setScale(2, RoundingMode.HALF_UP);
+                        }
+
+                        return new RestauranteDistanciaDTO(
+                                new RestauranteResponseDTO(restaurante),
+                                distancia,
+                                frete,
+                                tempo,
+                                mediaPrecoBigDecimal
+                        );
+                    }
+                    return null;
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 }
