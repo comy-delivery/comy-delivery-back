@@ -30,9 +30,12 @@ public class TokenService {
         long expirationTimeMillis = TimeUnit.MINUTES.toMillis(expirationMinutes);
         Date expirationDate = new Date(System.currentTimeMillis() + expirationTimeMillis);
 
+        String role = usuario.getRoleUsuario().name();
+
         return Jwts.builder()
                 .subject(usuario.getUsername())
                 .claim("userId", usuario.getId())
+                .claim("roles", role)
                 .issuedAt(new Date())
                 .expiration(expirationDate)
                 .signWith(getSecretKey())
