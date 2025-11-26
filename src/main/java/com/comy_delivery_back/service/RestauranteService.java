@@ -7,6 +7,7 @@ import com.comy_delivery_back.dto.response.EnderecoResponseDTO;
 import com.comy_delivery_back.dto.response.ProdutoResponseDTO;
 import com.comy_delivery_back.dto.response.RestauranteResponseDTO;
 import com.comy_delivery_back.enums.DiasSemana;
+import com.comy_delivery_back.enums.RoleUsuario;
 import com.comy_delivery_back.exception.EnderecoNaoEncontradoException;
 import com.comy_delivery_back.exception.RegraDeNegocioException;
 import com.comy_delivery_back.exception.RestauranteNaoEncontradoException;
@@ -24,6 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -74,14 +76,23 @@ public class RestauranteService {
             throw new IllegalArgumentException("Username já cadastrado.");
         }
 
-        Restaurante novoRestaurante = new Restaurante();
+        //refatorado para receber instancia no signup
+        Restaurante novoRestaurante = Restaurante.builder()
+                .username(restauranteRequestDTO.username())
+                .password(passwordEncoder.encode(restauranteRequestDTO.password()))
+                .roleUsuario(RoleUsuario.RESTAURANTE)
 
-        novoRestaurante.setUsername(restauranteRequestDTO.username());
-        novoRestaurante.setPassword(passwordEncoder.encode(restauranteRequestDTO.password()));
-        novoRestaurante.setNmRestaurante(restauranteRequestDTO.nmRestaurante());
-        novoRestaurante.setEmailRestaurante(restauranteRequestDTO.emailRestaurante());
-        novoRestaurante.setCnpj(restauranteRequestDTO.cnpj());
-        novoRestaurante.setTelefoneRestaurante(restauranteRequestDTO.telefoneRestaurante());
+                .nmRestaurante(restauranteRequestDTO.nmRestaurante())
+                .emailRestaurante(restauranteRequestDTO.emailRestaurante())
+                .cnpj(restauranteRequestDTO.cnpj())
+                .telefoneRestaurante(restauranteRequestDTO.telefoneRestaurante())
+                .descricaoRestaurante(restauranteRequestDTO.descricaoRestaurante())
+                .categoria(restauranteRequestDTO.categoria())
+                .horarioAbertura(restauranteRequestDTO.horarioAbertura())
+                .horarioFechamento(restauranteRequestDTO.horarioFechamento())
+                .diasFuncionamento(restauranteRequestDTO.diasFuncionamento())
+                .dataCadastro(LocalDate.now())
+                .build();
 
         if (imagemLogo != null && !imagemLogo.isEmpty()) {
             //converte o MultipartFile em byte
@@ -90,22 +101,33 @@ public class RestauranteService {
         } else {
             novoRestaurante.setImagemLogo(null);
         }
-
-        if (imagemBanner != null && !imagemBanner.isEmpty()) {
+      
+       if (imagemBanner != null && !imagemBanner.isEmpty()) {
             byte[] imagemBytes2 = imagemBanner.getBytes();
             novoRestaurante.setImagemBanner(imagemBytes2);
         } else {
             novoRestaurante.setImagemBanner(null);
         }
 
-        novoRestaurante.setDescricaoRestaurante(restauranteRequestDTO.descricaoRestaurante());
-        novoRestaurante.setCategoria(restauranteRequestDTO.categoria());
-        novoRestaurante.setHorarioAbertura(restauranteRequestDTO.horarioAbertura());
-        novoRestaurante.setHorarioFechamento(restauranteRequestDTO.horarioFechamento());
-        novoRestaurante.setDiasFuncionamento(restauranteRequestDTO.diasFuncionamento());
-        novoRestaurante.setAvaliacaoMediaRestaurante(0.0);
+        List<Endereco> enderecos = restauranteRequestDTO.enderecos().stream()
+                .map(enderecoRequestDTO -> {
+                    Endereco endereco = new Endereco();
 
-        novoRestaurante.setEnderecos(new ArrayList<>());
+                    endereco.setLogradouro(enderecoRequestDTO.logradouro());
+                    endereco.setNumero(enderecoRequestDTO.numero());
+                    endereco.setComplemento(enderecoRequestDTO.complemento());
+                    endereco.setBairro(enderecoRequestDTO.bairro());
+                    endereco.setCidade(enderecoRequestDTO.cidade());
+                    endereco.setCep(enderecoRequestDTO.cep());
+                    endereco.setEstado(enderecoRequestDTO.estado());
+                    endereco.setTipoEndereco(enderecoRequestDTO.tipoEndereco());
+                    endereco.setRestaurante(novoRestaurante);
+
+                    return endereco;
+
+                }).toList();
+        novoRestaurante.setEnderecos(enderecos);
+
         Restaurante restauranteSalvo = restauranteRepository.save(novoRestaurante);
 
         if (restauranteRequestDTO.enderecos() != null && !restauranteRequestDTO.enderecos().isEmpty()) {

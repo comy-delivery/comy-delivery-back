@@ -4,6 +4,10 @@ import com.comy_delivery_back.dto.request.AtualizarClienteRequestDTO;
 import com.comy_delivery_back.dto.request.AtualizarEnderecoRequestDTO;
 import com.comy_delivery_back.dto.request.ClienteRequestDTO;
 import com.comy_delivery_back.dto.request.EnderecoRequestDTO;
+import com.comy_delivery_back.dto.response.ClienteResponseDTO;
+import com.comy_delivery_back.dto.response.EnderecoResponseDTO;
+import com.comy_delivery_back.dto.response.PedidoResponseDTO;
+import com.comy_delivery_back.enums.RoleUsuario;
 import com.comy_delivery_back.dto.response.*;
 import com.comy_delivery_back.enums.TipoEndereco;
 import com.comy_delivery_back.exception.ClienteNaoEncontradoException;
@@ -70,14 +74,17 @@ public class ClienteService {
             throw new RegistrosDuplicadosException("EMAIL já cadastrado!");
         }
 
-        Cliente novoCliente = new Cliente();
+        Cliente novoCliente = Cliente.builder()
+                .username(clienteRequestDTO.username())
+                .password(passwordEncoder.encode(clienteRequestDTO.password()))
+                .roleUsuario(RoleUsuario.CLIENTE)
 
-        novoCliente.setUsername(clienteRequestDTO.username());
-        novoCliente.setPassword(passwordEncoder.encode(clienteRequestDTO.password()));
-        novoCliente.setNmCliente(clienteRequestDTO.nmCliente());
-        novoCliente.setCpfCliente(clienteRequestDTO.cpfCliente());
-        novoCliente.setEmailCliente(clienteRequestDTO.emailCliente());
-        novoCliente.setTelefoneCliente(clienteRequestDTO.telefoneCliente());
+                // CAMPOS ESPECÍFICOS (Cliente):
+                .nmCliente(clienteRequestDTO.nmCliente())
+                .cpfCliente(clienteRequestDTO.cpfCliente())
+                .emailCliente(clienteRequestDTO.emailCliente())
+                .telefoneCliente(clienteRequestDTO.telefoneCliente())
+                .build();
 
         novoCliente.setEnderecos(new ArrayList<>());
         Cliente clienteSalvo = clienteRepository.save(novoCliente);

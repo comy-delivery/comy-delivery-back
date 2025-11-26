@@ -4,6 +4,7 @@ import com.comy_delivery_back.enums.RoleUsuario;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -11,6 +12,7 @@ import java.util.List;
 @Data
 @Entity
 @AllArgsConstructor
+@SuperBuilder
 @PrimaryKeyJoinColumn(name = "id")
 public class Cliente extends Usuario{
 
@@ -34,13 +36,15 @@ public class Cliente extends Usuario{
     @OneToMany(
             mappedBy = "cliente"
     )
+    @Builder.Default//correcao
     private List<Pedido> pedidos = new ArrayList<>();
 
     @OneToMany(
             mappedBy = "cliente",
             cascade = CascadeType.ALL
     )
-    private List<Endereco> enderecos;
+    @Builder.Default//correcao
+    private List<Endereco> enderecos = new ArrayList<>();
 
     @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDate dataCadastroCliente = LocalDate.now();
