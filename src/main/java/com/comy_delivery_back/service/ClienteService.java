@@ -21,6 +21,7 @@ import com.comy_delivery_back.utils.DistanciaUtils;
 import com.comy_delivery_back.utils.FreteUtils;
 import com.comy_delivery_back.utils.TempoUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,6 +43,9 @@ public class ClienteService {
     private final EmailService emailService;
     private final RestauranteRepository restauranteRepository;
     private final ProdutoRepository produtoRepository;
+
+    @Value("${app.password-recovery.url}")
+    private String passwordRecoveryUrl;
 
     public ClienteService(ClienteRepository clienteRepository,
                           EnderecoRepository enderecoRepository, EnderecoService enderecoService, PasswordEncoder passwordEncoder,
@@ -281,7 +285,7 @@ public class ClienteService {
 
         clienteRepository.save(cliente);
 
-        String linkRecuperacao = "http://localhost/8084/reset-password?token=" + token;
+        String linkRecuperacao = passwordRecoveryUrl + "token=" + token;
 
 
             emailService.enviarEmailRecuperacao(cliente.getEmailCliente(), linkRecuperacao)

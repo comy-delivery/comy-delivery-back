@@ -15,6 +15,7 @@ import com.comy_delivery_back.repository.PedidoRepository;
 import com.comy_delivery_back.repository.RestauranteRepository;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -34,6 +35,9 @@ public class EntregadorService {
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
     private final PedidoRepository pedidoRepository;
+
+    @Value("${app.password-recovery.url}")
+    private String passwordRecoveryUrl;
 
     public EntregadorService(EntregadorRepository entregadorRepository, EntregaRepository entregaRepository, RestauranteRepository restauranteRepository, RestauranteService restauranteService, PasswordEncoder passwordEncoder, EmailService emailService, PedidoRepository pedidoRepository) {
         this.entregadorRepository = entregadorRepository;
@@ -261,7 +265,7 @@ public class EntregadorService {
 
         entregadorRepository.save(entregador);
 
-        String linkRecuperacao = "http://localhost/8084/reset-password?token=" + token;
+        String linkRecuperacao = passwordRecoveryUrl+"token=" + token;
 
         emailService.enviarEmailRecuperacao(entregador.getEmailEntregador(), linkRecuperacao)
                 .exceptionally(ex ->{

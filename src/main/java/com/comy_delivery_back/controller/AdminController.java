@@ -74,4 +74,16 @@ public class AdminController {
 
         return ResponseEntity.noContent().build();
     }
+
+    @PatchMapping("/{id}/reativar")
+    @Operation(summary = "Reativa um administrador desativado")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Admin reativado com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Admin não encontrado"),
+            @ApiResponse(responseCode = "400", description = "Admin já está ativo")
+    })
+    public ResponseEntity<AdminResponseDTO> reativarAdmin(@PathVariable Long id) {
+        AdminResponseDTO admin = adminService.reativarAdmin(id);
+        return ResponseEntity.ok(admin);
+    }
 }
