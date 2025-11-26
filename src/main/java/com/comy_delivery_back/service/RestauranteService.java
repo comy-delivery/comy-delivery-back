@@ -92,6 +92,7 @@ public class RestauranteService {
                 .horarioFechamento(restauranteRequestDTO.horarioFechamento())
                 .diasFuncionamento(restauranteRequestDTO.diasFuncionamento())
                 .dataCadastro(LocalDate.now())
+                .avaliacaoMediaRestaurante(0.0)
                 .build();
 
         if (imagemLogo != null && !imagemLogo.isEmpty()) {
