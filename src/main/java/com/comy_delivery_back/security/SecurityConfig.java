@@ -74,24 +74,22 @@ public class SecurityConfig {
                         sessionConfig.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/admins").permitAll() //ver de mudar pra api/admins
-                        .requestMatchers(HttpMethod.POST, "/api/cliente").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/entregador").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/restaurante").permitAll()
-
-                        .requestMatchers("/**/recuperar-senha", "/**/redefinir-senha", "/**/recuperacao/**").permitAll()
-
-                        .requestMatchers(HttpMethod.GET, "/api/restaurante/abertos").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/restaurante/{id}").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/restaurante/{idRestaurante}/produtos").permitAll()
-
-                        .requestMatchers("/api/cliente/**").hasRole("CLIENTE")
-
-                        .requestMatchers("/api/entregador/**").hasRole("ENTREGADOR")
-
-                        .requestMatchers("/api/restaurante/**").hasRole("RESTAURANTE")
+                        .requestMatchers("/admins").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/cliente", "/api/entregador", "/api/restaurante").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/**/recuperar-senha", "/**/redefinir-senha").permitAll()
+                        .requestMatchers("/api/*/recuperacao/**").permitAll() // Rotas de recuperação
+                        .requestMatchers(HttpMethod.GET, "/api/restaurante/abertos", "/api/restaurante/{id}", "/api/restaurante/{idRestaurante}/produtos").permitAll()
 
                         .requestMatchers("/admins/**").hasRole("ADMIN")
+
+                        .requestMatchers(HttpMethod.GET, "/api/cliente/ativos").hasRole("ADMIN")
+
+                        .requestMatchers(HttpMethod.GET, "/api/cliente/{idCliente}").hasRole("ADMIN")
+
+                        .requestMatchers("/api/entregador/**").hasRole("ENTREGADOR")
+                        .requestMatchers("/api/restaurante/**").hasRole("RESTAURANTE")
+
+                        .requestMatchers("/api/cliente/**").hasRole("CLIENTE")
                         .anyRequest().authenticated())
                 .authenticationProvider(daoAuthenticationProvider)
                 .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);

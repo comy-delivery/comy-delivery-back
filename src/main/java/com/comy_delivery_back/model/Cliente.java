@@ -36,13 +36,15 @@ public class Cliente extends Usuario{
     @OneToMany(
             mappedBy = "cliente"
     )
+    @Builder.Default//correcao
     private List<Pedido> pedidos = new ArrayList<>();
 
     @OneToMany(
             mappedBy = "cliente",
             cascade = CascadeType.ALL
     )
-    private List<Endereco> enderecos;
+    @Builder.Default//correcao
+    private List<Endereco> enderecos = new ArrayList<>();
 
     @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDate dataCadastroCliente = LocalDate.now();
