@@ -73,6 +73,7 @@ public class EntregadorService {
                 .telefoneEntregador(entregadorRequestDTO.telefoneEntregador())
                 .veiculo(entregadorRequestDTO.veiculo())
                 .placa(entregadorRequestDTO.placa())
+                .avaliacaoMediaEntregador(0.0)
                 .build();
 
         entregadorRepository.save(novoEntregador);
