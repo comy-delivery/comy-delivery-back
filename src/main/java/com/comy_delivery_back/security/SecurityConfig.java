@@ -74,6 +74,9 @@ public class SecurityConfig {
                         sessionConfig.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/v3/api-docs/**").permitAll()
+                        .requestMatchers("/swagger-ui/**").permitAll()
+                        .requestMatchers("/swagger-ui.html").permitAll()
                         .requestMatchers("/admins").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/cliente", "/api/entregador", "/api/restaurante").permitAll()
                         .requestMatchers(HttpMethod.POST, "/**/recuperar-senha", "/**/redefinir-senha").permitAll()
