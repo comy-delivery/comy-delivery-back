@@ -7,13 +7,13 @@ import java.time.LocalDate;
 
 @Schema(description = "Métricas de desempenho do entregador")
 public record DashboardEntregadorDTO(
-        @Schema(description = "Quantidade total de entregas concluídas em todo o histórico", example = "150")
+        @Schema(description = "Quantidade total de entregas concluídas", example = "150")
         Long quantidadeTotalEntregas,
 
-        @Schema(description = "Valor total ganho com entregas", example = "1500.50")
+        @Schema(description = "Valor total recebido", example = "1500.50")
         BigDecimal valorTotalRecebido,
 
         @Schema(description = "Data de referência", example = "2025-11-25")
         LocalDate dataReferencia
-) {
-}
+) {}
+

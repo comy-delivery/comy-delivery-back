@@ -6,11 +6,9 @@ import java.util.List;
 
 @Schema(description = "Métricas consolidadas do restaurante")
 public record DashboardRestauranteDTO(
-        @Schema(description = "Quantidade TOTAL de pedidos na história do restaurante", example = "1500")
+        @Schema(description = "Quantidade total de pedidos históricos", example = "1500")
         Long totalPedidosGeral,
 
-        @Schema(description = "Lista de faturamento agrupada por dia")
+        @Schema(description = "Histórico de faturamento agrupado por dia")
         List<FaturamentoDiarioDTO> historicoFaturamento
-) {
-
-}
+) {}

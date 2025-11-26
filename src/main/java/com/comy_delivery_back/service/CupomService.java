@@ -100,6 +100,12 @@ public class CupomService {
         }
 
         if (cupom.getQtdUsoMaximo() != null && cupom.getQtdUsado() >= cupom.getQtdUsoMaximo()) {
+            log.warn("Cupom '{}' atingiu o limite de uso ({}/{})", codigo, cupom.getQtdUsado(), cupom.getQtdUsoMaximo());
+
+            cupom.setAtivo(false);
+            cupomRepository.save(cupom);
+            log.info("Cupom '{}' foi desativado automaticamente por atingir o limite de uso", codigo);
+
             throw new CupomInvalidoException("Cupom atingiu o limite de uso");
         }
 
@@ -113,14 +119,26 @@ public class CupomService {
 
     @Transactional
     public void incrementarUso(Long idCupom) {
+        log.debug("Incrementando uso do cupom ID: {}", idCupom);
+
         Cupom cupom = cupomRepository.findById(idCupom)
                 .orElseThrow(() -> new CupomNaoEncontradoException(idCupom));
+
         cupom.setQtdUsado(cupom.getQtdUsado() + 1);
+
+        if (cupom.getQtdUsoMaximo() != null && cupom.getQtdUsado() >= cupom.getQtdUsoMaximo()) {
+            cupom.setAtivo(false);
+            log.info("Cupom '{}' (ID: {}) foi desativado automaticamente. Uso: {}/{}",
+                    cupom.getCodigoCupom(), idCupom, cupom.getQtdUsado(), cupom.getQtdUsoMaximo());
+        }
+
         cupomRepository.save(cupom);
     }
 
     @Transactional
     public BigDecimal aplicarDesconto(Long id, BigDecimal valorPedido) {
+        log.debug("Aplicando desconto do cupom ID: {} no valor {}", id, valorPedido);
+
         Cupom cupom = cupomRepository.findById(id)
                 .orElseThrow(() -> new CupomNaoEncontradoException(id));
 
@@ -133,13 +151,20 @@ public class CupomService {
         }
 
         if (cupom.getQtdUsoMaximo() != null && cupom.getQtdUsado() >= cupom.getQtdUsoMaximo()) {
+            log.warn("Tentativa de usar cupom que já atingiu o limite: {}", cupom.getCodigoCupom());
+
+            if (cupom.isAtivo()) {
+                cupom.setAtivo(false);
+                cupomRepository.save(cupom);
+                log.info("Cupom '{}' foi desativado automaticamente por atingir o limite de uso", cupom.getCodigoCupom());
+            }
+
             throw new CupomInvalidoException("Cupom atingiu o limite de uso");
         }
 
         if (cupom.getVlMinimoPedido() != null && valorPedido.compareTo(cupom.getVlMinimoPedido()) < 0) {
             throw new CupomInvalidoException("Valor do pedido é menor que o mínimo necessário para usar este cupom");
         }
-
 
         BigDecimal desconto = switch (cupom.getTipoCupom()) {
             case VALOR_FIXO -> cupom.getVlDesconto();
@@ -149,30 +174,43 @@ public class CupomService {
             default -> BigDecimal.ZERO;
         };
 
-
         if (desconto.compareTo(valorPedido) > 0) {
             desconto = valorPedido;
         }
 
+        log.debug("Desconto calculado: {} para o cupom '{}'", desconto, cupom.getCodigoCupom());
         return desconto;
     }
 
     public Boolean verificarValidade(Long id) {
+        log.debug("Verificando validade do cupom ID: {}", id);
+
         Cupom cupom = cupomRepository.findById(id)
                 .orElseThrow(() -> new CupomNaoEncontradoException(id));
 
         if (!cupom.isAtivo()) {
+            log.debug("Cupom ID {} está inativo", id);
             return false;
         }
 
         if (cupom.getDtValidade().isBefore(LocalDateTime.now())) {
+            log.debug("Cupom ID {} está expirado", id);
             return false;
         }
 
         if (cupom.getQtdUsoMaximo() != null && cupom.getQtdUsado() >= cupom.getQtdUsoMaximo()) {
+            log.debug("Cupom ID {} atingiu o limite de uso ({}/{})", id, cupom.getQtdUsado(), cupom.getQtdUsoMaximo());
+
+            if (cupom.isAtivo()) {
+                cupom.setAtivo(false);
+                cupomRepository.save(cupom);
+                log.info("Cupom '{}' (ID: {}) foi desativado automaticamente por atingir o limite de uso",
+                        cupom.getCodigoCupom(), id);
+            }
             return false;
         }
 
+        log.debug("Cupom ID {} é válido", id);
         return true;
     }
 
