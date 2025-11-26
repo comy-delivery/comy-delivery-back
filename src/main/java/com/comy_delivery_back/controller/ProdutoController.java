@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -135,6 +136,23 @@ public class ProdutoController {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(imagem);
+    }
+
+    @Operation(summary = "Atualizar produto para promoção")
+    @PatchMapping("/{id}/promocao")
+    public ResponseEntity<ProdutoResponseDTO> atualizarPromocao(
+            @PathVariable Long id,
+            @RequestParam BigDecimal vlPrecoPromocional,
+            @RequestParam(defaultValue = "true") Boolean isPromocao) {
+        ProdutoResponseDTO response = produtoService.atualizarPromocao(id, vlPrecoPromocional, isPromocao);
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "Listar categorias de produtos de um restaurante")
+    @GetMapping("/restaurante/{restauranteId}/categorias")
+    public ResponseEntity<List<String>> listarCategoriasPorRestaurante(@PathVariable Long restauranteId) {
+        List<String> categorias = produtoService.listarCategoriasPorRestaurante(restauranteId);
+        return ResponseEntity.ok(categorias);
     }
 
 }
