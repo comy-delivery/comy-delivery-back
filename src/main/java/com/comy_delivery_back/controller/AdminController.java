@@ -17,7 +17,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 
 
 @RestController
-@RequestMapping("/admins")
+@RequestMapping("/api/admim")
 @Tag(name = "Administradores", description = "Controller para as operações com o banco de dados para os admins")
 public class AdminController {
 
