@@ -2,6 +2,7 @@ package com.comy_delivery_back.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -73,7 +74,24 @@ public class SecurityConfig {
                         sessionConfig.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/admins").permitAll() //ver de mudar pra api/admins
+                        .requestMatchers(HttpMethod.POST, "/api/cliente").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/entregador").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/restaurante").permitAll()
+
+                        .requestMatchers("/**/recuperar-senha", "/**/redefinir-senha", "/**/recuperacao/**").permitAll()
+
+                        .requestMatchers(HttpMethod.GET, "/api/restaurante/abertos").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/restaurante/{id}").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/restaurante/{idRestaurante}/produtos").permitAll()
+
                         .requestMatchers("/api/cliente/**").hasRole("CLIENTE")
+
+                        .requestMatchers("/api/entregador/**").hasRole("ENTREGADOR")
+
+                        .requestMatchers("/api/restaurante/**").hasRole("RESTAURANTE")
+
+                        .requestMatchers("/admins/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .authenticationProvider(daoAuthenticationProvider)
                 .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
