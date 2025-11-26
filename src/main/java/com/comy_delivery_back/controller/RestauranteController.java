@@ -1,5 +1,6 @@
 package com.comy_delivery_back.controller;
 
+import com.comy_delivery_back.dto.request.AtualizarEnderecoRequestDTO;
 import com.comy_delivery_back.dto.request.EnderecoRequestDTO;
 import com.comy_delivery_back.dto.request.RedefinirSenhaRequestDTO;
 import com.comy_delivery_back.dto.request.RestauranteRequestDTO;
@@ -45,9 +46,10 @@ public class RestauranteController {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<RestauranteResponseDTO> cadastrarRestaurante(
             @RequestPart("restaurante") @Valid RestauranteRequestDTO restauranteRequestDTO,
-            @RequestPart(value = "imagemLogo", required = false) MultipartFile imagem) throws IOException {
+            @RequestPart(value = "imagemLogo", required = false) MultipartFile imagemLogo,
+            @RequestPart(value = "imagemBanner", required = false) MultipartFile imagemBanner) throws IOException {
 
-        RestauranteResponseDTO responseDTO = restauranteService.cadastrarRestaurante(restauranteRequestDTO, imagem);
+        RestauranteResponseDTO responseDTO = restauranteService.cadastrarRestaurante(restauranteRequestDTO, imagemLogo, imagemBanner);
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
     }
 
@@ -82,9 +84,10 @@ public class RestauranteController {
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<RestauranteResponseDTO> atualizarRestaurante(@PathVariable Long id,
                                                                        @RequestPart("restaurante") RestauranteRequestDTO restauranteRequestDTO,
-                                                                       @RequestPart(value = "imagemLogo", required = false) MultipartFile imagem) throws IOException {
+                                                                       @RequestPart(value = "imagemLogo", required = false) MultipartFile imagemLogo,
+                                                                       @RequestPart(value = "imagemBanner", required = false) MultipartFile imagemBanner) throws IOException {
 
-        RestauranteResponseDTO responseDTO = restauranteService.atualizarRestaurante(id, restauranteRequestDTO, imagem);
+        RestauranteResponseDTO responseDTO = restauranteService.atualizarRestaurante(id, restauranteRequestDTO, imagemLogo, imagemBanner);
         return ResponseEntity.ok(responseDTO);
     }
 
@@ -109,7 +112,7 @@ public class RestauranteController {
     @PutMapping("/{idRestaurante}/enderecos/{idEndereco}")
     public ResponseEntity<EnderecoResponseDTO> alterarEnderecoRestaurante(@PathVariable Long idRestaurante,
                                                                           @PathVariable Long idEndereco,
-                                                                          @RequestBody @Valid EnderecoRequestDTO enderecoRequestDTO) {
+                                                                          @RequestBody @Valid AtualizarEnderecoRequestDTO enderecoRequestDTO) {
 
         EnderecoResponseDTO responseDTO = restauranteService.alterarEnderecoRestaurante(idRestaurante, idEndereco, enderecoRequestDTO);
         return ResponseEntity.ok(responseDTO);
@@ -126,10 +129,10 @@ public class RestauranteController {
         return ResponseEntity.ok(abertos);
     }
 
-    @Operation(summary = "Listar Endereços do Cliente",
+    @Operation(summary = "Listar Endereços do Restaurante",
             responses = {
                     @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = EnderecoResponseDTO.class))),
-                    @ApiResponse(responseCode = "404", description = "Cliente não encontrado")
+                    @ApiResponse(responseCode = "404", description = "Restaurante não encontrado")
             })
     @GetMapping("/{idRestaurante}/enderecos")
     public ResponseEntity<List<EnderecoResponseDTO>> listarEnderecosDoRestaurante(@PathVariable Long idRestaurante) {
@@ -218,4 +221,74 @@ public class RestauranteController {
 
         return ResponseEntity.ok(Map.of("message", "Senha redefinida com sucesso."));
     }
+
+    @Operation(summary = "Upload/Atualizar Logo", description = "Envia o arquivo de imagem para ser a logo do restaurante.")
+    @PutMapping(value = "/{id}/logo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Void> atualizarLogo(
+            @PathVariable Long id,
+            @RequestPart("imagem") MultipartFile imagem) throws IOException {
+        restauranteService.atualizarImagemLogo(id, imagem);
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "Buscar Logo", description = "Retorna o binário da imagem da logo.")
+    @GetMapping(value = "/{id}/logo", produces = {MediaType.IMAGE_PNG_VALUE, MediaType.IMAGE_JPEG_VALUE})
+    public ResponseEntity<byte[]> buscarLogo(@PathVariable Long id) {
+        byte[] imagem = restauranteService.buscarImagemLogo(id);
+        if (imagem == null || imagem.length == 0) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(imagem);
+    }
+
+    @Operation(summary = "Upload/Atualizar Banner", description = "Envia o arquivo de imagem para ser o banner do restaurante.")
+    @PutMapping(value = "/{id}/banner", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Void> atualizarBanner(
+            @PathVariable Long id,
+            @RequestPart("imagem") MultipartFile imagem) throws IOException {
+        restauranteService.atualizarImagemBanner(id, imagem);
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "Buscar Banner", description = "Retorna o binário da imagem do banner.")
+    @GetMapping(value = "/{id}/banner", produces = {MediaType.IMAGE_PNG_VALUE, MediaType.IMAGE_JPEG_VALUE})
+    public ResponseEntity<byte[]> buscarBanner(@PathVariable Long id) {
+        byte[] imagem = restauranteService.buscarImagemBanner(id);
+        if (imagem == null || imagem.length == 0) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(imagem);
+    }
+
+    @Operation(summary = "Adicionar novo endereço ao restaurante",
+            description = "Cria um novo endereço e o vincula ao restaurante informado.",
+            responses = {
+                    @ApiResponse(responseCode = "201", description = "Endereço criado com sucesso",
+                            content = @Content(schema = @Schema(implementation = EnderecoResponseDTO.class))),
+                    @ApiResponse(responseCode = "404", description = "Restaurante não encontrado"),
+                    @ApiResponse(responseCode = "400", description = "Dados do endereço inválidos")
+            })
+    @PostMapping("/{id}/enderecos")
+    public ResponseEntity<EnderecoResponseDTO> adicionarEndereco(
+            @PathVariable Long id,
+            @RequestBody @Valid EnderecoRequestDTO enderecoRequestDTO) {
+
+        EnderecoResponseDTO response = restauranteService.adicionarEnderecoRestaurante(id, enderecoRequestDTO);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @Operation(summary = "Recalcular Tempo Médio de Entrega",
+            description = "Calcula a média histórica do tempo total (da criação do pedido até a entrega) e atualiza o cadastro do restaurante.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Tempo atualizado com sucesso"),
+                    @ApiResponse(responseCode = "404", description = "Restaurante não encontrado")
+            })
+    @PatchMapping("/{id}/calcular-tempo-medio")
+    public ResponseEntity<RestauranteResponseDTO> recalcularTempoMedio(@PathVariable Long id) {
+        RestauranteResponseDTO response = restauranteService.atualizarTempoMedioEntrega(id);
+        return ResponseEntity.ok(response);
+    }
+
+
 }

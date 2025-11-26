@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -38,22 +39,10 @@ public class ProdutoController {
     })
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ProdutoResponseDTO> criar(@RequestPart("produto") @Valid ProdutoRequestDTO dto,
-                                                    @RequestPart("imagem") MultipartFile imagem) {
-
-        if (imagem.isEmpty()) {
-            return ResponseEntity.badRequest().body(null);
-        }
-
-        try {
+                                                    @RequestPart("imagem") MultipartFile imagem) throws IOException {
 
             ProdutoResponseDTO response = produtoService.criarProduto(dto, imagem);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
-        } catch (IOException e) {
-
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(null);
-        }
-
     }
 
 
@@ -110,15 +99,11 @@ public class ProdutoController {
     public ResponseEntity<ProdutoResponseDTO> atualizar(
             @PathVariable Long id,
             @RequestPart("produto") @Valid ProdutoRequestDTO dto,
-            @RequestPart(value = "imagem", required = false) MultipartFile imagem) {
+            @RequestPart(value = "imagem", required = false) MultipartFile imagem) throws IOException {
 
-        try {
             ProdutoResponseDTO response = produtoService.atualizarProduto(id, dto, imagem);
             return ResponseEntity.ok(response);
-        } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(null);
-        }
+
     }
 
     @Operation(summary = "Deletar um produto cadastrado por um restaurante")
@@ -132,6 +117,42 @@ public class ProdutoController {
     public ResponseEntity<Void> deletar(@PathVariable Long id) {
         produtoService.deletarProduto(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Upload/Atualizar Imagem do Produto")
+    @PutMapping(value = "/{id}/imagem", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Void> atualizarImagem(
+            @PathVariable Long id,
+            @RequestPart("imagem") MultipartFile imagem) throws IOException {
+        produtoService.atualizarImagemProduto(id, imagem);
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "Buscar Imagem do Produto")
+    @GetMapping(value = "/{id}/imagem", produces = {MediaType.IMAGE_PNG_VALUE, MediaType.IMAGE_JPEG_VALUE})
+    public ResponseEntity<byte[]> buscarImagem(@PathVariable Long id) {
+        byte[] imagem = produtoService.buscarImagemProduto(id);
+        if (imagem == null || imagem.length == 0) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(imagem);
+    }
+
+    @Operation(summary = "Atualizar produto para promoção")
+    @PatchMapping("/{id}/promocao")
+    public ResponseEntity<ProdutoResponseDTO> atualizarPromocao(
+            @PathVariable Long id,
+            @RequestParam BigDecimal vlPrecoPromocional,
+            @RequestParam(defaultValue = "true") Boolean isPromocao) {
+        ProdutoResponseDTO response = produtoService.atualizarPromocao(id, vlPrecoPromocional, isPromocao);
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "Listar categorias de produtos de um restaurante")
+    @GetMapping("/restaurante/{restauranteId}/categorias")
+    public ResponseEntity<List<String>> listarCategoriasPorRestaurante(@PathVariable Long restauranteId) {
+        List<String> categorias = produtoService.listarCategoriasPorRestaurante(restauranteId);
+        return ResponseEntity.ok(categorias);
     }
 
 }

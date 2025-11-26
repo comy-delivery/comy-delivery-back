@@ -2,22 +2,26 @@ package com.comy_delivery_back.service;
 
 import com.comy_delivery_back.dto.request.AtualizarStatusEntregaDTO;
 import com.comy_delivery_back.dto.request.EntregaRequestDTO;
+import com.comy_delivery_back.dto.response.DashboardEntregadorDTO;
 import com.comy_delivery_back.dto.response.EntregaResponseDTO;
 import com.comy_delivery_back.enums.StatusEntrega;
-import com.comy_delivery_back.exception.EntregaNaoEncontradaException;
-import com.comy_delivery_back.exception.EntregadorNaoEncontradoException;
-import com.comy_delivery_back.exception.PedidoNaoEncontradoException;
+import com.comy_delivery_back.exception.*;
+import com.comy_delivery_back.model.Avaliacao;
 import com.comy_delivery_back.model.Entrega;
 import com.comy_delivery_back.model.Entregador;
 import com.comy_delivery_back.model.Pedido;
+import com.comy_delivery_back.repository.AvaliacaoRepository;
 import com.comy_delivery_back.repository.EntregaRepository;
 import com.comy_delivery_back.repository.EntregadorRepository;
 import com.comy_delivery_back.repository.PedidoRepository;
-import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 @Slf4j
@@ -26,11 +30,13 @@ public class EntregaService {
     private final EntregaRepository entregaRepository;
     private final PedidoRepository pedidoRepository;
     private final EntregadorRepository entregadorRepository;
+    private final AvaliacaoRepository avaliacaoRepository;
 
-    public EntregaService(EntregaRepository entregaRepository, PedidoRepository pedidoRepository, EntregadorRepository entregadorRepository) {
+    public EntregaService(EntregaRepository entregaRepository, PedidoRepository pedidoRepository, EntregadorRepository entregadorRepository, AvaliacaoRepository avaliacaoRepository) {
         this.entregaRepository = entregaRepository;
         this.pedidoRepository = pedidoRepository;
         this.entregadorRepository = entregadorRepository;
+        this.avaliacaoRepository = avaliacaoRepository;
     }
 
     @Transactional
@@ -48,6 +54,7 @@ public class EntregaService {
         novaEntrega.setStatusEntrega(StatusEntrega.PENDENTE);
         novaEntrega.setEnderecoOrigem(pedido.getEnderecoOrigem());
         novaEntrega.setEnderecoDestino(pedido.getEnderecoEntrega());
+        novaEntrega.setVlEntrega(pedido.getVlEntrega());
 
         Entrega entrega = entregaRepository.save(novaEntrega);
 
@@ -129,6 +136,31 @@ public class EntregaService {
     }
 
     @Transactional
+    public EntregaResponseDTO vincularAvaliacao(Long idEntrega, Long idAvaliacao) {
+        log.info("Vinculando avaliação {} à entrega {}", idAvaliacao, idEntrega);
+
+        Entrega entrega = entregaRepository.findById(idEntrega)
+                .orElseThrow(() -> new EntregaNaoEncontradaException(idEntrega));
+
+        Avaliacao avaliacao = avaliacaoRepository.findById(idAvaliacao)
+                .orElseThrow(() -> new AvaliacaoNaoEncontradaException(idAvaliacao));
+
+        if (!entrega.getPedido().getIdPedido().equals(avaliacao.getPedido().getIdPedido())) {
+            throw new RegraDeNegocioException("A avaliação informada não pertence ao pedido desta entrega.");
+        }
+
+        if (avaliacao.getAvaliacaoEntrega() != null) {
+            entrega.setAvaliacaoCliente(Double.valueOf(avaliacao.getAvaliacaoEntrega()));
+        } else {
+            entrega.setAvaliacaoCliente(Double.valueOf(avaliacao.getNuNota()));
+        }
+
+        entregaRepository.save(entrega);
+
+        return new EntregaResponseDTO(entrega);
+    }
+
+    @Transactional
     public EntregaResponseDTO buscarEntregaPorIdPedido(Long idPedido){
         Entrega entrega = entregaRepository.findByPedido_IdPedido(idPedido)
                 .orElseThrow(()-> new PedidoNaoEncontradoException(idPedido));
@@ -156,6 +188,20 @@ public class EntregaService {
         return entregaRepository.findByEntregadorId(idEntregador)
                 .stream()
                 .map(EntregaResponseDTO::new).toList();
+    }
+
+
+    @Transactional(readOnly = true)
+    public DashboardEntregadorDTO obterDashboardEntregador(Long entregadorId) {
+        if (!entregadorRepository.existsById(entregadorId)) {
+            throw new EntregadorNaoEncontradoException(entregadorId);
+        }
+
+        Long totalEntregas = entregaRepository.countTotalEntregasConcluidas(entregadorId);
+
+        BigDecimal valorTotal = entregaRepository.sumValorTotalEntregas(entregadorId);
+
+        return new DashboardEntregadorDTO(totalEntregas, valorTotal, LocalDate.now());
     }
 
 }

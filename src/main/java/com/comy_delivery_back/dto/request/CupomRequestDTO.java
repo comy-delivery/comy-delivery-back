@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public record CupomRequestDTO(
@@ -29,10 +30,10 @@ public record CupomRequestDTO(
         @NotNull(message = "Data de validade é obrigatória")
         @FutureOrPresent
         @JsonFormat(pattern = "dd-MM-yyyy")
-        LocalDateTime dtValidade,
+        LocalDate dtValidade,
 
         @NotNull(message = "Precisa definir um limite")
-        @Size(min = 1, message = "Limite minimo é 1")
+        @Min(value = 1, message = "Limite minimo é 1")
         Integer qtdUsoMaximo,
 
         @NotNull(message = "ID do restaurante é obrigatório")

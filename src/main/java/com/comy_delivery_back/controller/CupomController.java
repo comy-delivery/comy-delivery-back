@@ -92,6 +92,12 @@ public class CupomController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
+    @PatchMapping("/{id}/ativar")
+    public ResponseEntity<Void> ativar(@PathVariable Long id) {
+        cupomService.ativarCupom(id);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletar(@PathVariable Long id) {
         cupomService.deletarCupom(id);

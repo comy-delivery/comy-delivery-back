@@ -4,6 +4,7 @@ import com.comy_delivery_back.dto.request.AdminRequestDTO;
 import com.comy_delivery_back.dto.response.AdminResponseDTO;
 import com.comy_delivery_back.enums.RoleUsuario;
 import com.comy_delivery_back.exception.AdminNaoEncontradoException;
+import com.comy_delivery_back.exception.RegraDeNegocioException;
 import com.comy_delivery_back.model.Admin;
 import com.comy_delivery_back.repository.AdminRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -77,6 +78,29 @@ public class AdminService {
         adminRepository.save(admin);
         log.info("Admin ID {} inativado (soft delete).", idAdmin);
 
+    }
+
+    @Transactional
+    public AdminResponseDTO reativarAdmin(Long idAdmin) {
+        log.info("Tentativa de reativar Admin ID: {}", idAdmin);
+
+        Admin admin = adminRepository.findById(idAdmin)
+                .orElseThrow(() -> {
+                    log.error("Admin não encontrado para reativação. ID: {}", idAdmin);
+                    return new AdminNaoEncontradoException(idAdmin);
+                });
+
+        if (admin.isAtivo()) {
+            log.warn("Tentativa de reativar Admin ID {} que já está ativo.", idAdmin);
+            throw new RegraDeNegocioException("Admin já está ativo.");
+        }
+
+        admin.setAtivo(true);
+        adminRepository.save(admin);
+
+        log.info("Admin ID {} reativado com sucesso.", idAdmin);
+
+        return new AdminResponseDTO(admin);
     }
 
 }

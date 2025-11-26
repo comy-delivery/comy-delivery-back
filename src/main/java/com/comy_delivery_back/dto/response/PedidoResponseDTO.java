@@ -11,8 +11,8 @@ import java.util.stream.Collectors;
 
 public record PedidoResponseDTO(
         Long idPedido,
-        ClienteResponseDTO cliente,
-        RestauranteResponseDTO restaurante,
+        Long clienteId,
+        Long restauranteId,
         EnderecoResponseDTO enderecoEntrega,
         EnderecoResponseDTO enderecoOrigem,
         CupomResponseDTO cupom,
@@ -36,8 +36,8 @@ public record PedidoResponseDTO(
     public  PedidoResponseDTO(Pedido p){
         this(
                 p.getIdPedido(),
-                new ClienteResponseDTO(p.getCliente()),
-                new RestauranteResponseDTO(p.getRestaurante()),
+                p.getCliente().getId(),
+                p.getRestaurante().getId(),
                 new EnderecoResponseDTO(p.getEnderecoEntrega()),
                 new EnderecoResponseDTO(p.getEnderecoOrigem()),
                 p.getCupom() != null ? new CupomResponseDTO(p.getCupom()) : null,

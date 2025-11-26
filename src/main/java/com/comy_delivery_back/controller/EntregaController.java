@@ -2,10 +2,13 @@ package com.comy_delivery_back.controller;
 
 import com.comy_delivery_back.dto.request.AtualizarStatusEntregaDTO;
 import com.comy_delivery_back.dto.request.EntregaRequestDTO;
+import com.comy_delivery_back.dto.response.DashboardEntregadorDTO;
 import com.comy_delivery_back.dto.response.EntregaResponseDTO;
 import com.comy_delivery_back.enums.StatusEntrega;
 import com.comy_delivery_back.service.EntregaService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -87,6 +90,34 @@ public class EntregaController {
             @RequestParam StatusEntrega status) {
         List<EntregaResponseDTO> entregas = entregaService.buscarEntregaEntregadorPorStatus(idEntregador, status);
         return ResponseEntity.ok(entregas);
+    }
+
+    @Operation(summary = "Vincular Avaliação à Entrega",
+            description = "Atualiza a nota da entrega com base em uma avaliação já cadastrada. Valida se ambos pertencem ao mesmo pedido.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Vínculo realizado com sucesso"),
+                    @ApiResponse(responseCode = "404", description = "Entrega ou Avaliação não encontrada"),
+                    @ApiResponse(responseCode = "400", description = "Avaliação não pertence ao pedido da entrega")
+            })
+    @PatchMapping("/{idEntrega}/avaliacao/{idAvaliacao}")
+    public ResponseEntity<EntregaResponseDTO> vincularAvaliacao(
+            @PathVariable Long idEntrega,
+            @PathVariable Long idAvaliacao) {
+
+        EntregaResponseDTO response = entregaService.vincularAvaliacao(idEntrega, idAvaliacao);
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "Obter dashboard do entregador",
+            description = "Retorna o total de entregas realizadas e o valor faturado no dia atual.",
+            responses = {
+                    @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = DashboardEntregadorDTO.class))),
+                    @ApiResponse(responseCode = "404", description = "Entregador não encontrado")
+            })
+    @GetMapping("/entregador/{id}/dashboard")
+    public ResponseEntity<DashboardEntregadorDTO> obterDashboardEntregador(@PathVariable Long id) {
+        DashboardEntregadorDTO dashboard = entregaService.obterDashboardEntregador(id);
+        return ResponseEntity.ok(dashboard);
     }
 
 }

@@ -36,4 +36,9 @@ public class Usuario {
     private String tokenRecuperacaoSenha;
     private LocalDateTime expiracaoToken;
 
+    @PrePersist
+    public void prePersist(){
+         isAtivo = true;
+    }
+
 }

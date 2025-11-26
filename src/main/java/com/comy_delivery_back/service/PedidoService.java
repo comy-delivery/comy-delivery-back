@@ -4,6 +4,8 @@ import com.comy_delivery_back.dto.request.AceitarPedidoRequestDTO;
 import com.comy_delivery_back.dto.request.EntregaRequestDTO;
 import com.comy_delivery_back.dto.request.ItemPedidoRequestDTO;
 import com.comy_delivery_back.dto.request.PedidoRequestDTO;
+import com.comy_delivery_back.dto.response.DashboardRestauranteDTO;
+import com.comy_delivery_back.dto.response.FaturamentoDiarioDTO;
 import com.comy_delivery_back.dto.response.PedidoResponseDTO;
 import com.comy_delivery_back.enums.StatusPedido;
 import com.comy_delivery_back.exception.*;
@@ -12,6 +14,7 @@ import com.comy_delivery_back.repository.*;
 import com.comy_delivery_back.utils.DistanciaUtils;
 import com.comy_delivery_back.utils.FreteUtils;
 import com.comy_delivery_back.utils.StatusPedidoValidator;
+import com.comy_delivery_back.utils.TempoUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -79,6 +82,11 @@ public class PedidoService {
         if (dto.itensPedido() == null || dto.itensPedido().isEmpty()) {
             throw new PedidoException("Pedido deve conter pelo menos um item");
         }
+        double distanciaKM =0.0;
+        distanciaKM = DistanciaUtils.calcularDistancia(enderecoOrigem.getLatitude(), enderecoOrigem.getLongitude(),enderecoEntrega.getLatitude(),enderecoEntrega.getLongitude());
+
+        Integer totalTempoEstimado = calcularTempoEntrega(restaurante, distanciaKM);
+
 
         Pedido pedido = new Pedido();
         pedido.setCliente(cliente);
@@ -88,7 +96,7 @@ public class PedidoService {
         pedido.setFormaPagamento(dto.formaPagamento());
         pedido.setDsObservacoes(dto.dsObservacoes());
         pedido.setVlEntrega(calcularEntrega(enderecoOrigem, enderecoEntrega));
-        pedido.setTempoEstimadoEntrega(restaurante.getTempoMediaEntrega());
+        pedido.setTempoEstimadoEntrega(totalTempoEstimado);
 
         if (dto.cupomId() != null) {
             Cupom cupom = cupomRepository.findById(dto.cupomId())
@@ -123,7 +131,8 @@ public class PedidoService {
                     pedido.getIdPedido(),
                     pedido.getTempoEstimadoEntrega(),
                     pedido.getEnderecoOrigem().getIdEndereco(),
-                    pedido.getEnderecoEntrega().getIdEndereco()
+                    pedido.getEnderecoEntrega().getIdEndereco(),
+                    pedido.getVlEntrega()
             );
 
             entregaService.cadastrarEntrega(entregaDTO);
@@ -327,6 +336,13 @@ public class PedidoService {
         return pedido.getTempoEstimadoEntrega();
     }
 
+    @Transactional(readOnly = true)
+    public BigDecimal calcularValorEntrega(Long id) {
+        Pedido pedido = pedidoRepository.findById(id)
+                .orElseThrow(() -> new PedidoNaoEncontradoException(id));
+        return pedido.getVlEntrega();
+    }
+
     @Transactional
     public Boolean finalizarPedido(Long id) {
         Pedido pedido = pedidoRepository.findById(id)
@@ -403,6 +419,21 @@ public class PedidoService {
         return pedido.getVlDesconto() != null ? pedido.getVlDesconto() : BigDecimal.ZERO;
     }
 
+    @Transactional(readOnly = true)
+    public DashboardRestauranteDTO obterDashboardCompleto(Long restauranteId) {
+        if (!restauranteRepository.existsById(restauranteId)) {
+            throw new RestauranteNaoEncontradoException(restauranteId);
+        }
+
+        // 1. Busca o count total de pedidos (TODOS)
+        Long totalPedidosGeral = pedidoRepository.countByRestaurante_Id(restauranteId);
+
+        // 2. Busca o somatório agrupado por dia
+        List<FaturamentoDiarioDTO> historico = pedidoRepository.findFaturamentoAgrupadoPorDia(restauranteId);
+
+        return new DashboardRestauranteDTO(totalPedidosGeral, historico);
+    }
+
 
     private BigDecimal processarItensPedido(Pedido pedido, List<ItemPedidoRequestDTO> itensDTO) {
         BigDecimal subtotal = BigDecimal.ZERO;
@@ -446,6 +477,7 @@ public class PedidoService {
 
             item.setVlSubtotal(subtotalItem);
             itemPedidoRepository.save(item);
+            pedido.getItensPedido().add(item);
 
             subtotal = subtotal.add(subtotalItem);
         }
@@ -526,7 +558,6 @@ public class PedidoService {
                         String.format("Distância de %.2f km excede o limite de entrega (50 km)", distanciaKm)
                 );
             }
-
             return FreteUtils.calcularFrete(distanciaKm);
 
         } catch (IllegalArgumentException e) {
@@ -535,9 +566,17 @@ public class PedidoService {
 
     }
 
+
+
     private void validarTransicaoStatus(StatusPedido statusAtual, StatusPedido novoStatus) {
         StatusPedidoValidator.validarTransicao(statusAtual, novoStatus);
     }
 
+    public Integer calcularTempoEntrega(Restaurante restaurante, double distanciaKm) {
+        return TempoUtils.calcularTempoEntrega(
+                30,
+                distanciaKm
+        );
 
+    }
 }

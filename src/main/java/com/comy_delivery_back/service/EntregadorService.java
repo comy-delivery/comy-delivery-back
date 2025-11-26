@@ -4,15 +4,19 @@ import com.comy_delivery_back.dto.request.EntregadorRequestDTO;
 import com.comy_delivery_back.dto.response.EntregadorResponseDTO;
 import com.comy_delivery_back.enums.RoleUsuario;
 import com.comy_delivery_back.enums.StatusEntrega;
-import com.comy_delivery_back.exception.EntregaNaoEncontradaException;
-import com.comy_delivery_back.exception.EntregadorNaoEncontradoException;
-import com.comy_delivery_back.exception.RegistrosDuplicadosException;
+import com.comy_delivery_back.enums.StatusPedido;
+import com.comy_delivery_back.exception.*;
 import com.comy_delivery_back.model.Entrega;
 import com.comy_delivery_back.model.Entregador;
+import com.comy_delivery_back.model.Pedido;
+import com.comy_delivery_back.model.Restaurante;
 import com.comy_delivery_back.repository.EntregaRepository;
 import com.comy_delivery_back.repository.EntregadorRepository;
+import com.comy_delivery_back.repository.PedidoRepository;
+import com.comy_delivery_back.repository.RestauranteRepository;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -27,14 +31,23 @@ public class EntregadorService {
 
     private final EntregadorRepository entregadorRepository;
     private final EntregaRepository entregaRepository;
+    private final RestauranteRepository restauranteRepository;
+    private final RestauranteService restauranteService;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
+    private final PedidoRepository pedidoRepository;
 
-    public EntregadorService(EntregadorRepository entregadorRepository, EntregaRepository entregaRepository, PasswordEncoder passwordEncoder, EmailService emailService) {
+    @Value("${app.password-recovery.url}")
+    private String passwordRecoveryUrl;
+
+    public EntregadorService(EntregadorRepository entregadorRepository, EntregaRepository entregaRepository, RestauranteRepository restauranteRepository, RestauranteService restauranteService, PasswordEncoder passwordEncoder, EmailService emailService, PedidoRepository pedidoRepository) {
         this.entregadorRepository = entregadorRepository;
         this.entregaRepository = entregaRepository;
+        this.restauranteRepository = restauranteRepository;
+        this.restauranteService = restauranteService;
         this.passwordEncoder = passwordEncoder;
         this.emailService = emailService;
+        this.pedidoRepository = pedidoRepository;
     }
 
     @Transactional
@@ -165,9 +178,16 @@ public class EntregadorService {
             throw new IllegalStateException("A entrega ID " + idEntrega + " não pode ser iniciada. Status atual: " + entrega.getStatusEntrega());
         }
 
-        entrega.setStatusEntrega(StatusEntrega.EM_ROTA);
+        if (entrega.getEntregador() == null) {
+            throw new RegraDeNegocioException("A entrega não possui um entregador atribuído.");
+        }
+        Entregador entregador = entrega.getEntregador();
+        entregador.setDisponivel(false);
 
+        entrega.setStatusEntrega(StatusEntrega.EM_ROTA);
+        entrega.setDataHoraInicio(LocalDateTime.now());
         entregaRepository.save(entrega);
+        log.info("Entrega {} iniciada (EM_ROTA).", idEntrega);
     }
 
     @Transactional
@@ -175,14 +195,27 @@ public class EntregadorService {
 
         Entrega entrega = entregaRepository.findById(idEntrega)
                 .orElseThrow(() -> new EntregaNaoEncontradaException(idEntrega));
+        Pedido pedido = pedidoRepository.findById((entrega.getPedido().getIdPedido()))
+                .orElseThrow(() -> new PedidoNaoEncontradoException(entrega.getPedido().getIdPedido()));
+        Restaurante restaurante = restauranteRepository.findById(pedido.getRestaurante().getId())
+                .orElseThrow(() -> new RestauranteNaoEncontradoException(pedido.getRestaurante().getId()));
 
         if (entrega.getStatusEntrega() != StatusEntrega.EM_ROTA) {
             throw new IllegalStateException("A entrega ID " + idEntrega + " não pode ser finalizada. Status atual: " + entrega.getStatusEntrega());
         }
 
         entrega.setStatusEntrega(StatusEntrega.CONCLUIDA);
-
+        entrega.setDataHoraConclusao(LocalDateTime.now());
+        pedido.setStatus(StatusPedido.ENTREGUE);
+        restauranteService.atualizarTempoMedioEntrega(restaurante.getId());
         entregaRepository.save(entrega);
+
+        Entregador entregador = entrega.getEntregador();
+        if (entregador != null) {
+            entregador.setDisponivel(true);
+            entregadorRepository.save(entregador);
+            log.info("Entregador {} liberado (disponível) após finalizar entrega {}.", entregador.getId(), idEntrega);
+        }
     }
 
     @Transactional
@@ -197,6 +230,13 @@ public class EntregadorService {
         entrega.setStatusEntrega(StatusEntrega.CANCELADA);
 
         entregaRepository.save(entrega);
+
+        Entregador entregador = entrega.getEntregador();
+        if (entregador != null) {
+            entregador.setDisponivel(true);
+            entregadorRepository.save(entregador);
+            log.info("Entregador {} liberado (disponível) após cancelamento da entrega {}.", entregador.getId(), idEntrega);
+        }
     }
 
     @Transactional
@@ -227,7 +267,7 @@ public class EntregadorService {
 
         entregadorRepository.save(entregador);
 
-        String linkRecuperacao = "http://localhost/8084/reset-password?token=" + token;
+        String linkRecuperacao = passwordRecoveryUrl+"token=" + token;
 
         emailService.enviarEmailRecuperacao(entregador.getEmailEntregador(), linkRecuperacao)
                 .exceptionally(ex ->{

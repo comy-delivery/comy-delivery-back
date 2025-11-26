@@ -37,7 +37,10 @@ public record ProdutoRequestDTO(
 
         @Schema(description = "Valor do preço promocional", example = "25,00")
         @Positive(message = "Preço promocional deve ser positivo")
-        BigDecimal vlPrecoPromocional
+        BigDecimal vlPrecoPromocional,
+
+        @Size(max = 3000000, message = "O tamanho da imagem não deve exceder 3MB (após codificação base64).")
+        String imagemProduto
 
 
 ) {

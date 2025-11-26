@@ -20,9 +20,6 @@ public record ProdutoResponseDTO(
         @Schema(description = "Valor do preço do produto", example = "35,00")
         BigDecimal vlPreco,
 
-        @Schema(description = "Imagem de apresentação do produto", format = "byte")
-        byte[] imagemProduto,
-
         @Schema(description = "Restaurante que cadastrou o produto", example = "id:1")
         Long restauranteId,
 
@@ -50,7 +47,6 @@ public record ProdutoResponseDTO(
                 p.getNmProduto(),
                 p.getDsProduto(),
                 p.getVlPreco(),
-                p.getImagemProduto(),
                 p.getRestaurante().getId(),
                 p.getCategoriaProduto(),
                 p.getTempoPreparacao(),

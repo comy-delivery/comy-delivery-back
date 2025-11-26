@@ -1,27 +1,40 @@
 package com.comy_delivery_back.service;
 
 import com.comy_delivery_back.dto.request.AtualizarClienteRequestDTO;
+import com.comy_delivery_back.dto.request.AtualizarEnderecoRequestDTO;
 import com.comy_delivery_back.dto.request.ClienteRequestDTO;
 import com.comy_delivery_back.dto.request.EnderecoRequestDTO;
 import com.comy_delivery_back.dto.response.ClienteResponseDTO;
 import com.comy_delivery_back.dto.response.EnderecoResponseDTO;
 import com.comy_delivery_back.dto.response.PedidoResponseDTO;
 import com.comy_delivery_back.enums.RoleUsuario;
+import com.comy_delivery_back.dto.response.*;
+import com.comy_delivery_back.enums.TipoEndereco;
 import com.comy_delivery_back.exception.ClienteNaoEncontradoException;
 import com.comy_delivery_back.exception.EnderecoNaoEncontradoException;
 import com.comy_delivery_back.exception.RegistrosDuplicadosException;
+import com.comy_delivery_back.exception.RegraDeNegocioException;
 import com.comy_delivery_back.model.Cliente;
 import com.comy_delivery_back.model.Endereco;
+import com.comy_delivery_back.model.Restaurante;
 import com.comy_delivery_back.repository.ClienteRepository;
 import com.comy_delivery_back.repository.EnderecoRepository;
-import jakarta.transaction.Transactional;
+import com.comy_delivery_back.repository.ProdutoRepository;
+import com.comy_delivery_back.repository.RestauranteRepository;
+import com.comy_delivery_back.utils.DistanciaUtils;
+import com.comy_delivery_back.utils.FreteUtils;
+import com.comy_delivery_back.utils.TempoUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -29,16 +42,25 @@ public class ClienteService {
 
     private final ClienteRepository clienteRepository;
     private final EnderecoRepository enderecoRepository;
+    private final EnderecoService enderecoService;
     private final PasswordEncoder passwordEncoder;//usar depois
     private final EmailService emailService;
+    private final RestauranteRepository restauranteRepository;
+    private final ProdutoRepository produtoRepository;
+
+    @Value("${app.password-recovery.url}")
+    private String passwordRecoveryUrl;
 
     public ClienteService(ClienteRepository clienteRepository,
-                          EnderecoRepository enderecoRepository, PasswordEncoder passwordEncoder,
-                          EmailService emailService) {
+                          EnderecoRepository enderecoRepository, EnderecoService enderecoService, PasswordEncoder passwordEncoder,
+                          EmailService emailService, RestauranteRepository restauranteRepository, ProdutoRepository produtoRepository) {
         this.clienteRepository = clienteRepository;
         this.enderecoRepository = enderecoRepository;
+        this.enderecoService = enderecoService;
         this.passwordEncoder = passwordEncoder;
         this.emailService = emailService;
+        this.restauranteRepository = restauranteRepository;
+        this.produtoRepository = produtoRepository;
     }
 
     @Transactional
@@ -64,49 +86,61 @@ public class ClienteService {
                 .telefoneCliente(clienteRequestDTO.telefoneCliente())
                 .build();
 
-        List<Endereco> enderecos = clienteRequestDTO.enderecos().stream()
-                        .map(enderecoRequestDTO -> {
-                            Endereco endereco = new Endereco();
-
-                            endereco.setLogradouro(enderecoRequestDTO.logradouro());
-                            endereco.setNumero(enderecoRequestDTO.numero());
-                            endereco.setComplemento(enderecoRequestDTO.complemento());
-                            endereco.setBairro(enderecoRequestDTO.bairro());
-                            endereco.setCidade(enderecoRequestDTO.cidade());
-                            endereco.setCep(enderecoRequestDTO.cep());
-                            endereco.setEstado(enderecoRequestDTO.estado());
-                            endereco.setTipoEndereco(enderecoRequestDTO.tipoEndereco());
-
-                            return endereco;
-                        }).toList();
-        novoCliente.setEnderecos(enderecos); //cliente recebe o endereco - lado one
-        enderecos.forEach(endereco -> endereco.setCliente(novoCliente)); //endereco recebe o cliente que pertence - lado many
-
+        novoCliente.setEnderecos(new ArrayList<>());
         Cliente clienteSalvo = clienteRepository.save(novoCliente);
-        log.info("Cliente cadastrado com sucesso. ID: {}", clienteSalvo.getId());
 
-        return new ClienteResponseDTO(clienteSalvo);
+        if (clienteRequestDTO.enderecos() != null && !clienteRequestDTO.enderecos().isEmpty()) {
+            boolean primeiroEndereco = true;
+
+            for (EnderecoRequestDTO enderecoDTO : clienteRequestDTO.enderecos()) {
+                EnderecoResponseDTO enderecoSalvoDTO = enderecoService.cadastrarEndereco(enderecoDTO);
+
+                Endereco enderecoEntity = enderecoRepository.findByIdEndereco(enderecoSalvoDTO.idEndereco())
+                        .orElseThrow(() -> new EnderecoNaoEncontradoException(enderecoSalvoDTO.idEndereco()));
+
+                enderecoEntity.setCliente(clienteSalvo);
+                if (primeiroEndereco) {
+                    enderecoEntity.setPadrao(true);
+                    primeiroEndereco = false;
+                } else {
+                    enderecoEntity.setPadrao(false);
+                }
+
+                enderecoRepository.save(enderecoEntity);
+                clienteSalvo.getEnderecos().add(enderecoEntity);
+            }
+        }
+
+        log.info("Cliente cadastrado com sucesso. ID: {}", clienteSalvo.getId());
+        return buscarClientePorId(clienteSalvo.getId());
     }
 
     @Transactional
     public EnderecoResponseDTO cadastrarNovoEndereco(Long idCliente, EnderecoRequestDTO enderecoRequestDTO){
+        log.info("Cadastrando novo endereço para Cliente ID: {}", idCliente);
+
         Cliente cliente = clienteRepository.findById(idCliente)
                 .orElseThrow(()-> new ClienteNaoEncontradoException(idCliente));
 
-        Endereco novoEndereco = new Endereco();
 
-        novoEndereco.setLogradouro(enderecoRequestDTO.logradouro());
-        novoEndereco.setNumero(enderecoRequestDTO.numero());
-        novoEndereco.setComplemento(enderecoRequestDTO.complemento());
-        novoEndereco.setBairro(enderecoRequestDTO.bairro());
-        novoEndereco.setCidade(enderecoRequestDTO.cidade());
-        novoEndereco.setEstado(enderecoRequestDTO.estado());
-        novoEndereco.setTipoEndereco(enderecoRequestDTO.tipoEndereco());
-        novoEndereco.setCliente(cliente);
+        EnderecoResponseDTO enderecoSalvoDTO = enderecoService.cadastrarEndereco(enderecoRequestDTO);
 
-        enderecoRepository.save(novoEndereco);
+        Endereco enderecoEntity = enderecoRepository.findByIdEndereco(enderecoSalvoDTO.idEndereco())
+                .orElseThrow(() -> new EnderecoNaoEncontradoException(enderecoSalvoDTO.idEndereco()));
 
-        return new EnderecoResponseDTO(novoEndereco);
+        enderecoEntity.setCliente(cliente);
+
+        boolean temOutrosEnderecos = enderecoRepository.findByCliente_Id(idCliente).size() > 1;
+
+        if (cliente.getEnderecos() == null || cliente.getEnderecos().isEmpty()) {
+            enderecoEntity.setPadrao(true);
+        } else {
+            enderecoEntity.setPadrao(false);
+        }
+
+        enderecoRepository.save(enderecoEntity);
+
+        return new EnderecoResponseDTO(enderecoEntity);
     }
 
     @Transactional
@@ -124,17 +158,17 @@ public class ClienteService {
                 .map(ClienteResponseDTO::new).toList();
     }
 
-    @Transactional
-    public List<PedidoResponseDTO> listarPedidos(Long idCliente){
+    @Transactional(readOnly = true)
+    public List<PedidoResumoDTO> listarPedidos(Long idCliente){
         Cliente cliente = clienteRepository.findById(idCliente)
                 .orElseThrow(() -> {
                     log.warn("Tentativa de listar pedidos. Cliente não encontrado: {}", idCliente); // [AJUSTE] Log de Aviso
                     return new ClienteNaoEncontradoException(idCliente);
                 });
 
-        List<PedidoResponseDTO> pedidosCliente = cliente.getPedidos()
+        List<PedidoResumoDTO> pedidosCliente = cliente.getPedidos()
                 .stream()
-                .map(PedidoResponseDTO::new)
+                .map(PedidoResumoDTO::new)
                 .toList();
 
         return pedidosCliente;
@@ -178,7 +212,7 @@ public class ClienteService {
     }
 
     @Transactional
-    public EnderecoResponseDTO atualizarEnderecoCliente(Long idCliente, Long idEndereco, EnderecoRequestDTO enderecoRequestDTO) {
+    public EnderecoResponseDTO atualizarEnderecoCliente(Long idCliente, Long idEndereco, AtualizarEnderecoRequestDTO enderecoRequestDTO) {
         Cliente cliente = clienteRepository.findById(idCliente)
                 .orElseThrow(() -> {
                     log.error("Cliente não encontrado para atualização de endereço. ID: {}", idCliente); // [AJUSTE] Log de Erro
@@ -258,7 +292,7 @@ public class ClienteService {
 
         clienteRepository.save(cliente);
 
-        String linkRecuperacao = "http://localhost/8084/reset-password?token=" + token;
+        String linkRecuperacao = passwordRecoveryUrl + "token=" + token;
 
 
             emailService.enviarEmailRecuperacao(cliente.getEmailCliente(), linkRecuperacao)
@@ -296,5 +330,89 @@ public class ClienteService {
 
         log.info("Senha do cliente ID {} redefinida com sucesso.", cliente.getId());
         return true;
+    }
+
+    @Transactional
+    public EnderecoResponseDTO vincularEnderecoExistente(Long idCliente, Long idEndereco) {
+        Cliente cliente = clienteRepository.findById(idCliente)
+                .orElseThrow(() -> new ClienteNaoEncontradoException(idCliente));
+
+        Endereco endereco = enderecoRepository.findByIdEndereco(idEndereco)
+                .orElseThrow(() -> new EnderecoNaoEncontradoException(idEndereco));
+
+        if (endereco.getCliente() != null || endereco.getRestaurante() != null) {
+            throw new RegraDeNegocioException("Este endereço já está vinculado a outro usuário.");
+        }
+
+        endereco.setCliente(cliente);
+
+        if (cliente.getEnderecos().isEmpty()) {
+            endereco.setPadrao(true);
+        } else {
+            endereco.setPadrao(false);
+        }
+
+        cliente.getEnderecos().add(endereco);
+        enderecoRepository.save(endereco);
+
+        return new EnderecoResponseDTO(endereco);
+    }
+
+    @Transactional(readOnly = true)
+    public List<RestauranteDistanciaDTO> listarRestaurantesProximos(Long idCliente) {
+
+        Cliente cliente = clienteRepository.findById(idCliente)
+                .orElseThrow(() -> new ClienteNaoEncontradoException(idCliente));
+
+        Endereco enderecoCliente = cliente.getEnderecos().stream()
+                .filter(Endereco::isPadrao)
+                .findFirst()
+                .orElse(cliente.getEnderecos().stream().findFirst().orElse(null));
+
+        if (enderecoCliente == null || enderecoCliente.getLatitude() == null || enderecoCliente.getLongitude() == null) {
+            throw new RegraDeNegocioException("O cliente não possui endereço válido (com coordenadas) para calcular distância.");
+        }
+
+        List<Restaurante> restaurantes = restauranteRepository.findByIsDisponivelTrue();
+
+        return restaurantes.stream()
+                .map(restaurante -> {
+
+                    Endereco origem = restaurante.getEnderecos().stream()
+                            .filter(e -> e.getTipoEndereco() == TipoEndereco.MATRIZ)
+                            .findFirst()
+                            .orElse(restaurante.getEnderecos().stream().findFirst().orElse(null));
+
+                    if (origem != null && origem.getLatitude() != null && origem.getLongitude() != null) {
+
+                        double distancia = DistanciaUtils.calcularDistancia(
+                                origem.getLatitude(),
+                                origem.getLongitude(),
+                                enderecoCliente.getLatitude(),
+                                enderecoCliente.getLongitude()
+                        );
+
+                        BigDecimal frete = FreteUtils.calcularFrete(distancia);
+                        Integer tempo = TempoUtils.calcularTempoEntrega(30, distancia);
+
+                        Double mediaPreco = produtoRepository.calcularMediaPrecoPorRestaurante(restaurante.getId());
+                        BigDecimal mediaPrecoBigDecimal = BigDecimal.ZERO;
+
+                        if (mediaPreco != null) {
+                            mediaPrecoBigDecimal = BigDecimal.valueOf(mediaPreco).setScale(2, RoundingMode.HALF_UP);
+                        }
+
+                        return new RestauranteDistanciaDTO(
+                                new RestauranteResponseDTO(restaurante),
+                                distancia,
+                                frete,
+                                tempo,
+                                mediaPrecoBigDecimal
+                        );
+                    }
+                    return null;
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 }
