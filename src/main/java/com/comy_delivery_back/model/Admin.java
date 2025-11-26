@@ -6,10 +6,12 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.PrimaryKeyJoinColumn;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.experimental.SuperBuilder;
 
 @Entity
 @Data
 @AllArgsConstructor
+@SuperBuilder
 @PrimaryKeyJoinColumn(name = "id")
 public class Admin extends Usuario{
     //seta automatico na criação do ADMIN

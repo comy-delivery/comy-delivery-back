@@ -6,6 +6,7 @@ import com.comy_delivery_back.dto.request.EnderecoRequestDTO;
 import com.comy_delivery_back.dto.response.ClienteResponseDTO;
 import com.comy_delivery_back.dto.response.EnderecoResponseDTO;
 import com.comy_delivery_back.dto.response.PedidoResponseDTO;
+import com.comy_delivery_back.enums.RoleUsuario;
 import com.comy_delivery_back.exception.ClienteNaoEncontradoException;
 import com.comy_delivery_back.exception.EnderecoNaoEncontradoException;
 import com.comy_delivery_back.exception.RegistrosDuplicadosException;
@@ -51,14 +52,17 @@ public class ClienteService {
             throw new RegistrosDuplicadosException("EMAIL já cadastrado!");
         }
 
-        Cliente novoCliente = new Cliente();
+        Cliente novoCliente = Cliente.builder()
+                .username(clienteRequestDTO.username())
+                .password(passwordEncoder.encode(clienteRequestDTO.password()))
+                .roleUsuario(RoleUsuario.CLIENTE)
 
-        novoCliente.setUsername(clienteRequestDTO.username());
-        novoCliente.setPassword(passwordEncoder.encode(clienteRequestDTO.password()));
-        novoCliente.setNmCliente(clienteRequestDTO.nmCliente());
-        novoCliente.setCpfCliente(clienteRequestDTO.cpfCliente());
-        novoCliente.setEmailCliente(clienteRequestDTO.emailCliente());
-        novoCliente.setTelefoneCliente(clienteRequestDTO.telefoneCliente());
+                // CAMPOS ESPECÍFICOS (Cliente):
+                .nmCliente(clienteRequestDTO.nmCliente())
+                .cpfCliente(clienteRequestDTO.cpfCliente())
+                .emailCliente(clienteRequestDTO.emailCliente())
+                .telefoneCliente(clienteRequestDTO.telefoneCliente())
+                .build();
 
         List<Endereco> enderecos = clienteRequestDTO.enderecos().stream()
                         .map(enderecoRequestDTO -> {
@@ -75,12 +79,12 @@ public class ClienteService {
 
                             return endereco;
                         }).toList();
-        novoCliente.setEnderecos(enderecos); //cliente recebe o endereco
-
-        enderecos.forEach(endereco -> endereco.setCliente(novoCliente)); //endereco recebe o cliente que pertence
+        novoCliente.setEnderecos(enderecos); //cliente recebe o endereco - lado one
+        enderecos.forEach(endereco -> endereco.setCliente(novoCliente)); //endereco recebe o cliente que pertence - lado many
 
         Cliente clienteSalvo = clienteRepository.save(novoCliente);
         log.info("Cliente cadastrado com sucesso. ID: {}", clienteSalvo.getId());
+
         return new ClienteResponseDTO(clienteSalvo);
     }
 

@@ -1,20 +1,14 @@
 package com.comy_delivery_back.security;
 
-import com.comy_delivery_back.service.UserDetailsServiceImpl;
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
-import org.springframework.security.config.annotation.authentication.configurers.userdetails.DaoAuthenticationConfigurer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
+import org.springframework.security.core.authority.mapping.SimpleAuthorityMapper;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,7 +18,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 public class SecurityConfig {
 
-    private final JwtTokenFilter jwtTokenFilter;
+    private final JwtTokenFilter jwtTokenFilter; //valida jwt
 
     public SecurityConfig(JwtTokenFilter jwtTokenFilter) {
         this.jwtTokenFilter = jwtTokenFilter;
@@ -36,20 +30,33 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
+    //correcao do problema de prefixamento de roles
+    @Bean
+    public GrantedAuthoritiesMapper grantedAuthoritiesMapper(){
+        SimpleAuthorityMapper authorityMapper = new SimpleAuthorityMapper();
+        authorityMapper.setPrefix(""); //nao adiciona prefixo nas authorities que ja enviei
+
+        return authorityMapper;
+    }
+
     //validação inicial das credenciais
     @Bean
     public DaoAuthenticationProvider daoAuthenticationProvider(
-            UserDetailsService userDetailsService,
-            PasswordEncoder passwordEncoder
+            UserDetailsService userDetailsService, //busca usuario no banco
+            PasswordEncoder passwordEncoder,
+            GrantedAuthoritiesMapper grantedAuthoritiesMapper //mapeia roles
     ){
+        //"mostra" como validar as credenciais
         DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
 
         authenticationProvider.setUserDetailsService(userDetailsService);
         authenticationProvider.setPasswordEncoder(passwordEncoder);
+        authenticationProvider.setAuthoritiesMapper(grantedAuthoritiesMapper);
 
         return authenticationProvider;
     }
 
+    //ponto de entrada p iniciar login
     //controller de Login chama o AuthenticationManager e ele chama o DaoAuthenticationProvider
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {

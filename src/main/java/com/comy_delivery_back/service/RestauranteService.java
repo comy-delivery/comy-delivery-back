@@ -6,6 +6,7 @@ import com.comy_delivery_back.dto.response.EnderecoResponseDTO;
 import com.comy_delivery_back.dto.response.ProdutoResponseDTO;
 import com.comy_delivery_back.dto.response.RestauranteResponseDTO;
 import com.comy_delivery_back.enums.DiasSemana;
+import com.comy_delivery_back.enums.RoleUsuario;
 import com.comy_delivery_back.exception.EnderecoNaoEncontradoException;
 import com.comy_delivery_back.exception.RestauranteNaoEncontradoException;
 import com.comy_delivery_back.model.Endereco;
@@ -20,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
@@ -62,14 +64,23 @@ public class RestauranteService {
             throw new IllegalArgumentException("Username já cadastrado.");
         }
 
-        Restaurante novoRestaurante = new Restaurante();
+        //refatorado para receber instancia no signup
+        Restaurante novoRestaurante = Restaurante.builder()
+                .username(restauranteRequestDTO.username())
+                .password(passwordEncoder.encode(restauranteRequestDTO.password()))
+                .roleUsuario(RoleUsuario.RESTAURANTE)
 
-        novoRestaurante.setUsername(restauranteRequestDTO.username());
-        novoRestaurante.setPassword(passwordEncoder.encode(restauranteRequestDTO.password()));
-        novoRestaurante.setNmRestaurante(restauranteRequestDTO.nmRestaurante());
-        novoRestaurante.setEmailRestaurante(restauranteRequestDTO.emailRestaurante());
-        novoRestaurante.setCnpj(restauranteRequestDTO.cnpj());
-        novoRestaurante.setTelefoneRestaurante(restauranteRequestDTO.telefoneRestaurante());
+                .nmRestaurante(restauranteRequestDTO.nmRestaurante())
+                .emailRestaurante(restauranteRequestDTO.emailRestaurante())
+                .cnpj(restauranteRequestDTO.cnpj())
+                .telefoneRestaurante(restauranteRequestDTO.telefoneRestaurante())
+                .descricaoRestaurante(restauranteRequestDTO.descricaoRestaurante())
+                .categoria(restauranteRequestDTO.categoria())
+                .horarioAbertura(restauranteRequestDTO.horarioAbertura())
+                .horarioFechamento(restauranteRequestDTO.horarioFechamento())
+                .diasFuncionamento(restauranteRequestDTO.diasFuncionamento())
+                .dataCadastro(LocalDate.now())
+                .build();
 
         if (imagemFile != null && !imagemFile.isEmpty()) {
             //converte o MultipartFile em byte
@@ -78,8 +89,6 @@ public class RestauranteService {
         } else {
             novoRestaurante.setImagemLogo(null);
         }
-
-        novoRestaurante.setDescricaoRestaurante(restauranteRequestDTO.descricaoRestaurante());
 
         List<Endereco> enderecos = restauranteRequestDTO.enderecos().stream()
                 .map(enderecoRequestDTO -> {
@@ -99,11 +108,6 @@ public class RestauranteService {
 
                 }).toList();
         novoRestaurante.setEnderecos(enderecos);
-
-        novoRestaurante.setCategoria(restauranteRequestDTO.categoria());
-        novoRestaurante.setHorarioAbertura(restauranteRequestDTO.horarioAbertura());
-        novoRestaurante.setHorarioFechamento(restauranteRequestDTO.horarioFechamento());
-        novoRestaurante.setDiasFuncionamento(restauranteRequestDTO.diasFuncionamento());
 
         Restaurante restauranteSalvo = restauranteRepository.save(novoRestaurante);
         log.info("Restaurante cadastrado com sucesso. ID: {}", restauranteSalvo.getId());

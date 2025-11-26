@@ -7,8 +7,10 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.PastOrPresent;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -19,6 +21,7 @@ import java.util.List;
 @Entity
 @AllArgsConstructor
 @Data
+@SuperBuilder
 @PrimaryKeyJoinColumn(name = "id")
 public class Restaurante extends Usuario{
 

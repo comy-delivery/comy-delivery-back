@@ -37,39 +37,9 @@ public class AuthService {
         //obtem objeto do modelo
         Usuario usuario = userDetails.getUsuario();
 
-
         String token = tokenService.generateToken(usuario);
 
         return new LoginResponseDTO(token, usuario.getId()); //ver depois
 
-    }
-
-    public SignupResponseDTO signup(SignupRequestDTO signupRequestDto) {
-
-        if (usuarioRepository.existsByUsername((signupRequestDto.username()))){
-            throw new IllegalArgumentException("usuario já cadastrado.");
-        }
-
-        String encoderPassword = passwordEncoder.encode(signupRequestDto.password());
-
-
-        RoleUsuario role = signupRequestDto.role();
-
-        if (role != RoleUsuario.CLIENTE &&
-                role != RoleUsuario.RESTAURANTE &&
-                role != RoleUsuario.ENTREGADOR) {
-            throw new IllegalArgumentException("Role de usuário inválida para cadastro.");
-        }
-
-        Usuario novoUsuario = Usuario.builder()
-                .username(signupRequestDto.username())
-                .password(encoderPassword)
-                .roleUsuario(role)
-                .isAtivo(true)
-                .build();
-
-        usuarioRepository.save(novoUsuario);
-
-        return new SignupResponseDTO(novoUsuario.getId(), novoUsuario.getUsername());
     }
 }
