@@ -64,8 +64,9 @@ public class SecurityConfig {
                 //pega usuario existent
                 Usuario usuario = usuarioService.processOAuth2User(email, nome);
                 String token = tokenService.generateToken(usuario);
+                String refreshToken = tokenService.refreshToken(usuario);
 
-                LoginResponseDTO loginResponseDTO = new LoginResponseDTO(token, usuario.getId());
+                LoginResponseDTO loginResponseDTO = new LoginResponseDTO(token, refreshToken, usuario.getId());
 
                 response.setContentType("application/json;charset=UTF-8"); //tipo
                 response.setStatus(HttpServletResponse.SC_OK); //resposta

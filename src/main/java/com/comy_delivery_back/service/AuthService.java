@@ -1,10 +1,7 @@
 package com.comy_delivery_back.service;
 
 import com.comy_delivery_back.dto.request.LoginRequestDTO;
-import com.comy_delivery_back.dto.request.SignupRequestDTO;
 import com.comy_delivery_back.dto.response.LoginResponseDTO;
-import com.comy_delivery_back.dto.response.SignupResponseDTO;
-import com.comy_delivery_back.enums.RoleUsuario;
 import com.comy_delivery_back.model.Usuario;
 import com.comy_delivery_back.repository.UsuarioRepository;
 import com.comy_delivery_back.security.CustomUserDetails;
@@ -38,8 +35,9 @@ public class AuthService {
         Usuario usuario = userDetails.getUsuario();
 
         String token = tokenService.generateToken(usuario);
+        String refreshToken = tokenService.refreshToken(usuario);
 
-        return new LoginResponseDTO(token, usuario.getId()); //ver depois
+        return new LoginResponseDTO(token, refreshToken, usuario.getId()); //ver depois
 
     }
 }
