@@ -108,6 +108,17 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-mail</artifactId>
         </dependency>
+		<!--DotEnv-->
+		<dependency>
+			<groupId>me.paulschwarz</groupId>
+			<artifactId>spring-dotenv</artifactId>
+			<version>4.0.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.mercadopago</groupId>
+			<artifactId>sdk</artifactId>
+			<version>2.1.2</version>
+		</dependency>
 
 
 	</dependencies>
