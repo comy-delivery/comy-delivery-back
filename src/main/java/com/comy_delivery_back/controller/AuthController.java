@@ -40,7 +40,7 @@ public class AuthController {
     }
 
     @PostMapping("/register-complete")
-    public ResponseEntity<?> completeRegistration(@RequestParam String role,
+    public ResponseEntity<?> completeRegistration(@RequestParam String role, //?role=CLIENTE ou ?role=ENTREGADOR
                                                   @RequestBody Map<String, Object> dadosRegistro){
         if (!role.equalsIgnoreCase("CLIENTE") && !role.equalsIgnoreCase("ENTREGADOR")){
             return ResponseEntity.badRequest().body("Role inválida. Escolha CLIENTE ou ENTREGADOR.");
