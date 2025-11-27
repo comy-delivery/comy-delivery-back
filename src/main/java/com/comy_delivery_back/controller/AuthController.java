@@ -3,19 +3,23 @@ package com.comy_delivery_back.controller;
 import com.comy_delivery_back.dto.request.ClienteRequestDTO;
 import com.comy_delivery_back.dto.request.EntregadorRequestDTO;
 import com.comy_delivery_back.dto.request.LoginRequestDTO;
-import com.comy_delivery_back.dto.request.SignupRequestDTO;
+import com.comy_delivery_back.dto.request.RefreshTokenRequestDTO;
 import com.comy_delivery_back.dto.response.ClienteResponseDTO;
 import com.comy_delivery_back.dto.response.EntregadorResponseDTO;
 import com.comy_delivery_back.dto.response.LoginResponseDTO;
-import com.comy_delivery_back.dto.response.SignupResponseDTO;
-import com.comy_delivery_back.model.Cliente;
+import com.comy_delivery_back.dto.response.RefreshTokenResponseDTO;
+import com.comy_delivery_back.model.Usuario;
+import com.comy_delivery_back.security.CustomUserDetails;
 import com.comy_delivery_back.service.AuthService;
 import com.comy_delivery_back.service.ClienteService;
 import com.comy_delivery_back.service.EntregadorService;
+import com.comy_delivery_back.service.TokenService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpStatus;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -28,17 +32,48 @@ public class AuthController {
     private final EntregadorService entregadorService;
     private final ClienteService clienteService;
     private final ObjectMapper objectMapper;
+    private final TokenService tokenService;
+    private final UserDetailsService userDetailsService;
 
-    public AuthController(AuthService authService, EntregadorService entregadorService, ClienteService clienteService, ObjectMapper objectMapper) {
+    public AuthController(AuthService authService, EntregadorService entregadorService, ClienteService clienteService, ObjectMapper objectMapper, TokenService tokenService, UserDetailsService userDetailsService) {
         this.authService = authService;
         this.entregadorService = entregadorService;
         this.clienteService = clienteService;
         this.objectMapper = objectMapper;
+        this.tokenService = tokenService;
+        this.userDetailsService = userDetailsService;
     }
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDTO> login(@RequestBody LoginRequestDTO loginRequestDTO){
         return ResponseEntity.ok(authService.login(loginRequestDTO)); //mudar depois
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<RefreshTokenResponseDTO> refreshToken(@RequestBody RefreshTokenRequestDTO refreshTokenRequestDTO){
+
+        try{
+            String requestRefreshToken = refreshTokenRequestDTO.refreshToken();
+
+            String username = tokenService.validateRefreshToken(requestRefreshToken);
+
+            UserDetails userDetails = userDetailsService.loadUserByUsername(username); //carrega usuario do banco
+
+            if (userDetails == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+            }
+
+            Usuario usuario = ((CustomUserDetails) userDetails).getUsuario(); //obtem usuario
+
+            String newAccessToken = tokenService.generateToken(usuario);
+
+            //retorna o novo Access Token e o Refresh Token original (que continua válido)
+            RefreshTokenResponseDTO refreshTokenResponseDTO = new RefreshTokenResponseDTO(newAccessToken, requestRefreshToken);
+
+            return ResponseEntity.ok(refreshTokenResponseDTO);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
     }
 
     @PostMapping("/register-complete")

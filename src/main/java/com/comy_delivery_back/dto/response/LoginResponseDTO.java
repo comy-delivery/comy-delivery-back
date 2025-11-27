@@ -8,6 +8,11 @@ public record LoginResponseDTO(
                 example = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...")
         String jwt,
 
+        @Schema(description = "RefreshToken")
+        String refreshToken,
+
         @Schema(description = "ID do usuário autenticado", example = "1")
         Long userId
+
+
 ) {}
