@@ -169,7 +169,7 @@ VALUES
 ('Av. Nações Unidas', '80', 'Santo André', 'Capivari de Baixo', '88745000', 'SC', 'CASA', -28.4500, -48.9600, NULL, 25,
  TRUE),
 ('Av. Calistrato Müller Salles', '500', 'Portinho', 'Laguna', '88790000', 'SC', 'CASA', -28.4850, -48.7900, NULL, 26,
- TRUE);
+ TRUE) ON CONFLICT DO NOTHING;
 
 -- ==================================================================================
 -- 4. PRODUTOS (10 por restaurante, 2 em promoção)
@@ -200,7 +200,8 @@ FROM (VALUES ('X-Bacon', 'Pão, carne, queijo e bacon', 25.00, 'Lanches', 20, FA
                                                                                        categoria_produto,
                                                                                        tempo_preparacao, is_promocao,
                                                                                        vl_preco_promocional)
-         CROSS JOIN (VALUES (2), (3), (4), (5)) AS r(id);
+         CROSS JOIN (VALUES (2), (3), (4), (5)) AS r(id)
+    ON CONFLICT DO NOTHING;
 
 -- DOCES (Restaurantes 6 a 11)
 INSERT INTO public.produto (nm_produto, ds_produto, vl_preco, categoria_produto, tempo_preparacao, is_promocao,
@@ -230,7 +231,8 @@ FROM (VALUES ('Bolo de Pote', 'Chocolate belga', 15.00, 'Doces', 0, TRUE, 12.00)
                                                                                                tempo_preparacao,
                                                                                                is_promocao,
                                                                                                vl_preco_promocional)
-         CROSS JOIN (VALUES (6), (7), (8), (9), (10), (11)) AS r(id);
+         CROSS JOIN (VALUES (6), (7), (8), (9), (10), (11)) AS r(id)
+    ON CONFLICT DO NOTHING;
 
 -- PIZZA (Restaurantes 12, 13)
 INSERT INTO public.produto (nm_produto, ds_produto, vl_preco, categoria_produto, tempo_preparacao, is_promocao,
@@ -258,7 +260,8 @@ FROM (VALUES ('Pizza Calabresa M', 'Clássica', 40.00, 'Pizza', 30, TRUE, 35.00)
                                                                                       categoria_produto,
                                                                                       tempo_preparacao, is_promocao,
                                                                                       vl_preco_promocional)
-         CROSS JOIN (VALUES (12), (13)) AS r(id);
+         CROSS JOIN (VALUES (12), (13)) AS r(id)
+    ON CONFLICT DO NOTHING;
 
 -- ASIATICA (Restaurantes 14, 15, 16, 17)
 INSERT INTO public.produto (nm_produto, ds_produto, vl_preco, categoria_produto, tempo_preparacao, is_promocao,
@@ -285,7 +288,8 @@ FROM (VALUES ('Sushi Combo 1', '15 peças variadas', 45.00, 'Sushi', 20, TRUE, 3
              ('Água', '500ml', 4.00, 'Bebidas', 0, FALSE, NULL)) AS p(nm_produto, ds_produto, vl_preco,
                                                                       categoria_produto, tempo_preparacao, is_promocao,
                                                                       vl_preco_promocional)
-         CROSS JOIN (VALUES (14), (15), (16), (17)) AS r(id);
+         CROSS JOIN (VALUES (14), (15), (16), (17)) AS r(id)
+    ON CONFLICT DO NOTHING;
 
 -- SAUDAVEL (Restaurantes 18, 19)
 INSERT INTO public.produto (nm_produto, ds_produto, vl_preco, categoria_produto, tempo_preparacao, is_promocao,
@@ -312,7 +316,8 @@ FROM (VALUES ('Salada Caesar', 'Frango grelhado e molho', 28.00, 'Saladas', 15, 
              ('Água de Coco', 'Natural', 8.00, 'Bebidas', 0, FALSE, NULL)) AS p(nm_produto, ds_produto, vl_preco,
                                                                                 categoria_produto, tempo_preparacao,
                                                                                 is_promocao, vl_preco_promocional)
-         CROSS JOIN (VALUES (18), (19)) AS r(id);
+         CROSS JOIN (VALUES (18), (19)) AS r(id)
+    ON CONFLICT DO NOTHING;
 
 -- BRASILEIRA (Restaurantes 20, 21)
 INSERT INTO public.produto (nm_produto, ds_produto, vl_preco, categoria_produto, tempo_preparacao, is_promocao,
@@ -340,7 +345,8 @@ FROM (VALUES ('Feijoada Completa', 'Para 1 pessoa', 35.00, 'Refeição', 0, TRUE
                                                                                       categoria_produto,
                                                                                       tempo_preparacao, is_promocao,
                                                                                       vl_preco_promocional)
-         CROSS JOIN (VALUES (20), (21)) AS r(id);
+         CROSS JOIN (VALUES (20), (21)) AS r(id)
+    ON CONFLICT DO NOTHING;
 
 -- ==================================================================================
 -- 5. ADICIONAIS (2 por produto, lógica por categoria)
@@ -349,52 +355,62 @@ FROM (VALUES ('Feijoada Completa', 'Para 1 pessoa', 35.00, 'Refeição', 0, TRUE
 INSERT INTO public.adicional (nm_adicional, ds_adicional, vl_preco_adicional, produto_id, is_disponivel)
 SELECT 'Extra Bacon', 'Fatias crocantes', 5.00, id_produto, TRUE
 FROM public.produto
-WHERE categoria_produto IN ('Lanches', 'Pizza');
+WHERE categoria_produto IN ('Lanches', 'Pizza')
+    ON CONFLICT DO NOTHING;
 
 INSERT INTO public.adicional (nm_adicional, ds_adicional, vl_preco_adicional, produto_id, is_disponivel)
 SELECT 'Queijo Extra', 'Mussarela derretida', 4.00, id_produto, TRUE
 FROM public.produto
-WHERE categoria_produto IN ('Lanches', 'Pizza');
+WHERE categoria_produto IN ('Lanches', 'Pizza')
+    ON CONFLICT DO NOTHING;
 
 INSERT INTO public.adicional (nm_adicional, ds_adicional, vl_preco_adicional, produto_id, is_disponivel)
 SELECT 'Leite Condensado', 'Extra', 3.00, id_produto, TRUE
 FROM public.produto
-WHERE categoria_produto IN ('Doces', 'Açaí', 'Sobremesa', 'Pizza Doce');
+WHERE categoria_produto IN ('Doces', 'Açaí', 'Sobremesa', 'Pizza Doce')
+    ON CONFLICT DO NOTHING;
 
 INSERT INTO public.adicional (nm_adicional, ds_adicional, vl_preco_adicional, produto_id, is_disponivel)
 SELECT 'Granola', 'Crocante', 2.00, id_produto, TRUE
 FROM public.produto
-WHERE categoria_produto IN ('Doces', 'Açaí', 'Sobremesa');
+WHERE categoria_produto IN ('Doces', 'Açaí', 'Sobremesa')
+    ON CONFLICT DO NOTHING;
 
 INSERT INTO public.adicional (nm_adicional, ds_adicional, vl_preco_adicional, produto_id, is_disponivel)
 SELECT 'Cream Cheese', 'Philadelphia', 6.00, id_produto, TRUE
 FROM public.produto
-WHERE categoria_produto IN ('Sushi', 'Temaki', 'Sashimi');
+WHERE categoria_produto IN ('Sushi', 'Temaki', 'Sashimi')
+    ON CONFLICT DO NOTHING;
 
 INSERT INTO public.adicional (nm_adicional, ds_adicional, vl_preco_adicional, produto_id, is_disponivel)
 SELECT 'Cebolinha', 'Extra', 1.00, id_produto, TRUE
 FROM public.produto
-WHERE categoria_produto IN ('Sushi', 'Temaki', 'Pratos Quentes');
+WHERE categoria_produto IN ('Sushi', 'Temaki', 'Pratos Quentes')
+    ON CONFLICT DO NOTHING;
 
 INSERT INTO public.adicional (nm_adicional, ds_adicional, vl_preco_adicional, produto_id, is_disponivel)
 SELECT 'Ovo Frito', 'Gema mole', 3.00, id_produto, TRUE
 FROM public.produto
-WHERE categoria_produto IN ('Refeição');
+WHERE categoria_produto IN ('Refeição')
+    ON CONFLICT DO NOTHING;
 
 INSERT INTO public.adicional (nm_adicional, ds_adicional, vl_preco_adicional, produto_id, is_disponivel)
 SELECT 'Batata Frita Extra', 'Pequena porção', 8.00, id_produto, TRUE
 FROM public.produto
-WHERE categoria_produto IN ('Refeição');
+WHERE categoria_produto IN ('Refeição')
+    ON CONFLICT DO NOTHING;
 
 INSERT INTO public.adicional (nm_adicional, ds_adicional, vl_preco_adicional, produto_id, is_disponivel)
 SELECT 'Gelo e Limão', 'No copo', 0.00, id_produto, TRUE
 FROM public.produto
-WHERE categoria_produto IN ('Bebidas');
+WHERE categoria_produto IN ('Bebidas')
+    ON CONFLICT DO NOTHING;
 
 INSERT INTO public.adicional (nm_adicional, ds_adicional, vl_preco_adicional, produto_id, is_disponivel)
 SELECT 'Copo Descartável', 'Extra', 0.10, id_produto, TRUE
 FROM public.produto
-WHERE categoria_produto IN ('Bebidas');
+WHERE categoria_produto IN ('Bebidas')
+    ON CONFLICT DO NOTHING;
 
 -- ==================================================================================
 -- 6. CUPONS (2 por Restaurante, IDs 2-21)
@@ -415,7 +431,8 @@ SELECT CONCAT('BEMVINDO_', id),
        id,
        NOW()
 FROM public.restaurante
-WHERE id BETWEEN 2 AND 21;
+WHERE id BETWEEN 2 AND 21
+    ON CONFLICT (codigo_cupom) DO NOTHING;
 
 INSERT INTO public.cupom (codigo_cupom, ds_cupom, tipo_cupom, vl_desconto, percentual_desconto, vl_minimo_pedido,
                           dt_validade, qtd_uso_maximo, qtd_usado, is_ativo, restaurante_id, data_criacao)
@@ -432,7 +449,8 @@ SELECT CONCAT('VIP_', id),
        id,
        NOW()
 FROM public.restaurante
-WHERE id BETWEEN 2 AND 21;
+WHERE id BETWEEN 2 AND 21
+    ON CONFLICT (codigo_cupom) DO NOTHING;
 
 -- ==================================================================================
 -- 7. DIAS DE FUNCIONAMENTO
@@ -498,7 +516,8 @@ SELECT
     (SELECT pr.vl_preco FROM produto pr WHERE pr.restaurante_id = p.restaurante_id LIMIT 1),
     (SELECT pr.vl_preco FROM produto pr WHERE pr.restaurante_id = p.restaurante_id LIMIT 1) * 2,
     'Padrão'
-FROM public.pedido p WHERE p.id_pedido BETWEEN 1 AND 20;
+FROM public.pedido p WHERE p.id_pedido BETWEEN 1 AND 20
+ON CONFLICT DO NOTHING;
 
 -- Vinculando adicionais a alguns itens (Pedidos 1, 3, 11, 13)
 INSERT INTO public.item_pedido_adicional (item_pedido_id, adicional_id)
@@ -506,7 +525,8 @@ SELECT
     ip.id_item_pedido,
     (SELECT a.id_adicional FROM adicional a WHERE a.produto_id = ip.produto_id LIMIT 1)
 FROM item_pedido ip
-WHERE ip.pedido_id IN (1, 3, 11, 13);
+WHERE ip.pedido_id IN (1, 3, 11, 13)
+ON CONFLICT DO NOTHING;
 
 -- ==================================================================================
 -- 10. ENTREGAS
