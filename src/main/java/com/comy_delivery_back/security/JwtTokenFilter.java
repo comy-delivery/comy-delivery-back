@@ -31,7 +31,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
         String token = recoverToken(request);
 
         if (token != null){
-            String username = tokenService.getUsernameFromToken(token);
+            String username = tokenService.validateRefreshToken(token);
 
             //verifica se o token e valido e o contexto vazio
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null){
