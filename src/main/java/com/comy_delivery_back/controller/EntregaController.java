@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/entregas")
+@RequestMapping("/api/entrega")
 @Tag(name = "Entregas", description = "Endpoints para gestão de entregas e entregadores")
 public class EntregaController {
 

@@ -146,7 +146,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         //GERAIS
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/admim").permitAll() //mudei aqui
+                        .requestMatchers("/api/admin").permitAll()
                         .requestMatchers("/v3/api-docs/**").permitAll()
                         .requestMatchers("/swagger-ui/**").permitAll()
                         .requestMatchers("/swagger-ui.html").permitAll()
@@ -155,7 +155,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/*/recuperacao/**").permitAll() // Rotas de recuperação
                         .requestMatchers(HttpMethod.GET, "/api/restaurante/abertos", "/api/restaurante/{id}", "/api/restaurante/{idRestaurante}/produtos").permitAll()
 
-                        .requestMatchers("api/admim/**").hasRole("ADMIN") //mudei aqui
+                        .requestMatchers("api/admin/**").hasRole("ADMIN")
 
                         .requestMatchers(HttpMethod.GET, "/api/cliente/ativos").hasRole("ADMIN")
 
