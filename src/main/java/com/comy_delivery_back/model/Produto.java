@@ -52,4 +52,9 @@ public class Produto {
     @Column(nullable = false)
     private LocalDateTime dataCadastroProduto = LocalDateTime.now();
 
+    @PrePersist
+    public void prePersist(){
+        isAtivo = true;
+    }
+
 }

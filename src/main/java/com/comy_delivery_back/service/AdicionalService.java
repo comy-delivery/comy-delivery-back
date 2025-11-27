@@ -47,12 +47,14 @@ public class AdicionalService {
         return new AdicionalResponseDTO(adicionalSalvo);
     }
 
+    @Transactional
     public AdicionalResponseDTO buscarPorId(Long id) {
        return  this.adicionalRepository.findById(id).map(AdicionalResponseDTO::new)
                 .orElseThrow(() -> new AdicionalNaoEncontradoException(id));
 
     }
 
+    @Transactional(readOnly = true)
     public List<AdicionalResponseDTO> listarPorProduto(Long produtoId) {
         return adicionalRepository.findByProduto_IdProduto(produtoId).stream()
                 .map(AdicionalResponseDTO:: new)
@@ -60,6 +62,7 @@ public class AdicionalService {
     }
 
 
+    @Transactional(readOnly = true)
     public List<AdicionalResponseDTO> listarDisponiveis() {
         return adicionalRepository.findByIsDisponivelTrue().stream()
                 .map(AdicionalResponseDTO:: new)
