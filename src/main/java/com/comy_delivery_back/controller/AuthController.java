@@ -14,6 +14,7 @@ import com.comy_delivery_back.service.ClienteService;
 import com.comy_delivery_back.service.EntregadorService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpStatus;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,6 +22,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
+@Tag(name = "Autenticação", description = "Endpoint para login na api")
 public class AuthController {
     private final AuthService authService;
     private final EntregadorService entregadorService;
