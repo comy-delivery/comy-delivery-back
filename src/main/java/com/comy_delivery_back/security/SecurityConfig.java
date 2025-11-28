@@ -151,14 +151,17 @@ public class SecurityConfig {
                         .requestMatchers("/v3/api-docs/**").permitAll()
                         .requestMatchers("/swagger-ui/**").permitAll()
                         .requestMatchers("/swagger-ui.html").permitAll()
+                        .requestMatchers("/api/pagamento/webhook").permitAll()
+                        .requestMatchers("/api/pagamento/checkout/**").permitAll()
+                        .requestMatchers("/api/*/recuperacao/**").permitAll() // Rotas de recuperação
 
 
                         .requestMatchers(HttpMethod.POST, "/api/cliente", "/api/entregador", "/api/restaurante").permitAll()
                         .requestMatchers(HttpMethod.POST, "/**/recuperar-senha", "/**/redefinir-senha").permitAll()
-                        .requestMatchers("/api/*/recuperacao/**").permitAll() // Rotas de recuperação
+
                         .requestMatchers(HttpMethod.GET, "/api/restaurante/abertos", "/api/restaurante/{id}", "/api/restaurante/{idRestaurante}/produtos").permitAll()
 
-                        .requestMatchers("api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
                         .requestMatchers(HttpMethod.GET, "/api/cliente/ativos").hasRole("ADMIN")
 
