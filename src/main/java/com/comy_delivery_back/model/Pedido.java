@@ -92,7 +92,4 @@ public class Pedido {
     private List<Avaliacao> avaliacoes = new ArrayList<>();
 
 
-
-
-
 }
