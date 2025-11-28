@@ -160,7 +160,20 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/**/recuperar-senha", "/**/redefinir-senha").permitAll()
 
                         //PRA FACILITAR INTEGRAÇÃO
-                        .requestMatchers("/api/**").permitAll()
+//                        .requestMatchers("/api/**").permitAll()
+                        .requestMatchers("/api/adicional/**").hasAnyRole("ADMIN", "CLIENTE", "ENTREGADOR", "RESTAURANTE")
+                        .requestMatchers("/api/restaurante/**").hasAnyRole("ADMIN", "CLIENTE", "ENTREGADOR", "RESTAURANTE")
+                        .requestMatchers("/api/avaliacao/**").hasAnyRole("ADMIN", "CLIENTE", "ENTREGADOR", "RESTAURANTE")
+                        .requestMatchers("/api/cliente/**").hasAnyRole("ADMIN", "CLIENTE", "ENTREGADOR", "RESTAURANTE")
+                        .requestMatchers("/api/cupom/**").hasAnyRole("ADMIN", "CLIENTE", "ENTREGADOR", "RESTAURANTE")
+                        .requestMatchers("/api/endereco/**").hasAnyRole("ADMIN", "CLIENTE", "ENTREGADOR", "RESTAURANTE")
+                        .requestMatchers("/api/entrega/**").hasAnyRole("ADMIN", "CLIENTE", "ENTREGADOR", "RESTAURANTE")
+                        .requestMatchers("/api/entregador/**").hasAnyRole("ADMIN", "CLIENTE", "ENTREGADOR", "RESTAURANTE")
+                        .requestMatchers("/api/item/**").hasAnyRole("ADMIN", "CLIENTE", "ENTREGADOR", "RESTAURANTE")
+                        .requestMatchers("/api/pedido/**").hasAnyRole("ADMIN", "CLIENTE", "ENTREGADOR", "RESTAURANTE")
+                        .requestMatchers("/api/produto/**").hasAnyRole("ADMIN", "CLIENTE", "ENTREGADOR", "RESTAURANTE")
+
+
 
 //                        //Adicional
 //                        .requestMatchers(HttpMethod.POST, "/api/adicional").hasRole("RESTAURANTE")
