@@ -1,56 +1,56 @@
 -- ==================================================================================
 -- 1. USUÁRIOS (Tabela Pai - Herança JOINED)
--- Senha padrão: "SenhaForte123" -> $2a$10$DOzrhsOOiwWUsI0rf4g4Gu76VFJkk3cY9o/KFzgtoVHfTnITBWbGW
+-- Senha padrão: "SenhaForte123" -> $2a$10$CgsJdAealQODbmdKpEQIWevMNDmnzik7MOw1KAnCJD27z3wAhJglW
 -- ==================================================================================
 
 -- ADMIN (ID 1)
 INSERT INTO public.usuario (id, username, password, role_usuario, is_ativo)
-VALUES (1, 'admin_master', '$2a$10$DOzrhsOOiwWUsI0rf4g4Gu76VFJkk3cY9o/KFzgtoVHfTnITBWbGW', 'ADMIN',
+VALUES (1, 'admin_master', '$2a$10$CgsJdAealQODbmdKpEQIWevMNDmnzik7MOw1KAnCJD27z3wAhJglW', 'ADMIN',
         TRUE) ON CONFLICT (id) DO NOTHING;
 
 -- RESTAURANTES (IDs 2 ao 21)
 INSERT INTO public.usuario (id, username, password, role_usuario, is_ativo)
-VALUES (2, 'ponto_perfeito', '$2a$10$DOzrhsOOiwWUsI0rf4g4Gu76VFJkk3cY9o/KFzgtoVHfTnITBWbGW', 'RESTAURANTE', TRUE),
-       (3, 'burgerverso', '$2a$10$DOzrhsOOiwWUsI0rf4g4Gu76VFJkk3cY9o/KFzgtoVHfTnITBWbGW', 'RESTAURANTE', TRUE),
-       (4, 'vapt_vupt', '$2a$10$DOzrhsOOiwWUsI0rf4g4Gu76VFJkk3cY9o/KFzgtoVHfTnITBWbGW', 'RESTAURANTE', TRUE),
-       (5, 'stop_gourmet', '$2a$10$DOzrhsOOiwWUsI0rf4g4Gu76VFJkk3cY9o/KFzgtoVHfTnITBWbGW', 'RESTAURANTE', TRUE),
-       (6, 'doce_brisa', '$2a$10$DOzrhsOOiwWUsI0rf4g4Gu76VFJkk3cY9o/KFzgtoVHfTnITBWbGW', 'RESTAURANTE', TRUE),
-       (7, 'geleia_real', '$2a$10$DOzrhsOOiwWUsI0rf4g4Gu76VFJkk3cY9o/KFzgtoVHfTnITBWbGW', 'RESTAURANTE', TRUE),
-       (8, 'fada_acucar', '$2a$10$DOzrhsOOiwWUsI0rf4g4Gu76VFJkk3cY9o/KFzgtoVHfTnITBWbGW', 'RESTAURANTE', TRUE),
-       (9, 'conf_afeto', '$2a$10$DOzrhsOOiwWUsI0rf4g4Gu76VFJkk3cY9o/KFzgtoVHfTnITBWbGW', 'RESTAURANTE', TRUE),
-       (10, 'tribo_acai', '$2a$10$DOzrhsOOiwWUsI0rf4g4Gu76VFJkk3cY9o/KFzgtoVHfTnITBWbGW', 'RESTAURANTE', TRUE),
-       (11, 'super_fruta', '$2a$10$DOzrhsOOiwWUsI0rf4g4Gu76VFJkk3cY9o/KFzgtoVHfTnITBWbGW', 'RESTAURANTE', TRUE),
-       (12, 'massa_nostra', '$2a$10$DOzrhsOOiwWUsI0rf4g4Gu76VFJkk3cY9o/KFzgtoVHfTnITBWbGW', 'RESTAURANTE', TRUE),
-       (13, 'forno_magico', '$2a$10$DOzrhsOOiwWUsI0rf4g4Gu76VFJkk3cY9o/KFzgtoVHfTnITBWbGW', 'RESTAURANTE', TRUE),
-       (14, 'hashi_ouro', '$2a$10$DOzrhsOOiwWUsI0rf4g4Gu76VFJkk3cY9o/KFzgtoVHfTnITBWbGW', 'RESTAURANTE', TRUE),
-       (15, 'sakura_exp', '$2a$10$DOzrhsOOiwWUsI0rf4g4Gu76VFJkk3cY9o/KFzgtoVHfTnITBWbGW', 'RESTAURANTE', TRUE),
-       (16, 'dragao_wok', '$2a$10$DOzrhsOOiwWUsI0rf4g4Gu76VFJkk3cY9o/KFzgtoVHfTnITBWbGW', 'RESTAURANTE', TRUE),
-       (17, 'o_mandarim', '$2a$10$DOzrhsOOiwWUsI0rf4g4Gu76VFJkk3cY9o/KFzgtoVHfTnITBWbGW', 'RESTAURANTE', TRUE),
-       (18, 'terra_sabor', '$2a$10$DOzrhsOOiwWUsI0rf4g4Gu76VFJkk3cY9o/KFzgtoVHfTnITBWbGW', 'RESTAURANTE', TRUE),
-       (19, 'verde_vibe', '$2a$10$DOzrhsOOiwWUsI0rf4g4Gu76VFJkk3cY9o/KFzgtoVHfTnITBWbGW', 'RESTAURANTE', TRUE),
-       (20, 'temp_brasil', '$2a$10$DOzrhsOOiwWUsI0rf4g4Gu76VFJkk3cY9o/KFzgtoVHfTnITBWbGW', 'RESTAURANTE', TRUE),
-       (21, 'sabor_casa', '$2a$10$DOzrhsOOiwWUsI0rf4g4Gu76VFJkk3cY9o/KFzgtoVHfTnITBWbGW', 'RESTAURANTE',
+VALUES (2, 'ponto_perfeito', '$2a$10$CgsJdAealQODbmdKpEQIWevMNDmnzik7MOw1KAnCJD27z3wAhJglW', 'RESTAURANTE', TRUE),
+       (3, 'burgerverso', '$2a$10$CgsJdAealQODbmdKpEQIWevMNDmnzik7MOw1KAnCJD27z3wAhJglW', 'RESTAURANTE', TRUE),
+       (4, 'vapt_vupt', '$2a$10$CgsJdAealQODbmdKpEQIWevMNDmnzik7MOw1KAnCJD27z3wAhJglW', 'RESTAURANTE', TRUE),
+       (5, 'stop_gourmet', '$2a$10$CgsJdAealQODbmdKpEQIWevMNDmnzik7MOw1KAnCJD27z3wAhJglW', 'RESTAURANTE', TRUE),
+       (6, 'doce_brisa', '$2a$10$CgsJdAealQODbmdKpEQIWevMNDmnzik7MOw1KAnCJD27z3wAhJglW', 'RESTAURANTE', TRUE),
+       (7, 'geleia_real', '$2a$10$CgsJdAealQODbmdKpEQIWevMNDmnzik7MOw1KAnCJD27z3wAhJglW', 'RESTAURANTE', TRUE),
+       (8, 'fada_acucar', '$2a$10$CgsJdAealQODbmdKpEQIWevMNDmnzik7MOw1KAnCJD27z3wAhJglW', 'RESTAURANTE', TRUE),
+       (9, 'conf_afeto', '$2a$10$CgsJdAealQODbmdKpEQIWevMNDmnzik7MOw1KAnCJD27z3wAhJglW', 'RESTAURANTE', TRUE),
+       (10, 'tribo_acai', '$2a$10$CgsJdAealQODbmdKpEQIWevMNDmnzik7MOw1KAnCJD27z3wAhJglW', 'RESTAURANTE', TRUE),
+       (11, 'super_fruta', '$2a$10$CgsJdAealQODbmdKpEQIWevMNDmnzik7MOw1KAnCJD27z3wAhJglW', 'RESTAURANTE', TRUE),
+       (12, 'massa_nostra', '$2a$10$CgsJdAealQODbmdKpEQIWevMNDmnzik7MOw1KAnCJD27z3wAhJglW', 'RESTAURANTE', TRUE),
+       (13, 'forno_magico', '$2a$10$CgsJdAealQODbmdKpEQIWevMNDmnzik7MOw1KAnCJD27z3wAhJglW', 'RESTAURANTE', TRUE),
+       (14, 'hashi_ouro', '$2a$10$CgsJdAealQODbmdKpEQIWevMNDmnzik7MOw1KAnCJD27z3wAhJglW', 'RESTAURANTE', TRUE),
+       (15, 'sakura_exp', '$2a$10$CgsJdAealQODbmdKpEQIWevMNDmnzik7MOw1KAnCJD27z3wAhJglW', 'RESTAURANTE', TRUE),
+       (16, 'dragao_wok', '$2a$10$CgsJdAealQODbmdKpEQIWevMNDmnzik7MOw1KAnCJD27z3wAhJglW', 'RESTAURANTE', TRUE),
+       (17, 'o_mandarim', '$2a$10$CgsJdAealQODbmdKpEQIWevMNDmnzik7MOw1KAnCJD27z3wAhJglW', 'RESTAURANTE', TRUE),
+       (18, 'terra_sabor', '$2a$10$CgsJdAealQODbmdKpEQIWevMNDmnzik7MOw1KAnCJD27z3wAhJglW', 'RESTAURANTE', TRUE),
+       (19, 'verde_vibe', '$2a$10$CgsJdAealQODbmdKpEQIWevMNDmnzik7MOw1KAnCJD27z3wAhJglW', 'RESTAURANTE', TRUE),
+       (20, 'temp_brasil', '$2a$10$CgsJdAealQODbmdKpEQIWevMNDmnzik7MOw1KAnCJD27z3wAhJglW', 'RESTAURANTE', TRUE),
+       (21, 'sabor_casa', '$2a$10$CgsJdAealQODbmdKpEQIWevMNDmnzik7MOw1KAnCJD27z3wAhJglW', 'RESTAURANTE',
         TRUE) ON CONFLICT (id) DO NOTHING;
 
 -- CLIENTES (IDs 22 ao 26)
 INSERT INTO public.usuario (id, username, password, role_usuario, is_ativo)
-VALUES (22, 'cliente_ana', '$2a$10$DOzrhsOOiwWUsI0rf4g4Gu76VFJkk3cY9o/KFzgtoVHfTnITBWbGW', 'CLIENTE', TRUE),
-       (23, 'cliente_bruno', '$2a$10$DOzrhsOOiwWUsI0rf4g4Gu76VFJkk3cY9o/KFzgtoVHfTnITBWbGW', 'CLIENTE', TRUE),
-       (24, 'cliente_carla', '$2a$10$DOzrhsOOiwWUsI0rf4g4Gu76VFJkk3cY9o/KFzgtoVHfTnITBWbGW', 'CLIENTE', TRUE),
-       (25, 'cliente_daniel', '$2a$10$DOzrhsOOiwWUsI0rf4g4Gu76VFJkk3cY9o/KFzgtoVHfTnITBWbGW', 'CLIENTE', TRUE),
-       (26, 'cliente_elena', '$2a$10$DOzrhsOOiwWUsI0rf4g4Gu76VFJkk3cY9o/KFzgtoVHfTnITBWbGW', 'CLIENTE',
+VALUES (22, 'cliente_ana', '$2a$10$CgsJdAealQODbmdKpEQIWevMNDmnzik7MOw1KAnCJD27z3wAhJglW', 'CLIENTE', TRUE),
+       (23, 'cliente_bruno', '$2a$10$CgsJdAealQODbmdKpEQIWevMNDmnzik7MOw1KAnCJD27z3wAhJglW', 'CLIENTE', TRUE),
+       (24, 'cliente_carla', '$2a$10$CgsJdAealQODbmdKpEQIWevMNDmnzik7MOw1KAnCJD27z3wAhJglW', 'CLIENTE', TRUE),
+       (25, 'cliente_daniel', '$2a$10$CgsJdAealQODbmdKpEQIWevMNDmnzik7MOw1KAnCJD27z3wAhJglW', 'CLIENTE', TRUE),
+       (26, 'cliente_elena', '$2a$10$CgsJdAealQODbmdKpEQIWevMNDmnzik7MOw1KAnCJD27z3wAhJglW', 'CLIENTE',
         TRUE) ON CONFLICT (id) DO NOTHING;
 
 -- ENTREGADORES (IDs 27 ao 34)
 INSERT INTO public.usuario (id, username, password, role_usuario, is_ativo)
-VALUES (27, 'driver_felipe', '$2a$10$DOzrhsOOiwWUsI0rf4g4Gu76VFJkk3cY9o/KFzgtoVHfTnITBWbGW', 'ENTREGADOR', TRUE),
-       (28, 'driver_gabriela', '$2a$10$DOzrhsOOiwWUsI0rf4g4Gu76VFJkk3cY9o/KFzgtoVHfTnITBWbGW', 'ENTREGADOR', TRUE),
-       (29, 'driver_hugo', '$2a$10$DOzrhsOOiwWUsI0rf4g4Gu76VFJkk3cY9o/KFzgtoVHfTnITBWbGW', 'ENTREGADOR', TRUE),
-       (30, 'driver_ines', '$2a$10$DOzrhsOOiwWUsI0rf4g4Gu76VFJkk3cY9o/KFzgtoVHfTnITBWbGW', 'ENTREGADOR', TRUE),
-       (31, 'driver_joao', '$2a$10$DOzrhsOOiwWUsI0rf4g4Gu76VFJkk3cY9o/KFzgtoVHfTnITBWbGW', 'ENTREGADOR', TRUE),
-       (32, 'driver_keila', '$2a$10$DOzrhsOOiwWUsI0rf4g4Gu76VFJkk3cY9o/KFzgtoVHfTnITBWbGW', 'ENTREGADOR', TRUE),
-       (33, 'driver_lucas', '$2a$10$DOzrhsOOiwWUsI0rf4g4Gu76VFJkk3cY9o/KFzgtoVHfTnITBWbGW', 'ENTREGADOR', TRUE),
-       (34, 'driver_mariana', '$2a$10$DOzrhsOOiwWUsI0rf4g4Gu76VFJkk3cY9o/KFzgtoVHfTnITBWbGW', 'ENTREGADOR',
+VALUES (27, 'driver_felipe', '$2a$10$CgsJdAealQODbmdKpEQIWevMNDmnzik7MOw1KAnCJD27z3wAhJglW', 'ENTREGADOR', TRUE),
+       (28, 'driver_gabriela', '$2a$10$CgsJdAealQODbmdKpEQIWevMNDmnzik7MOw1KAnCJD27z3wAhJglW', 'ENTREGADOR', TRUE),
+       (29, 'driver_hugo', '$2a$10$CgsJdAealQODbmdKpEQIWevMNDmnzik7MOw1KAnCJD27z3wAhJglW', 'ENTREGADOR', TRUE),
+       (30, 'driver_ines', '$2a$10$CgsJdAealQODbmdKpEQIWevMNDmnzik7MOw1KAnCJD27z3wAhJglW', 'ENTREGADOR', TRUE),
+       (31, 'driver_joao', '$2a$10$CgsJdAealQODbmdKpEQIWevMNDmnzik7MOw1KAnCJD27z3wAhJglW', 'ENTREGADOR', TRUE),
+       (32, 'driver_keila', '$2a$10$CgsJdAealQODbmdKpEQIWevMNDmnzik7MOw1KAnCJD27z3wAhJglW', 'ENTREGADOR', TRUE),
+       (33, 'driver_lucas', '$2a$10$CgsJdAealQODbmdKpEQIWevMNDmnzik7MOw1KAnCJD27z3wAhJglW', 'ENTREGADOR', TRUE),
+       (34, 'driver_mariana', '$2a$10$CgsJdAealQODbmdKpEQIWevMNDmnzik7MOw1KAnCJD27z3wAhJglW', 'ENTREGADOR',
         TRUE) ON CONFLICT (id) DO NOTHING;
 
 -- ==================================================================================
