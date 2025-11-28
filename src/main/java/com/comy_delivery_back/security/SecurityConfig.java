@@ -25,6 +25,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.web.cors.CorsConfigurationSource;
 
 import java.util.Map;
 
@@ -36,66 +37,21 @@ public class SecurityConfig {
     private final TokenService tokenService;
     private final UsuarioService usuarioService;
     private final ObjectMapper objectMapper;
+    private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
 
 
-    public SecurityConfig(JwtTokenFilter jwtTokenFilter, TokenService tokenService, UsuarioService usuarioService, ObjectMapper objectMapper) {
+    public SecurityConfig(JwtTokenFilter jwtTokenFilter, TokenService tokenService, UsuarioService usuarioService, ObjectMapper objectMapper, OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler) {
         this.jwtTokenFilter = jwtTokenFilter;
         this.tokenService = tokenService;
         this.usuarioService = usuarioService;
         this.objectMapper = objectMapper;
+        this.oAuth2AuthenticationSuccessHandler = oAuth2AuthenticationSuccessHandler;
     }
 
 
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
-    }
-
-    @Bean
-    public AuthenticationSuccessHandler oauth2AuthenticationSucessHandler() {
-        return ((request, response, authentication) -> {
-
-            //pega informacoes do usuario google
-            OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
-            String email = oAuth2User.getAttribute("email");
-            String nome = oAuth2User.getAttribute("name");
-
-            try {
-                //pega usuario existent
-                Usuario usuario = usuarioService.processOAuth2User(email, nome);
-                String token = tokenService.generateToken(usuario);
-                String refreshToken = tokenService.refreshToken(usuario);
-
-                LoginResponseDTO loginResponseDTO = new LoginResponseDTO(token, refreshToken, usuario.getId());
-
-                response.setContentType("application/json;charset=UTF-8"); //tipo
-                response.setStatus(HttpServletResponse.SC_OK); //resposta
-
-                //converte o dto para json string
-                String jsonResponse = objectMapper.writeValueAsString(loginResponseDTO);
-
-                //escreve string
-                response.getWriter().write(jsonResponse);
-
-            } catch (UsuarioNaoRegistradoException e) {
-                response.setContentType("application/json;charset=UTF-8");
-                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-
-                //criando a resposta
-                String jsonError = objectMapper.writeValueAsString(Map.of(
-                        "status", "REGISTRO_PENDENTE",
-                        "message", "Usuário não encontrado. Complete o cadastro com este e-mail.",
-                        "email", email,
-                        "nome", nome
-                ));
-
-                //escreve a string
-                response.getWriter().write(jsonError);
-            }
-
-            //finaliza requisicao
-            response.getWriter().flush();
-        });
     }
 
     //correcao do problema de prefixamento de roles
@@ -134,13 +90,14 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity,
                                                    DaoAuthenticationProvider daoAuthenticationProvider,
-                                                   AuthenticationSuccessHandler oauth2AuthenticationSuccessHandler) throws Exception {
+                                                   CorsConfigurationSource corsConfigurationSource) throws Exception {
         httpSecurity
+                .cors(cors -> cors.configurationSource(corsConfigurationSource))
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(sessionConfig ->
                         sessionConfig.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .oauth2Login(oauth2 -> oauth2
-                        .successHandler(oauth2AuthenticationSuccessHandler)
+                        .successHandler(oAuth2AuthenticationSuccessHandler)
                         .authorizationEndpoint(endpoint -> endpoint.baseUri("/oauth2/authorization"))
                         .redirectionEndpoint(redirection -> redirection.baseUri("/oauth2/callback/*"))
                 )
