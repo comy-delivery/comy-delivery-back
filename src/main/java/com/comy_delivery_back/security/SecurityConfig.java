@@ -309,6 +309,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/restaurante/{id}/banner").permitAll()
                         // .requestMatchers(HttpMethod.POST, "/api/restaurante/{id}/enderecos").hasRole("RESTAURANTE")
                         .requestMatchers(HttpMethod.PATCH, "/api/restaurante/{id}/calcular-tempo-medio").permitAll()
+                        .requestMatchers(HttpMethod.PATCH, "/api/restaurante/status/abrir-todos").permitAll()//somente para desenvolvimento
 
                         .anyRequest().authenticated())
                 .authenticationProvider(daoAuthenticationProvider)

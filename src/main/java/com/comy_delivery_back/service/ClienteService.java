@@ -373,9 +373,11 @@ public class ClienteService {
             throw new RegraDeNegocioException("O cliente não possui endereço válido (com coordenadas) para calcular distância.");
         }
 
+
         List<Restaurante> restaurantes = restauranteRepository.findByIsDisponivelTrue();
 
         return restaurantes.stream()
+                .filter(Restaurante::isAberto)
                 .map(restaurante -> {
 
                     Endereco origem = restaurante.getEnderecos().stream()

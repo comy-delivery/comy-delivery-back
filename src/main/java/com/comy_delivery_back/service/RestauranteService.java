@@ -593,4 +593,20 @@ public class RestauranteService {
         return new RestauranteResponseDTO(restaurante);
     }
 
+    @Transactional
+    public void abrirTodosRestaurantes() {
+        log.info("Iniciando abertura de todos os restaurantes disponíveis.");
+
+        List<Restaurante> restaurantes = restauranteRepository.findByIsDisponivelTrue();
+
+        if (restaurantes.isEmpty()) {
+            log.warn("Nenhum restaurante disponível encontrado para abrir.");
+            return;
+        }
+
+        restaurantes.forEach(restaurante -> restaurante.setAberto(true));
+        restauranteRepository.saveAll(restaurantes);
+        log.info("{} restaurantes foram abertos com sucesso.", restaurantes.size());
+    }
+
 }

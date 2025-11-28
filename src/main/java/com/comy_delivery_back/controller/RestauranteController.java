@@ -290,5 +290,13 @@ public class RestauranteController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "Abrir todos os restaurantes",
+            description = "Define o status de aberto como 'true' para todos os restaurantes que estão disponíveis no sistema.")
+    @PatchMapping("/status/abrir-todos")
+    public ResponseEntity<Void> abrirTodosRestaurantes() {
+        restauranteService.abrirTodosRestaurantes();
+        return ResponseEntity.noContent().build();
+    }
+
 
 }
