@@ -1,7 +1,5 @@
 package com.comy_delivery_back;
 
-import com.mercadopago.MercadoPagoConfig;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.openfeign.EnableFeignClients;
