@@ -52,7 +52,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationSuccessHandler oauth2AuthenticationSucessHandler(){
+    public AuthenticationSuccessHandler oauth2AuthenticationSucessHandler() {
         return ((request, response, authentication) -> {
 
             //pega informacoes do usuario google
@@ -60,7 +60,7 @@ public class SecurityConfig {
             String email = oAuth2User.getAttribute("email");
             String nome = oAuth2User.getAttribute("name");
 
-            try{
+            try {
                 //pega usuario existent
                 Usuario usuario = usuarioService.processOAuth2User(email, nome);
                 String token = tokenService.generateToken(usuario);
@@ -100,7 +100,7 @@ public class SecurityConfig {
 
     //correcao do problema de prefixamento de roles
     @Bean
-    public GrantedAuthoritiesMapper grantedAuthoritiesMapper(){
+    public GrantedAuthoritiesMapper grantedAuthoritiesMapper() {
         SimpleAuthorityMapper authorityMapper = new SimpleAuthorityMapper();
         authorityMapper.setPrefix(""); //nao adiciona prefixo nas authorities que ja enviei
 
@@ -113,7 +113,7 @@ public class SecurityConfig {
             UserDetailsService userDetailsService, //busca usuario no banco
             PasswordEncoder passwordEncoder,
             GrantedAuthoritiesMapper grantedAuthoritiesMapper //mapeia roles
-    ){
+    ) {
         //"mostra" como validar as credenciais
         DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
 
@@ -134,10 +134,10 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity,
                                                    DaoAuthenticationProvider daoAuthenticationProvider,
-                                                   AuthenticationSuccessHandler oauth2AuthenticationSuccessHandler) throws Exception{
+                                                   AuthenticationSuccessHandler oauth2AuthenticationSuccessHandler) throws Exception {
         httpSecurity
                 .csrf(csrf -> csrf.disable())
-                .sessionManagement(sessionConfig->
+                .sessionManagement(sessionConfig ->
                         sessionConfig.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .oauth2Login(oauth2 -> oauth2
                         .successHandler(oauth2AuthenticationSuccessHandler)
@@ -146,31 +146,167 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
                         //GERAIS
-                        .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/admin").permitAll()
                         .requestMatchers("/v3/api-docs/**").permitAll()
                         .requestMatchers("/swagger-ui/**").permitAll()
                         .requestMatchers("/swagger-ui.html").permitAll()
-                        .requestMatchers("/api/pagamento/webhook").permitAll()
-                        .requestMatchers("/api/pagamento/checkout/**").permitAll()
+
+                        //Health
+                        .requestMatchers(HttpMethod.GET, "/api/health").permitAll()
+
+                        //Auth
+                        .requestMatchers("/api/auth/**").permitAll()
+                        //Recuperação
                         .requestMatchers("/api/*/recuperacao/**").permitAll() // Rotas de recuperação
-
-
-                        .requestMatchers(HttpMethod.POST, "/api/cliente", "/api/entregador", "/api/restaurante").permitAll()
                         .requestMatchers(HttpMethod.POST, "/**/recuperar-senha", "/**/redefinir-senha").permitAll()
 
-                        .requestMatchers(HttpMethod.GET, "/api/restaurante/abertos", "/api/restaurante/{id}", "/api/restaurante/{idRestaurante}/produtos").permitAll()
+                        //PRA FACILITAR INTEGRAÇÃO
+                        .requestMatchers("/api/**").permitAll()
 
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+//                        //Adicional
+//                        .requestMatchers(HttpMethod.POST, "/api/adicional").hasRole("RESTAURANTE")
+//                        .requestMatchers(HttpMethod.GET, "/api/adicional/{id}").hasAnyRole("RESTAURANTE","CLIENTE")
+//                        .requestMatchers(HttpMethod.GET, "/api/adicional/produto/{produtoId}").hasAnyRole("RESTAURANTE","CLIENTE")
+//                        .requestMatchers(HttpMethod.GET, "/api/adicional/disponiveis").hasAnyRole("RESTAURANTE","CLIENTE")
+//                        .requestMatchers(HttpMethod.PUT, "/api/adicional/{id}").hasRole("RESTAURANTE")
+//                        .requestMatchers(HttpMethod.PATCH, "/api/adicional/{id}/ativar").hasRole("RESTAURANTE")
+//                        .requestMatchers(HttpMethod.PATCH, "/api/adicional/{id}/desativar").hasRole("RESTAURANTE")
+//                        .requestMatchers(HttpMethod.DELETE, "/api/adicional/{id}").hasRole("RESTAURANTE")
+//
+//                        //Admin
+//                        .requestMatchers("/api/admin").hasRole("ADMIN")
+//
+//                        //Avaliacao
+//                        .requestMatchers(HttpMethod.POST, "/api/avaliacao").hasRole("CLIENTE")
+//                        .requestMatchers(HttpMethod.GET, "/api/avaliacao/restaurante/{restauranteId}").permitAll()
+//                        .requestMatchers(HttpMethod.DELETE, "/api/avaliacao/{id}").hasRole("CLIENTE")
+//
+//                        //Cliente
+//                        .requestMatchers(HttpMethod.POST, "/api/cliente").permitAll()
+//                        .requestMatchers(HttpMethod.GET, "/api/cliente/{idCliente}").permitAll()
+//                        .requestMatchers(HttpMethod.GET, "/api/cliente/ativos").hasRole("ADMIN")
+//                        .requestMatchers(HttpMethod.PUT, "/api/cliente/{idCliente}").hasRole("CLIENTE")
+//                        .requestMatchers(HttpMethod.DELETE, "/api/cliente/{idCliente}").hasRole("CLIENTE")
+//                        .requestMatchers(HttpMethod.GET, "/api/cliente/{idCliente}/enderecos").hasRole("CLIENTE")
+//                        .requestMatchers(HttpMethod.POST, "/api/cliente/{idCliente}/enderecos").hasRole("CLIENTE")
+//                        .requestMatchers(HttpMethod.PUT, "/api/cliente/{idCliente}/enderecos/{idEndereco}").hasRole("CLIENTE")
+//                        .requestMatchers(HttpMethod.GET, "/api/cliente/{idCliente}/pedidos").hasRole("CLIENTE")
+//                        .requestMatchers(HttpMethod.GET, "/api/cliente/{idCliente}/restaurantes-distancia").permitAll()
+//
+//                        //Cupom
+//                        .requestMatchers(HttpMethod.POST, "/api/cupom").hasRole("RESTAURANTE")
+//                        .requestMatchers(HttpMethod.GET, "/api/cupom/{id}").permitAll()
+//                        .requestMatchers(HttpMethod.GET, "/api/cupom/codigo/{codigo}").permitAll()
+//                        .requestMatchers(HttpMethod.GET, "/api/cupom").permitAll()
+//                        .requestMatchers(HttpMethod.GET, "/api/cupom/restaurante/{restauranteId}").permitAll()
+//                        .requestMatchers(HttpMethod.POST, "/api/cupom/{codigo}/validar").permitAll()
+//                        .requestMatchers(HttpMethod.GET, "/api/cupom/{id}/verificar-validade").permitAll()
+//                        .requestMatchers(HttpMethod.POST, "/api/cupom/{id}/aplicar-desconto").permitAll()
+//                        .requestMatchers(HttpMethod.PATCH, "/api/cupom/{id}/incrementar-uso").permitAll()
+//                        .requestMatchers(HttpMethod.PUT, "/api/cupom/{id}").hasRole("RESTAURANTE")
+//                        .requestMatchers(HttpMethod.PATCH, "/api/cupom/{id}/desativar").hasRole("RESTAURANTE")
+//                        .requestMatchers(HttpMethod.PATCH, "/api/cupom/{id}/ativar").hasRole("RESTAURANTE")
+//                        .requestMatchers(HttpMethod.DELETE, "/api/cupom/{id}").hasRole("RESTAURANTE")
+//
+//                        //Endereço
+//                        .requestMatchers(HttpMethod.GET, "/api/endereco/{cep}").permitAll()
+//                        .requestMatchers(HttpMethod.DELETE, "/api/endereco/{id}").hasAnyRole("RESTAURANTE","CLIENTE")
+//                        .requestMatchers(HttpMethod.POST, "/api/endereco").hasAnyRole("RESTAURANTE","CLIENTE")
+//                        .requestMatchers(HttpMethod.GET, "/api/endereco/buscar/{id}").permitAll()
+//                        .requestMatchers(HttpMethod.PATCH, "/api/endereco/alterar/{id}").hasAnyRole("RESTAURANTE","CLIENTE")
+//                        .requestMatchers(HttpMethod.PATCH, "/api/endereco/{id}/padrao").hasAnyRole("RESTAURANTE","CLIENTE")
+//                        .requestMatchers(HttpMethod.PATCH, "/api/endereco/{idEndereco}/vincular").hasAnyRole("RESTAURANTE","CLIENTE")
+//
+//                        //Entrega
+//                        .requestMatchers(HttpMethod.POST, "/api/entrega").permitAll()
+//                        .requestMatchers(HttpMethod.PATCH, "/api/entrega/{id}").permitAll()
+//                        .requestMatchers(HttpMethod.GET, "/api/entrega/{id}").permitAll()
+//                        .requestMatchers(HttpMethod.GET, "/api/entrega/pedido/{idPedido}").permitAll()
+//                        .requestMatchers(HttpMethod.GET, "/api/entrega/status").permitAll()
+//                        .requestMatchers(HttpMethod.GET, "/api/entrega/entregador/{idEntregador}").hasRole("ENTREGADOR")
+//                        .requestMatchers(HttpMethod.GET, "/api/entrega/entregador/{idEntregador}/status").hasRole("ENTREGADOR")
+//                        .requestMatchers(HttpMethod.PATCH, "/api/entrega/{idEntrega}/avaliacao/{idAvaliacao}").hasRole("ENTREGADOR")
+//                        .requestMatchers(HttpMethod.GET, "/api/entrega/entregador/{id}/dashboard").hasRole("ENTREGADOR")
+//
+//                        //Entregador
+//                        .requestMatchers(HttpMethod.POST, "/api/entregador").permitAll()
+//                        .requestMatchers(HttpMethod.GET, "/api/entregador/{id}").hasRole("ENTREGADOR")
+//                        .requestMatchers(HttpMethod.GET, "/api/entregador/disponiveis").permitAll()
+//                        .requestMatchers(HttpMethod.PUT, "/api/entregador/{id}").hasRole("ENTREGADOR")
+//                        .requestMatchers(HttpMethod.DELETE, "/api/entregador/{id}").hasRole("ENTREGADOR")
+//                        .requestMatchers(HttpMethod.PATCH, "/api/entregador/{id}/disponivel").hasRole("ENTREGADOR")
+//                        .requestMatchers(HttpMethod.PATCH, "/api/entregador/{id}/indisponivel").hasRole("ENTREGADOR")
+//                        .requestMatchers(HttpMethod.PATCH, "/api/entregador/{idEntregador}/atribuir/{idEntrega}").hasRole("ENTREGADOR")
+//                        .requestMatchers(HttpMethod.PATCH, "/api/entregador/entrega/{idEntrega}/iniciar").hasRole("ENTREGADOR")
+//                        .requestMatchers(HttpMethod.PATCH, "/api/entregador/entrega/{idEntrega}/finalizar").hasRole("ENTREGADOR")
+//                        .requestMatchers(HttpMethod.PATCH, "/api/entregador/entrega/{idEntrega}/cancelar").hasRole("ENTREGADOR")
+//
+//                        //ItemPedido
+//                        .requestMatchers(HttpMethod.POST, "/api/item").hasAnyRole("RESTAURANTE","CLIENTE")
+//                        .requestMatchers(HttpMethod.GET, "/api/item/{id}").hasAnyRole("RESTAURANTE","CLIENTE")
+//                        .requestMatchers(HttpMethod.GET, "/api/item/pedido/{pedidoId}").hasAnyRole("RESTAURANTE","CLIENTE")
+//                        .requestMatchers(HttpMethod.PATCH, "/api/item/{id}/quantidade").hasRole("CLIENTE")
+//                        .requestMatchers(HttpMethod.PATCH, "/api/item/{id}/observacao").hasRole("CLIENTE")
+//                        .requestMatchers(HttpMethod.PATCH, "/api/item/{id}/adicionais").hasRole("CLIENTE")
+//                        .requestMatchers(HttpMethod.DELETE, "/api/item/{id}/adicionais").hasRole("CLIENTE")
+//                        .requestMatchers(HttpMethod.GET, "/api/item/{id}/subtotal").hasRole("RESTAURANTE")
+//                        .requestMatchers(HttpMethod.DELETE, "/api/item/{id}").hasAnyRole("RESTAURANTE","CLIENTE")
+//                        .requestMatchers(HttpMethod.POST, "/api/item/{id}/duplicar").hasRole("CLIENTE")
+//
+//                        //Pedido
+//                        .requestMatchers(HttpMethod.POST, "/api/pedido").hasRole("CLIENTE")
+//                        .requestMatchers(HttpMethod.PATCH, "/api/pedido/{id}/aceitar").hasRole("RESTAURANTE")
+//                        .requestMatchers(HttpMethod.PATCH, "/api/pedido/{id}/recusar").hasRole("RESTAURANTE")
+//                        .requestMatchers(HttpMethod.GET, "/api/pedido/{id}").hasAnyRole("RESTAURANTE","CLIENTE")
+//                        .requestMatchers(HttpMethod.GET, "/api/pedido/cliente/{clienteId}").hasRole("CLIENTE")
+//                        .requestMatchers(HttpMethod.GET, "/api/pedido/restaurante/{restauranteId}").hasRole("RESTAURANTE")
+//                        .requestMatchers(HttpMethod.GET, "/api/pedido/restaurante/{restauranteId}/pendentes").hasRole("RESTAURANTE")
+//                        .requestMatchers(HttpMethod.GET, "/api/pedido/restaurante/{restauranteId}/aceitos").hasRole("RESTAURANTE")
+//                        .requestMatchers(HttpMethod.GET, "/api/pedido/restaurante/{restauranteId}/recusados").hasRole("RESTAURANTE")
+//                        .requestMatchers(HttpMethod.PATCH, "/api/pedido/{id}/status").hasRole("RESTAURANTE")
+//                        .requestMatchers(HttpMethod.DELETE, "/api/pedido/{id}").hasAnyRole("RESTAURANTE","CLIENTE")
+//                        .requestMatchers(HttpMethod.GET, "/api/pedido/{id}/subtotal").hasRole("RESTAURANTE")
+//                        .requestMatchers(HttpMethod.GET, "/api/pedido/{id}/total").hasRole("RESTAURANTE")
+//                        .requestMatchers(HttpMethod.GET, "/api/pedido/{id}/valor-entrega").hasRole("RESTAURANTE")
+//                        .requestMatchers(HttpMethod.GET, "/api/pedido/restaurante/{restauranteId}/dashboard").hasRole("RESTAURANTE")
+//                        .requestMatchers(HttpMethod.GET, "/api/pedido/{id}/tempo-estimado").permitAll()
+//                        .requestMatchers(HttpMethod.PATCH, "/api/pedido/{id}/finalizar").permitAll()
+//                        .requestMatchers(HttpMethod.PATCH, "/api/pedido/{id}/cupom").hasAnyRole("RESTAURANTE","CLIENTE")
+//                        .requestMatchers(HttpMethod.DELETE, "/api/pedido/{id}/cupom").hasAnyRole("RESTAURANTE","CLIENTE")
+//                        .requestMatchers(HttpMethod.GET, "/api/pedido/{id}/desconto").permitAll()
+//
+//                        //Produto
+//                        .requestMatchers(HttpMethod.POST, "/api/produto").hasRole("RESTAURANTE")
+//                        .requestMatchers(HttpMethod.GET, "/api/produto/{id}").hasRole("RESTAURANTE")
+//                        .requestMatchers(HttpMethod.GET, "/api/produto/restaurante/{restauranteId}").permitAll()
+//                        .requestMatchers(HttpMethod.GET, "/api/produto/promocoes").permitAll()
+//                        .requestMatchers(HttpMethod.PUT, "/api/produto/{id}").hasRole("RESTAURANTE")
+//                        .requestMatchers(HttpMethod.DELETE, "/api/produto/{id}").hasRole("RESTAURANTE")
+//                        .requestMatchers(HttpMethod.PUT, "/api/produto/{id}/imagem").hasRole("RESTAURANTE")
+//                        .requestMatchers(HttpMethod.GET, "/api/produto/{id}/imagem").permitAll()
+//                        .requestMatchers(HttpMethod.PATCH, "/api/produto/{id}/promocao").hasRole("RESTAURANTE")
+//                        .requestMatchers(HttpMethod.GET, "/api/produto/restaurante/{restauranteId}/categorias").permitAll()
+//
+//                        //Restaurante
+//                        .requestMatchers(HttpMethod.POST, "/api/restaurante").permitAll()
+//                        .requestMatchers(HttpMethod.GET, "/api/restaurante/{id}").permitAll()
+//                        .requestMatchers(HttpMethod.GET, "/api/restaurante/cnpj/{cnpj}").permitAll()
+//                        .requestMatchers(HttpMethod.PUT, "/api/restaurante/{id}").hasRole("RESTAURANTE")
+//                        .requestMatchers(HttpMethod.DELETE, "/api/restaurante/{id}").hasAnyRole("RESTAURANTE","ADMIN")
+//                        .requestMatchers(HttpMethod.PUT, "/api/restaurante/{idRestaurante}/enderecos/{idEndereco}").hasRole("RESTAURANTE")
+//                        .requestMatchers(HttpMethod.GET, "/api/restaurante/abertos").permitAll()
+//                        .requestMatchers(HttpMethod.GET, "/api/restaurante/{idRestaurante}/enderecos").permitAll()
+//                        .requestMatchers(HttpMethod.GET, "/api/restaurante/{idRestaurante}/produtos").permitAll()
+//                        .requestMatchers(HttpMethod.PATCH, "/api/restaurante/{id}/status/abrir").permitAll()
+//                        .requestMatchers(HttpMethod.PATCH, "/api/restaurante/{id}/status/fechar").permitAll()
+//                        .requestMatchers(HttpMethod.PATCH, "/api/restaurante/{id}/status/disponibilizar").hasAnyRole("RESTAURANTE","ADMIN")
+//                        .requestMatchers(HttpMethod.PATCH, "/api/restaurante/{id}/status/indisponibilizar").hasAnyRole("RESTAURANTE","ADMIN")
+//                        .requestMatchers(HttpMethod.PUT, "/api/restaurante/{id}/logo").hasRole("RESTAURANTE")
+//                        .requestMatchers(HttpMethod.GET, "/api/restaurante/{id}/logo").permitAll()
+//                        .requestMatchers(HttpMethod.PUT, "/api/restaurante/{id}/banner").hasRole("RESTAURANTE")
+//                        .requestMatchers(HttpMethod.GET, "/api/restaurante/{id}/banner").permitAll()
+//                        .requestMatchers(HttpMethod.POST, "/api/restaurante/{id}/enderecos").hasRole("RESTAURANTE")
+//                        .requestMatchers(HttpMethod.PATCH, "/api/restaurante/{id}/calcular-tempo-medio").permitAll()
 
-                        .requestMatchers(HttpMethod.GET, "/api/cliente/ativos").hasRole("ADMIN")
-
-                        .requestMatchers(HttpMethod.GET, "/api/cliente/{idCliente}").hasRole("ADMIN")
-
-                        .requestMatchers("/api/entregador/**").hasRole("ENTREGADOR")
-                        .requestMatchers("/api/restaurante/**").hasRole("RESTAURANTE")
-
-                        .requestMatchers("/api/cliente/**").hasRole("CLIENTE")
                         .anyRequest().authenticated())
                 .authenticationProvider(daoAuthenticationProvider)
                 .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
