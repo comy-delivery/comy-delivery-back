@@ -161,6 +161,10 @@ public class SecurityConfig {
 
                         //PRA FACILITAR INTEGRAÇÃO
 //                        .requestMatchers("/api/**").permitAll()
+                           .requestMatchers(HttpMethod.POST, "/api/cliente").permitAll()
+                            .requestMatchers(HttpMethod.POST, "/api/restaurante").permitAll()
+                            .requestMatchers(HttpMethod.POST, "/api/entregador").permitAll()
+                                       .requestMatchers(HttpMethod.POST, "/api/admin").permitAll()
                         .requestMatchers("/api/adicional/**").hasAnyRole("ADMIN", "CLIENTE", "ENTREGADOR", "RESTAURANTE")
                         .requestMatchers("/api/restaurante/**").hasAnyRole("ADMIN", "CLIENTE", "ENTREGADOR", "RESTAURANTE")
                         .requestMatchers("/api/avaliacao/**").hasAnyRole("ADMIN", "CLIENTE", "ENTREGADOR", "RESTAURANTE")
