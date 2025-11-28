@@ -5,16 +5,18 @@ import com.comy_delivery_back.enums.VeiculoEntregador;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @AllArgsConstructor
 @Data
+@SuperBuilder
 @PrimaryKeyJoinColumn(name = "id")
 public class Entregador extends Usuario{
 
@@ -53,7 +55,8 @@ public class Entregador extends Usuario{
             mappedBy = "entregador",
             cascade = CascadeType.ALL
     )
-    private List<Entrega> entregasEntregador;
+    @Builder.Default
+    private List<Entrega> entregasEntregador = new ArrayList<>();
 
 
 }

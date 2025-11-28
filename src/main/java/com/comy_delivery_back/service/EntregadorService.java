@@ -2,6 +2,7 @@ package com.comy_delivery_back.service;
 
 import com.comy_delivery_back.dto.request.EntregadorRequestDTO;
 import com.comy_delivery_back.dto.response.EntregadorResponseDTO;
+import com.comy_delivery_back.enums.RoleUsuario;
 import com.comy_delivery_back.enums.StatusEntrega;
 import com.comy_delivery_back.enums.StatusPedido;
 import com.comy_delivery_back.exception.*;
@@ -61,17 +62,19 @@ public class EntregadorService {
             throw new RegistrosDuplicadosException("Email vinculado a uma conta");
         }
 
-        Entregador novoEntregador = new Entregador();
+        Entregador novoEntregador = Entregador.builder()
+                .username(entregadorRequestDTO.username())
+                .password(passwordEncoder.encode(entregadorRequestDTO.password()))
+                .roleUsuario(RoleUsuario.ENTREGADOR)
 
-        novoEntregador.setUsername(entregadorRequestDTO.username());
-        novoEntregador.setPassword(passwordEncoder.encode(entregadorRequestDTO.password()));
-        novoEntregador.setNmEntregador(entregadorRequestDTO.nmEntregador());
-        novoEntregador.setEmailEntregador(entregadorRequestDTO.emailEntregador());
-        novoEntregador.setCpfEntregador(entregadorRequestDTO.cpfEntregador());
-        novoEntregador.setTelefoneEntregador(entregadorRequestDTO.telefoneEntregador());
-        novoEntregador.setVeiculo(entregadorRequestDTO.veiculo());
-        novoEntregador.setPlaca(entregadorRequestDTO.placa());
-        novoEntregador.setAvaliacaoMediaEntregador(0.0);
+                .nmEntregador(entregadorRequestDTO.nmEntregador())
+                .emailEntregador(entregadorRequestDTO.emailEntregador())
+                .cpfEntregador(entregadorRequestDTO.cpfEntregador())
+                .telefoneEntregador(entregadorRequestDTO.telefoneEntregador())
+                .veiculo(entregadorRequestDTO.veiculo())
+                .placa(entregadorRequestDTO.placa())
+                .avaliacaoMediaEntregador(0.0)
+                .build();
 
         entregadorRepository.save(novoEntregador);
         return new EntregadorResponseDTO(novoEntregador);

@@ -7,6 +7,8 @@ import com.comy_delivery_back.dto.response.EnderecoResponseDTO;
 import com.comy_delivery_back.dto.response.ProdutoResponseDTO;
 import com.comy_delivery_back.dto.response.RestauranteResponseDTO;
 import com.comy_delivery_back.enums.DiasSemana;
+import com.comy_delivery_back.enums.RoleUsuario;
+import com.comy_delivery_back.exception.CepNaoEncontradoException;
 import com.comy_delivery_back.exception.EnderecoNaoEncontradoException;
 import com.comy_delivery_back.exception.RegraDeNegocioException;
 import com.comy_delivery_back.exception.RestauranteNaoEncontradoException;
@@ -24,6 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -55,10 +58,13 @@ public class RestauranteService {
     }
 
     @Transactional
-    public RestauranteResponseDTO cadastrarRestaurante(RestauranteRequestDTO restauranteRequestDTO, MultipartFile imagemLogo, MultipartFile imagemBanner) throws IOException {
+    public RestauranteResponseDTO cadastrarRestaurante(RestauranteRequestDTO restauranteRequestDTO,
+                                                       MultipartFile imagemLogo,
+                                                       MultipartFile imagemBanner) throws IOException {
 
         log.info("Iniciando cadastro do novo restaurante: {}", restauranteRequestDTO.nmRestaurante());
 
+        // Validação de duplicatas
         if (restauranteRepository.findByCnpj(restauranteRequestDTO.cnpj()).isPresent()){
             log.error("CNPJ duplicado detectado: {}", restauranteRequestDTO.cnpj());
             throw new IllegalArgumentException("CNPJ já cadastrado.");
@@ -74,59 +80,86 @@ public class RestauranteService {
             throw new IllegalArgumentException("Username já cadastrado.");
         }
 
-        Restaurante novoRestaurante = new Restaurante();
+        // Criar restaurante
+        Restaurante novoRestaurante = Restaurante.builder()
+                .username(restauranteRequestDTO.username())
+                .password(passwordEncoder.encode(restauranteRequestDTO.password()))
+                .roleUsuario(RoleUsuario.RESTAURANTE)
+                .nmRestaurante(restauranteRequestDTO.nmRestaurante())
+                .emailRestaurante(restauranteRequestDTO.emailRestaurante())
+                .cnpj(restauranteRequestDTO.cnpj())
+                .telefoneRestaurante(restauranteRequestDTO.telefoneRestaurante())
+                .descricaoRestaurante(restauranteRequestDTO.descricaoRestaurante())
+                .categoria(restauranteRequestDTO.categoria())
+                .horarioAbertura(restauranteRequestDTO.horarioAbertura())
+                .horarioFechamento(restauranteRequestDTO.horarioFechamento())
+                .diasFuncionamento(restauranteRequestDTO.diasFuncionamento())
+                .dataCadastro(LocalDate.now())
+                .avaliacaoMediaRestaurante(0.0)
+                .tempoMediaEntrega(restauranteRequestDTO.tempoMediaEntrega())
+                .build();
 
-        novoRestaurante.setUsername(restauranteRequestDTO.username());
-        novoRestaurante.setPassword(passwordEncoder.encode(restauranteRequestDTO.password()));
-        novoRestaurante.setNmRestaurante(restauranteRequestDTO.nmRestaurante());
-        novoRestaurante.setEmailRestaurante(restauranteRequestDTO.emailRestaurante());
-        novoRestaurante.setCnpj(restauranteRequestDTO.cnpj());
-        novoRestaurante.setTelefoneRestaurante(restauranteRequestDTO.telefoneRestaurante());
-
+        // Processar imagens
         if (imagemLogo != null && !imagemLogo.isEmpty()) {
-            //converte o MultipartFile em byte
-            byte[] imagemBytes = imagemLogo.getBytes();
-            novoRestaurante.setImagemLogo(imagemBytes);
-        } else {
-            novoRestaurante.setImagemLogo(null);
-        }
-
-        if (imagemBanner != null && !imagemBanner.isEmpty()) {
-            byte[] imagemBytes2 = imagemBanner.getBytes();
-            novoRestaurante.setImagemBanner(imagemBytes2);
-        } else {
-            novoRestaurante.setImagemBanner(null);
-        }
-
-        novoRestaurante.setDescricaoRestaurante(restauranteRequestDTO.descricaoRestaurante());
-        novoRestaurante.setCategoria(restauranteRequestDTO.categoria());
-        novoRestaurante.setHorarioAbertura(restauranteRequestDTO.horarioAbertura());
-        novoRestaurante.setHorarioFechamento(restauranteRequestDTO.horarioFechamento());
-        novoRestaurante.setDiasFuncionamento(restauranteRequestDTO.diasFuncionamento());
-        novoRestaurante.setAvaliacaoMediaRestaurante(0.0);
-
-        novoRestaurante.setEnderecos(new ArrayList<>());
-        Restaurante restauranteSalvo = restauranteRepository.save(novoRestaurante);
-
-        if (restauranteRequestDTO.enderecos() != null && !restauranteRequestDTO.enderecos().isEmpty()) {
-            for (EnderecoRequestDTO enderecoDTO : restauranteRequestDTO.enderecos()) {
-
-                EnderecoResponseDTO enderecoSalvoDTO = enderecoService.cadastrarEndereco(enderecoDTO);
-
-                Endereco enderecoEntity = enderecoRepository.findByIdEndereco(enderecoSalvoDTO.idEndereco())
-                        .orElseThrow(() -> new EnderecoNaoEncontradoException(enderecoSalvoDTO.idEndereco()));
-
-                enderecoEntity.setRestaurante(restauranteSalvo);
-
-                enderecoRepository.save(enderecoEntity);
-                restauranteSalvo.getEnderecos().add(enderecoEntity);
+            try {
+                byte[] imagemBytes = imagemLogo.getBytes();
+                novoRestaurante.setImagemLogo(imagemBytes);
+            } catch (IOException e) {
+                log.error("Falha ao ler o arquivo de logo durante o cadastro.", e);
+                throw new RuntimeException("Falha ao ler o arquivo de imagem.", e);
             }
         }
 
+        if (imagemBanner != null && !imagemBanner.isEmpty()) {
+            try {
+                byte[] imagemBytes = imagemBanner.getBytes();
+                novoRestaurante.setImagemBanner(imagemBytes);
+            } catch (IOException e) {
+                log.error("Falha ao ler o arquivo de banner durante o cadastro.", e);
+                throw new RuntimeException("Falha ao ler o arquivo de imagem.", e);
+            }
+        }
 
-        log.info("Restaurante cadastrado com sucesso. ID: {}", restauranteSalvo.getId());
+        // IMPORTANTE: Inicializar a lista de endereços ANTES de salvar
+        novoRestaurante.setEnderecos(new ArrayList<>());
 
-        return buscarRestaurantePorId(restauranteSalvo.getId());
+        // Salvar restaurante primeiro
+        Restaurante restauranteSalvo = restauranteRepository.save(novoRestaurante);
+        log.info("Restaurante base salvo com ID: {}", restauranteSalvo.getId());
+
+        // Processar e associar endereços
+        if (restauranteRequestDTO.enderecos() != null && !restauranteRequestDTO.enderecos().isEmpty()) {
+            for (EnderecoRequestDTO enderecoDTO : restauranteRequestDTO.enderecos()) {
+                try {
+                    // Cadastrar endereço na API CEP
+                    EnderecoResponseDTO enderecoSalvoDTO = enderecoService.cadastrarEndereco(enderecoDTO);
+
+                    // Buscar o endereço salvo
+                    Endereco enderecoEntity = enderecoRepository.findByIdEndereco(enderecoSalvoDTO.idEndereco())
+                            .orElseThrow(() -> new EnderecoNaoEncontradoException(enderecoSalvoDTO.idEndereco()));
+
+                    // Associar ao restaurante
+                    enderecoEntity.setRestaurante(restauranteSalvo);
+                    enderecoRepository.save(enderecoEntity);
+
+                    // Adicionar à lista
+                    restauranteSalvo.getEnderecos().add(enderecoEntity);
+                    log.debug("Endereço ID {} associado ao restaurante.", enderecoEntity.getIdEndereco());
+
+                } catch (CepNaoEncontradoException e) {
+                    log.error("CEP não encontrado para o endereço: {}", enderecoDTO.cep());
+                    throw new RegraDeNegocioException("CEP inválido: " + enderecoDTO.cep());
+                }
+            }
+
+            // Salvar restaurante novamente para persistir os endereços
+            restauranteSalvo = restauranteRepository.save(restauranteSalvo);
+        }
+
+        log.info("Restaurante cadastrado com sucesso. ID: {}, Endereços: {}",
+                restauranteSalvo.getId(), restauranteSalvo.getEnderecos().size());
+
+        return new RestauranteResponseDTO(restauranteSalvo);
     }
 
     @Transactional

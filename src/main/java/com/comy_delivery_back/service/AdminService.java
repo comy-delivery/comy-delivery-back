@@ -2,6 +2,7 @@ package com.comy_delivery_back.service;
 
 import com.comy_delivery_back.dto.request.AdminRequestDTO;
 import com.comy_delivery_back.dto.response.AdminResponseDTO;
+import com.comy_delivery_back.enums.RoleUsuario;
 import com.comy_delivery_back.exception.AdminNaoEncontradoException;
 import com.comy_delivery_back.exception.RegraDeNegocioException;
 import com.comy_delivery_back.model.Admin;
@@ -38,13 +39,15 @@ public class AdminService {
             throw new RegistrosDuplicadosException("Email já cadastrado.");
         }
 
-        Admin novoAdmin = new Admin();
+        Admin novoAdmin = Admin.builder()
+                .username(adminRequestDTO.username())
+                .password(passwordEncoder.encode(adminRequestDTO.password()))
+                .roleUsuario(RoleUsuario.ADMIN)
 
-        novoAdmin.setUsername(adminRequestDTO.username());
-        novoAdmin.setPassword(passwordEncoder.encode(adminRequestDTO.password()));
-        novoAdmin.setNmAdmin(adminRequestDTO.nmAdmin());
-        novoAdmin.setEmailAdmin(adminRequestDTO.emailAdmin());
-        novoAdmin.setCpfAdmin(adminRequestDTO.cpfAdmin());
+                .nmAdmin(adminRequestDTO.nmAdmin())
+                .emailAdmin(adminRequestDTO.emailAdmin())
+                .cpfAdmin(adminRequestDTO.cpfAdmin())
+                .build();
 
         adminRepository.save(novoAdmin);
         log.info("Novo Admin cadastrado com sucesso. ID: {}", novoAdmin.getId());

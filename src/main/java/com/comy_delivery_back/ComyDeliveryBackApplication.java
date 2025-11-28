@@ -12,6 +12,7 @@ public class ComyDeliveryBackApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(ComyDeliveryBackApplication.class, args);
+
 	}
 
 }
