@@ -1,6 +1,9 @@
 -- ==================================================================================
+-- SCRIPT DE POPULAÇÃO CORRIGIDO (COM IDs EXPLÍCITOS E PROTEÇÃO CONTRA DUPLICIDADE)
+-- ==================================================================================
+
+-- ==================================================================================
 -- 1. USUÁRIOS (Tabela Pai - Herança JOINED)
--- Senha padrão: "SenhaForte123" -> $2a$10$CgsJdAealQODbmdKpEQIWevMNDmnzik7MOw1KAnCJD27z3wAhJglW
 -- ==================================================================================
 
 -- ADMIN (ID 1)
@@ -130,295 +133,302 @@ VALUES (27, 'Felipe Motos', 'felipe@driver.com', '72437769062', '48988881111', '
 
 -- ==================================================================================
 -- 3. ENDEREÇOS (RESTAURANTES E CLIENTES) - Região de Tubarão/SC
+-- (IDs Definidos: 100 + ID do Usuário para evitar colisão e duplicidade)
 -- ==================================================================================
 
-INSERT INTO public.endereco (logradouro, numero, bairro, cidade, cep, estado, tipo_endereco, latitude, longitude,
+INSERT INTO public.endereco (id_endereco, logradouro, numero, bairro, cidade, cep, estado, tipo_endereco, latitude, longitude,
                              restaurante_id, cliente_id, is_padrao)
 VALUES
--- Restaurantes (IDs 2-21)
-('Av. Marcolino Martins Cabral', '100', 'Centro', 'Tubarão', '88701000', 'SC', 'MATRIZ', -28.4812, -49.0064, 2, NULL,
- TRUE),
-('Rua Lauro Müller', '250', 'Centro', 'Tubarão', '88701100', 'SC', 'MATRIZ', -28.4820, -49.0070, 3, NULL, TRUE),
-('Av. Patrício Lima', '500', 'Humaitá', 'Tubarão', '88704400', 'SC', 'MATRIZ', -28.4750, -49.0150, 4, NULL, TRUE),
-('Rua dos Ferroviários', '80', 'Oficinas', 'Tubarão', '88702200', 'SC', 'MATRIZ', -28.4900, -49.0100, 5, NULL, TRUE),
-('Rua Altamiro Guimarães', '300', 'Centro', 'Tubarão', '88701050', 'SC', 'MATRIZ', -28.4830, -49.0050, 6, NULL, TRUE),
-('Av. José Acácio Moreira', '1200', 'Dehon', 'Tubarão', '88704000', 'SC', 'MATRIZ', -28.4880, -48.9990, 7, NULL, TRUE),
-('Rua Padre Geraldo Spettmann', '400', 'Humaitá', 'Tubarão', '88704300', 'SC', 'MATRIZ', -28.4720, -49.0120, 8, NULL,
- TRUE),
-('Av. Rodovalho', '55', 'Centro', 'Tubarão', '88701150', 'SC', 'MATRIZ', -28.4805, -49.0080, 9, NULL, TRUE),
-('Rua São José', '900', 'Centro', 'Tubarão', '88701200', 'SC', 'MATRIZ', -28.4840, -49.0040, 10, NULL, TRUE),
-('Av. Pedro Zapelini', '1500', 'Santo Antônio', 'Tubarão', '88701300', 'SC', 'MATRIZ', -28.4950, -49.0200, 11, NULL,
- TRUE),
-('Rua Princesa Isabel', '200', 'Oficinas', 'Tubarão', '88702100', 'SC', 'MATRIZ', -28.4890, -49.0110, 12, NULL, TRUE),
-('Av. Exp. José Pedro Coelho', '2200', 'Revoredo', 'Tubarão', '88704700', 'SC', 'MATRIZ', -28.4650, -49.0180, 13, NULL,
- TRUE),
-('Rua Marechal Deodoro', '150', 'Centro', 'Tubarão', '88701010', 'SC', 'MATRIZ', -28.4790, -49.0090, 14, NULL, TRUE),
-('Av. Getúlio Vargas', '800', 'Centro', 'Capivari de Baixo', '88745000', 'SC', 'MATRIZ', -28.4450, -48.9580, 15, NULL,
- TRUE),
-('Rua Tubalcain Faraco', '60', 'Centro', 'Tubarão', '88701120', 'SC', 'MATRIZ', -28.4815, -49.0075, 16, NULL, TRUE),
-('Av. Marcolino', '2020', 'Vila Moema', 'Tubarão', '88705000', 'SC', 'MATRIZ', -28.4860, -49.0020, 17, NULL, TRUE),
-('Rua Wenceslau Braz', '330', 'Vila Moema', 'Tubarão', '88705100', 'SC', 'MATRIZ', -28.4870, -49.0010, 18, NULL, TRUE),
-('Rua Roberto Zumblick', '700', 'Humaitá', 'Tubarão', '88704200', 'SC', 'MATRIZ', -28.4740, -49.0140, 19, NULL, TRUE),
-('Rua Vidal Ramos', '110', 'Centro', 'Tubarão', '88701020', 'SC', 'MATRIZ', -28.4800, -49.0060, 20, NULL, TRUE),
-('Av. Colombo Salles', '50', 'Centro', 'Laguna', '88790000', 'SC', 'MATRIZ', -28.4810, -48.7800, 21, NULL, TRUE),
--- Clientes (IDs 22-26)
-('Rua Silvio Burigo', '1000', 'Monte Castelo', 'Tubarão', '88702500', 'SC', 'CASA', -28.5000, -49.0300, NULL, 22, TRUE),
-('Rua Januário Alves Garcia', '250', 'Centro', 'Tubarão', '88701030', 'SC', 'TRABALHO', -28.4825, -49.0055, NULL, 23,
- TRUE),
-('Rua Recife', '400', 'Recife', 'Tubarão', '88701500', 'SC', 'CASA', -28.4850, -49.0150, NULL, 24, TRUE),
-('Av. Nações Unidas', '80', 'Santo André', 'Capivari de Baixo', '88745000', 'SC', 'CASA', -28.4500, -48.9600, NULL, 25,
- TRUE),
-('Av. Calistrato Müller Salles', '500', 'Portinho', 'Laguna', '88790000', 'SC', 'CASA', -28.4850, -48.7900, NULL, 26,
- TRUE) ON CONFLICT DO NOTHING;
+-- Restaurantes (IDs 2-21 -> Endereços 102-121)
+(102, 'Av. Marcolino Martins Cabral', '100', 'Centro', 'Tubarão', '88701000', 'SC', 'MATRIZ', -28.4812, -49.0064, 2, NULL, TRUE),
+(103, 'Rua Lauro Müller', '250', 'Centro', 'Tubarão', '88701100', 'SC', 'MATRIZ', -28.4820, -49.0070, 3, NULL, TRUE),
+(104, 'Av. Patrício Lima', '500', 'Humaitá', 'Tubarão', '88704400', 'SC', 'MATRIZ', -28.4750, -49.0150, 4, NULL, TRUE),
+(105, 'Rua dos Ferroviários', '80', 'Oficinas', 'Tubarão', '88702200', 'SC', 'MATRIZ', -28.4900, -49.0100, 5, NULL, TRUE),
+(106, 'Rua Altamiro Guimarães', '300', 'Centro', 'Tubarão', '88701050', 'SC', 'MATRIZ', -28.4830, -49.0050, 6, NULL, TRUE),
+(107, 'Av. José Acácio Moreira', '1200', 'Dehon', 'Tubarão', '88704000', 'SC', 'MATRIZ', -28.4880, -48.9990, 7, NULL, TRUE),
+(108, 'Rua Padre Geraldo Spettmann', '400', 'Humaitá', 'Tubarão', '88704300', 'SC', 'MATRIZ', -28.4720, -49.0120, 8, NULL, TRUE),
+(109, 'Av. Rodovalho', '55', 'Centro', 'Tubarão', '88701150', 'SC', 'MATRIZ', -28.4805, -49.0080, 9, NULL, TRUE),
+(110, 'Rua São José', '900', 'Centro', 'Tubarão', '88701200', 'SC', 'MATRIZ', -28.4840, -49.0040, 10, NULL, TRUE),
+(111, 'Av. Pedro Zapelini', '1500', 'Santo Antônio', 'Tubarão', '88701300', 'SC', 'MATRIZ', -28.4950, -49.0200, 11, NULL, TRUE),
+(112, 'Rua Princesa Isabel', '200', 'Oficinas', 'Tubarão', '88702100', 'SC', 'MATRIZ', -28.4890, -49.0110, 12, NULL, TRUE),
+(113, 'Av. Exp. José Pedro Coelho', '2200', 'Revoredo', 'Tubarão', '88704700', 'SC', 'MATRIZ', -28.4650, -49.0180, 13, NULL, TRUE),
+(114, 'Rua Marechal Deodoro', '150', 'Centro', 'Tubarão', '88701010', 'SC', 'MATRIZ', -28.4790, -49.0090, 14, NULL, TRUE),
+(115, 'Av. Getúlio Vargas', '800', 'Centro', 'Capivari de Baixo', '88745000', 'SC', 'MATRIZ', -28.4450, -48.9580, 15, NULL, TRUE),
+(116, 'Rua Tubalcain Faraco', '60', 'Centro', 'Tubarão', '88701120', 'SC', 'MATRIZ', -28.4815, -49.0075, 16, NULL, TRUE),
+(117, 'Av. Marcolino', '2020', 'Vila Moema', 'Tubarão', '88705000', 'SC', 'MATRIZ', -28.4860, -49.0020, 17, NULL, TRUE),
+(118, 'Rua Wenceslau Braz', '330', 'Vila Moema', 'Tubarão', '88705100', 'SC', 'MATRIZ', -28.4870, -49.0010, 18, NULL, TRUE),
+(119, 'Rua Roberto Zumblick', '700', 'Humaitá', 'Tubarão', '88704200', 'SC', 'MATRIZ', -28.4740, -49.0140, 19, NULL, TRUE),
+(120, 'Rua Vidal Ramos', '110', 'Centro', 'Tubarão', '88701020', 'SC', 'MATRIZ', -28.4800, -49.0060, 20, NULL, TRUE),
+(121, 'Av. Colombo Salles', '50', 'Centro', 'Laguna', '88790000', 'SC', 'MATRIZ', -28.4810, -48.7800, 21, NULL, TRUE),
+-- Clientes (IDs 22-26 -> Endereços 122-126)
+(122, 'Rua Silvio Burigo', '1000', 'Monte Castelo', 'Tubarão', '88702500', 'SC', 'CASA', -28.5000, -49.0300, NULL, 22, TRUE),
+(123, 'Rua Januário Alves Garcia', '250', 'Centro', 'Tubarão', '88701030', 'SC', 'TRABALHO', -28.4825, -49.0055, NULL, 23, TRUE),
+(124, 'Rua Recife', '400', 'Recife', 'Tubarão', '88701500', 'SC', 'CASA', -28.4850, -49.0150, NULL, 24, TRUE),
+(125, 'Av. Nações Unidas', '80', 'Santo André', 'Capivari de Baixo', '88745000', 'SC', 'CASA', -28.4500, -48.9600, NULL, 25, TRUE),
+(126, 'Av. Calistrato Müller Salles', '500', 'Portinho', 'Laguna', '88790000', 'SC', 'CASA', -28.4850, -48.7900, NULL, 26, TRUE)
+    ON CONFLICT (id_endereco) DO NOTHING;
 
 -- ==================================================================================
 -- 4. PRODUTOS (10 por restaurante, 2 em promoção)
+-- IDs Determinísticos: (ID Restaurante * 100) + Índice (1 a 10)
+-- Ex: Restaurante 2 terá produtos 201 a 210
 -- ==================================================================================
+
 -- LANCHES (Restaurantes 2, 3, 4, 5)
-INSERT INTO public.produto (nm_produto, ds_produto, vl_preco, categoria_produto, tempo_preparacao, is_promocao,
+INSERT INTO public.produto (id_produto, nm_produto, ds_produto, vl_preco, categoria_produto, tempo_preparacao, is_promocao,
                             vl_preco_promocional, is_ativo, restaurante_id, data_cadastro_produto)
-SELECT p.nm_produto,
-       p.ds_produto,
-       p.vl_preco,
-       p.categoria_produto,
-       p.tempo_preparacao,
-       p.is_promocao,
-       p.vl_preco_promocional,
-       TRUE,
-       r.id,
-       NOW()
-FROM (VALUES ('X-Bacon', 'Pão, carne, queijo e bacon', 25.00, 'Lanches', 20, FALSE, NULL),
-             ('X-Salada', 'Pão, carne, queijo e salada', 20.00, 'Lanches', 20, TRUE, 15.00),
-             ('X-Tudo', 'Completo com tudo dentro', 35.00, 'Lanches', 25, FALSE, NULL),
-             ('Smash Simples', 'Carne prensada e queijo', 18.00, 'Lanches', 15, FALSE, NULL),
-             ('Smash Duplo', 'Duas carnes prensadas', 22.00, 'Lanches', 15, TRUE, 19.00),
-             ('Batata Frita P', 'Porção individual', 12.00, 'Acompanhamento', 10, FALSE, NULL),
-             ('Batata Frita G', 'Porção família', 20.00, 'Acompanhamento', 15, FALSE, NULL),
-             ('Refrigerante Lata', '350ml gelado', 6.00, 'Bebidas', 0, FALSE, NULL),
-             ('Suco Natural', 'Laranja 500ml', 10.00, 'Bebidas', 5, FALSE, NULL),
-             ('Milkshake', 'Morango 500ml', 18.00, 'Sobremesa', 10, FALSE, NULL)) AS p(nm_produto, ds_produto, vl_preco,
-                                                                                       categoria_produto,
-                                                                                       tempo_preparacao, is_promocao,
-                                                                                       vl_preco_promocional)
+SELECT
+    (r.id * 100) + p.idx, -- Gera ID único: 201, 202... 301, 302...
+    p.nm_produto,
+    p.ds_produto,
+    p.vl_preco,
+    p.categoria_produto,
+    p.tempo_preparacao,
+    p.is_promocao,
+    p.vl_preco_promocional,
+    TRUE,
+    r.id,
+    NOW()
+FROM (VALUES
+          (1, 'X-Bacon', 'Pão, carne, queijo e bacon', 25.00, 'Lanches', 20, FALSE, NULL),
+          (2, 'X-Salada', 'Pão, carne, queijo e salada', 20.00, 'Lanches', 20, TRUE, 15.00),
+          (3, 'X-Tudo', 'Completo com tudo dentro', 35.00, 'Lanches', 25, FALSE, NULL),
+          (4, 'Smash Simples', 'Carne prensada e queijo', 18.00, 'Lanches', 15, FALSE, NULL),
+          (5, 'Smash Duplo', 'Duas carnes prensadas', 22.00, 'Lanches', 15, TRUE, 19.00),
+          (6, 'Batata Frita P', 'Porção individual', 12.00, 'Acompanhamento', 10, FALSE, NULL),
+          (7, 'Batata Frita G', 'Porção família', 20.00, 'Acompanhamento', 15, FALSE, NULL),
+          (8, 'Refrigerante Lata', '350ml gelado', 6.00, 'Bebidas', 0, FALSE, NULL),
+          (9, 'Suco Natural', 'Laranja 500ml', 10.00, 'Bebidas', 5, FALSE, NULL),
+          (10, 'Milkshake', 'Morango 500ml', 18.00, 'Sobremesa', 10, FALSE, NULL)
+     ) AS p(idx, nm_produto, ds_produto, vl_preco, categoria_produto, tempo_preparacao, is_promocao, vl_preco_promocional)
          CROSS JOIN (VALUES (2), (3), (4), (5)) AS r(id)
-    ON CONFLICT DO NOTHING;
+    ON CONFLICT (id_produto) DO NOTHING;
 
 -- DOCES (Restaurantes 6 a 11)
-INSERT INTO public.produto (nm_produto, ds_produto, vl_preco, categoria_produto, tempo_preparacao, is_promocao,
+INSERT INTO public.produto (id_produto, nm_produto, ds_produto, vl_preco, categoria_produto, tempo_preparacao, is_promocao,
                             vl_preco_promocional, is_ativo, restaurante_id, data_cadastro_produto)
-SELECT p.nm_produto,
-       p.ds_produto,
-       p.vl_preco,
-       p.categoria_produto,
-       p.tempo_preparacao,
-       p.is_promocao,
-       p.vl_preco_promocional,
-       TRUE,
-       r.id,
-       NOW()
-FROM (VALUES ('Bolo de Pote', 'Chocolate belga', 15.00, 'Doces', 0, TRUE, 12.00),
-             ('Torta de Limão', 'Fatia generosa', 12.00, 'Doces', 0, FALSE, NULL),
-             ('Brigadeiro Gourmet', '4 unidades', 10.00, 'Doces', 0, FALSE, NULL),
-             ('Brownie', 'Com nozes', 8.00, 'Doces', 0, TRUE, 6.00),
-             ('Cheesecake', 'Frutas vermelhas', 18.00, 'Doces', 0, FALSE, NULL),
-             ('Açaí 300ml', 'Puro', 15.00, 'Açaí', 5, FALSE, NULL),
-             ('Açaí 500ml', 'Completo', 22.00, 'Açaí', 5, FALSE, NULL),
-             ('Água s/ Gás', '500ml', 4.00, 'Bebidas', 0, FALSE, NULL),
-             ('Café Expresso', 'Grão moído na hora', 5.00, 'Bebidas', 3, FALSE, NULL),
-             ('Coxinha de Morango', 'Chocolate ao redor', 7.00, 'Doces', 0, FALSE, NULL)) AS p(nm_produto, ds_produto,
-                                                                                               vl_preco,
-                                                                                               categoria_produto,
-                                                                                               tempo_preparacao,
-                                                                                               is_promocao,
-                                                                                               vl_preco_promocional)
+SELECT
+    (r.id * 100) + p.idx,
+    p.nm_produto,
+    p.ds_produto,
+    p.vl_preco,
+    p.categoria_produto,
+    p.tempo_preparacao,
+    p.is_promocao,
+    p.vl_preco_promocional,
+    TRUE,
+    r.id,
+    NOW()
+FROM (VALUES
+          (1, 'Bolo de Pote', 'Chocolate belga', 15.00, 'Doces', 0, TRUE, 12.00),
+          (2, 'Torta de Limão', 'Fatia generosa', 12.00, 'Doces', 0, FALSE, NULL),
+          (3, 'Brigadeiro Gourmet', '4 unidades', 10.00, 'Doces', 0, FALSE, NULL),
+          (4, 'Brownie', 'Com nozes', 8.00, 'Doces', 0, TRUE, 6.00),
+          (5, 'Cheesecake', 'Frutas vermelhas', 18.00, 'Doces', 0, FALSE, NULL),
+          (6, 'Açaí 300ml', 'Puro', 15.00, 'Açaí', 5, FALSE, NULL),
+          (7, 'Açaí 500ml', 'Completo', 22.00, 'Açaí', 5, FALSE, NULL),
+          (8, 'Água s/ Gás', '500ml', 4.00, 'Bebidas', 0, FALSE, NULL),
+          (9, 'Café Expresso', 'Grão moído na hora', 5.00, 'Bebidas', 3, FALSE, NULL),
+          (10, 'Coxinha de Morango', 'Chocolate ao redor', 7.00, 'Doces', 0, FALSE, NULL)
+     ) AS p(idx, nm_produto, ds_produto, vl_preco, categoria_produto, tempo_preparacao, is_promocao, vl_preco_promocional)
          CROSS JOIN (VALUES (6), (7), (8), (9), (10), (11)) AS r(id)
-    ON CONFLICT DO NOTHING;
+    ON CONFLICT (id_produto) DO NOTHING;
 
 -- PIZZA (Restaurantes 12, 13)
-INSERT INTO public.produto (nm_produto, ds_produto, vl_preco, categoria_produto, tempo_preparacao, is_promocao,
+INSERT INTO public.produto (id_produto, nm_produto, ds_produto, vl_preco, categoria_produto, tempo_preparacao, is_promocao,
                             vl_preco_promocional, is_ativo, restaurante_id, data_cadastro_produto)
-SELECT p.nm_produto,
-       p.ds_produto,
-       p.vl_preco,
-       p.categoria_produto,
-       p.tempo_preparacao,
-       p.is_promocao,
-       p.vl_preco_promocional,
-       TRUE,
-       r.id,
-       NOW()
-FROM (VALUES ('Pizza Calabresa M', 'Clássica', 40.00, 'Pizza', 30, TRUE, 35.00),
-             ('Pizza 4 Queijos G', 'Muito queijo', 60.00, 'Pizza', 35, FALSE, NULL),
-             ('Pizza Frango Catupiry M', 'Cremosa', 45.00, 'Pizza', 30, FALSE, NULL),
-             ('Pizza Portuguesa G', 'Ovos, presunto, cebola', 58.00, 'Pizza', 35, TRUE, 50.00),
-             ('Pizza Marguerita M', 'Manjericão fresco', 38.00, 'Pizza', 30, FALSE, NULL),
-             ('Pizza Chocolate P', 'Sobremesa', 30.00, 'Pizza Doce', 25, FALSE, NULL),
-             ('Borda Recheada', 'Catupiry', 10.00, 'Adicional', 0, FALSE, NULL),
-             ('Coca Cola 2L', 'Gelada', 14.00, 'Bebidas', 0, FALSE, NULL),
-             ('Guaraná 2L', 'Gelado', 12.00, 'Bebidas', 0, FALSE, NULL),
-             ('Cerveja Long Neck', 'Heineken', 9.00, 'Bebidas', 0, FALSE, NULL)) AS p(nm_produto, ds_produto, vl_preco,
-                                                                                      categoria_produto,
-                                                                                      tempo_preparacao, is_promocao,
-                                                                                      vl_preco_promocional)
+SELECT
+    (r.id * 100) + p.idx,
+    p.nm_produto,
+    p.ds_produto,
+    p.vl_preco,
+    p.categoria_produto,
+    p.tempo_preparacao,
+    p.is_promocao,
+    p.vl_preco_promocional,
+    TRUE,
+    r.id,
+    NOW()
+FROM (VALUES
+          (1, 'Pizza Calabresa M', 'Clássica', 40.00, 'Pizza', 30, TRUE, 35.00),
+          (2, 'Pizza 4 Queijos G', 'Muito queijo', 60.00, 'Pizza', 35, FALSE, NULL),
+          (3, 'Pizza Frango Catupiry M', 'Cremosa', 45.00, 'Pizza', 30, FALSE, NULL),
+          (4, 'Pizza Portuguesa G', 'Ovos, presunto, cebola', 58.00, 'Pizza', 35, TRUE, 50.00),
+          (5, 'Pizza Marguerita M', 'Manjericão fresco', 38.00, 'Pizza', 30, FALSE, NULL),
+          (6, 'Pizza Chocolate P', 'Sobremesa', 30.00, 'Pizza Doce', 25, FALSE, NULL),
+          (7, 'Borda Recheada', 'Catupiry', 10.00, 'Adicional', 0, FALSE, NULL),
+          (8, 'Coca Cola 2L', 'Gelada', 14.00, 'Bebidas', 0, FALSE, NULL),
+          (9, 'Guaraná 2L', 'Gelado', 12.00, 'Bebidas', 0, FALSE, NULL),
+          (10, 'Cerveja Long Neck', 'Heineken', 9.00, 'Bebidas', 0, FALSE, NULL)
+     ) AS p(idx, nm_produto, ds_produto, vl_preco, categoria_produto, tempo_preparacao, is_promocao, vl_preco_promocional)
          CROSS JOIN (VALUES (12), (13)) AS r(id)
-    ON CONFLICT DO NOTHING;
+    ON CONFLICT (id_produto) DO NOTHING;
 
 -- ASIATICA (Restaurantes 14, 15, 16, 17)
-INSERT INTO public.produto (nm_produto, ds_produto, vl_preco, categoria_produto, tempo_preparacao, is_promocao,
+INSERT INTO public.produto (id_produto, nm_produto, ds_produto, vl_preco, categoria_produto, tempo_preparacao, is_promocao,
                             vl_preco_promocional, is_ativo, restaurante_id, data_cadastro_produto)
-SELECT p.nm_produto,
-       p.ds_produto,
-       p.vl_preco,
-       p.categoria_produto,
-       p.tempo_preparacao,
-       p.is_promocao,
-       p.vl_preco_promocional,
-       TRUE,
-       r.id,
-       NOW()
-FROM (VALUES ('Sushi Combo 1', '15 peças variadas', 45.00, 'Sushi', 20, TRUE, 39.90),
-             ('Temaki Salmão', 'Completo com cream cheese', 22.00, 'Temaki', 10, FALSE, NULL),
-             ('Yakisoba Misto', 'Carne e Frango', 35.00, 'Pratos Quentes', 25, FALSE, NULL),
-             ('Hot Roll', '8 unidades', 20.00, 'Sushi', 15, TRUE, 15.00),
-             ('Sashimi Salmão', '10 fatias', 30.00, 'Sashimi', 15, FALSE, NULL),
-             ('Harumaki', '2 rolinhos primavera', 12.00, 'Entrada', 10, FALSE, NULL),
-             ('Sunomono', 'Salada de pepino', 10.00, 'Entrada', 5, FALSE, NULL),
-             ('Guioza', '6 unidades vapor', 18.00, 'Entrada', 15, FALSE, NULL),
-             ('Refrigerante Lata', 'Lata', 6.00, 'Bebidas', 0, FALSE, NULL),
-             ('Água', '500ml', 4.00, 'Bebidas', 0, FALSE, NULL)) AS p(nm_produto, ds_produto, vl_preco,
-                                                                      categoria_produto, tempo_preparacao, is_promocao,
-                                                                      vl_preco_promocional)
+SELECT
+    (r.id * 100) + p.idx,
+    p.nm_produto,
+    p.ds_produto,
+    p.vl_preco,
+    p.categoria_produto,
+    p.tempo_preparacao,
+    p.is_promocao,
+    p.vl_preco_promocional,
+    TRUE,
+    r.id,
+    NOW()
+FROM (VALUES
+          (1, 'Sushi Combo 1', '15 peças variadas', 45.00, 'Sushi', 20, TRUE, 39.90),
+          (2, 'Temaki Salmão', 'Completo com cream cheese', 22.00, 'Temaki', 10, FALSE, NULL),
+          (3, 'Yakisoba Misto', 'Carne e Frango', 35.00, 'Pratos Quentes', 25, FALSE, NULL),
+          (4, 'Hot Roll', '8 unidades', 20.00, 'Sushi', 15, TRUE, 15.00),
+          (5, 'Sashimi Salmão', '10 fatias', 30.00, 'Sashimi', 15, FALSE, NULL),
+          (6, 'Harumaki', '2 rolinhos primavera', 12.00, 'Entrada', 10, FALSE, NULL),
+          (7, 'Sunomono', 'Salada de pepino', 10.00, 'Entrada', 5, FALSE, NULL),
+          (8, 'Guioza', '6 unidades vapor', 18.00, 'Entrada', 15, FALSE, NULL),
+          (9, 'Refrigerante Lata', 'Lata', 6.00, 'Bebidas', 0, FALSE, NULL),
+          (10, 'Água', '500ml', 4.00, 'Bebidas', 0, FALSE, NULL)
+     ) AS p(idx, nm_produto, ds_produto, vl_preco, categoria_produto, tempo_preparacao, is_promocao, vl_preco_promocional)
          CROSS JOIN (VALUES (14), (15), (16), (17)) AS r(id)
-    ON CONFLICT DO NOTHING;
+    ON CONFLICT (id_produto) DO NOTHING;
 
 -- SAUDAVEL (Restaurantes 18, 19)
-INSERT INTO public.produto (nm_produto, ds_produto, vl_preco, categoria_produto, tempo_preparacao, is_promocao,
+INSERT INTO public.produto (id_produto, nm_produto, ds_produto, vl_preco, categoria_produto, tempo_preparacao, is_promocao,
                             vl_preco_promocional, is_ativo, restaurante_id, data_cadastro_produto)
-SELECT p.nm_produto,
-       p.ds_produto,
-       p.vl_preco,
-       p.categoria_produto,
-       p.tempo_preparacao,
-       p.is_promocao,
-       p.vl_preco_promocional,
-       TRUE,
-       r.id,
-       NOW()
-FROM (VALUES ('Salada Caesar', 'Frango grelhado e molho', 28.00, 'Saladas', 15, TRUE, 22.00),
-             ('Wrap de Atum', 'Integral', 20.00, 'Lanches', 10, FALSE, NULL),
-             ('Marmita Fit', 'Frango e batata doce', 25.00, 'Refeição', 0, FALSE, NULL),
-             ('Suco Detox', 'Verde', 12.00, 'Bebidas', 5, TRUE, 9.00),
-             ('Poke Havaiano', 'Salmão e frutas', 40.00, 'Poke', 15, FALSE, NULL),
-             ('Omelete Proteico', '3 ovos e queijo', 18.00, 'Refeição', 10, FALSE, NULL),
-             ('Tapioca Frango', 'Sem glúten', 16.00, 'Lanches', 10, FALSE, NULL),
-             ('Salada de Frutas', 'Mel e granola', 14.00, 'Sobremesa', 5, FALSE, NULL),
-             ('Smoothie Manga', 'Com iogurte', 15.00, 'Bebidas', 5, FALSE, NULL),
-             ('Água de Coco', 'Natural', 8.00, 'Bebidas', 0, FALSE, NULL)) AS p(nm_produto, ds_produto, vl_preco,
-                                                                                categoria_produto, tempo_preparacao,
-                                                                                is_promocao, vl_preco_promocional)
+SELECT
+    (r.id * 100) + p.idx,
+    p.nm_produto,
+    p.ds_produto,
+    p.vl_preco,
+    p.categoria_produto,
+    p.tempo_preparacao,
+    p.is_promocao,
+    p.vl_preco_promocional,
+    TRUE,
+    r.id,
+    NOW()
+FROM (VALUES
+          (1, 'Salada Caesar', 'Frango grelhado e molho', 28.00, 'Saladas', 15, TRUE, 22.00),
+          (2, 'Wrap de Atum', 'Integral', 20.00, 'Lanches', 10, FALSE, NULL),
+          (3, 'Marmita Fit', 'Frango e batata doce', 25.00, 'Refeição', 0, FALSE, NULL),
+          (4, 'Suco Detox', 'Verde', 12.00, 'Bebidas', 5, TRUE, 9.00),
+          (5, 'Poke Havaiano', 'Salmão e frutas', 40.00, 'Poke', 15, FALSE, NULL),
+          (6, 'Omelete Proteico', '3 ovos e queijo', 18.00, 'Refeição', 10, FALSE, NULL),
+          (7, 'Tapioca Frango', 'Sem glúten', 16.00, 'Lanches', 10, FALSE, NULL),
+          (8, 'Salada de Frutas', 'Mel e granola', 14.00, 'Sobremesa', 5, FALSE, NULL),
+          (9, 'Smoothie Manga', 'Com iogurte', 15.00, 'Bebidas', 5, FALSE, NULL),
+          (10, 'Água de Coco', 'Natural', 8.00, 'Bebidas', 0, FALSE, NULL)
+     ) AS p(idx, nm_produto, ds_produto, vl_preco, categoria_produto, tempo_preparacao, is_promocao, vl_preco_promocional)
          CROSS JOIN (VALUES (18), (19)) AS r(id)
-    ON CONFLICT DO NOTHING;
+    ON CONFLICT (id_produto) DO NOTHING;
 
 -- BRASILEIRA (Restaurantes 20, 21)
-INSERT INTO public.produto (nm_produto, ds_produto, vl_preco, categoria_produto, tempo_preparacao, is_promocao,
+INSERT INTO public.produto (id_produto, nm_produto, ds_produto, vl_preco, categoria_produto, tempo_preparacao, is_promocao,
                             vl_preco_promocional, is_ativo, restaurante_id, data_cadastro_produto)
-SELECT p.nm_produto,
-       p.ds_produto,
-       p.vl_preco,
-       p.categoria_produto,
-       p.tempo_preparacao,
-       p.is_promocao,
-       p.vl_preco_promocional,
-       TRUE,
-       r.id,
-       NOW()
-FROM (VALUES ('Feijoada Completa', 'Para 1 pessoa', 35.00, 'Refeição', 0, TRUE, 29.90),
-             ('Prato Feito (PF)', 'Bife, arroz, feijão', 25.00, 'Refeição', 15, FALSE, NULL),
-             ('Virado à Paulista', 'Tradicional', 30.00, 'Refeição', 20, FALSE, NULL),
-             ('Bife a Cavalo', 'Com ovo frito', 28.00, 'Refeição', 15, TRUE, 24.00),
-             ('Parmegiana Frango', 'Com purê', 32.00, 'Refeição', 25, FALSE, NULL),
-             ('Strogonoff Carne', 'Com batata palha', 30.00, 'Refeição', 15, FALSE, NULL),
-             ('Pudim de Leite', 'Fatia', 10.00, 'Sobremesa', 0, FALSE, NULL),
-             ('Mousse Maracujá', 'Potinho', 8.00, 'Sobremesa', 0, FALSE, NULL),
-             ('Refrigerante 600ml', 'Garrafa', 8.00, 'Bebidas', 0, FALSE, NULL),
-             ('Suco de Laranja', 'Jarra 1L', 20.00, 'Bebidas', 10, FALSE, NULL)) AS p(nm_produto, ds_produto, vl_preco,
-                                                                                      categoria_produto,
-                                                                                      tempo_preparacao, is_promocao,
-                                                                                      vl_preco_promocional)
+SELECT
+    (r.id * 100) + p.idx,
+    p.nm_produto,
+    p.ds_produto,
+    p.vl_preco,
+    p.categoria_produto,
+    p.tempo_preparacao,
+    p.is_promocao,
+    p.vl_preco_promocional,
+    TRUE,
+    r.id,
+    NOW()
+FROM (VALUES
+          (1, 'Feijoada Completa', 'Para 1 pessoa', 35.00, 'Refeição', 0, TRUE, 29.90),
+          (2, 'Prato Feito (PF)', 'Bife, arroz, feijão', 25.00, 'Refeição', 15, FALSE, NULL),
+          (3, 'Virado à Paulista', 'Tradicional', 30.00, 'Refeição', 20, FALSE, NULL),
+          (4, 'Bife a Cavalo', 'Com ovo frito', 28.00, 'Refeição', 15, TRUE, 24.00),
+          (5, 'Parmegiana Frango', 'Com purê', 32.00, 'Refeição', 25, FALSE, NULL),
+          (6, 'Strogonoff Carne', 'Com batata palha', 30.00, 'Refeição', 15, FALSE, NULL),
+          (7, 'Pudim de Leite', 'Fatia', 10.00, 'Sobremesa', 0, FALSE, NULL),
+          (8, 'Mousse Maracujá', 'Potinho', 8.00, 'Sobremesa', 0, FALSE, NULL),
+          (9, 'Refrigerante 600ml', 'Garrafa', 8.00, 'Bebidas', 0, FALSE, NULL),
+          (10, 'Suco de Laranja', 'Jarra 1L', 20.00, 'Bebidas', 10, FALSE, NULL)
+     ) AS p(idx, nm_produto, ds_produto, vl_preco, categoria_produto, tempo_preparacao, is_promocao, vl_preco_promocional)
          CROSS JOIN (VALUES (20), (21)) AS r(id)
-    ON CONFLICT DO NOTHING;
+    ON CONFLICT (id_produto) DO NOTHING;
 
 -- ==================================================================================
--- 5. ADICIONAIS (2 por produto, lógica por categoria)
+-- 5. ADICIONAIS
+-- IDs Determinísticos: (ID Produto * 10) + Índice
+-- Garante que o adicional está vinculado ao produto de forma única
 -- ==================================================================================
 
-INSERT INTO public.adicional (nm_adicional, ds_adicional, vl_preco_adicional, produto_id, is_disponivel)
-SELECT 'Extra Bacon', 'Fatias crocantes', 5.00, id_produto, TRUE
-FROM public.produto
-WHERE categoria_produto IN ('Lanches', 'Pizza')
-    ON CONFLICT DO NOTHING;
+-- Extra Bacon (Índice 1)
+INSERT INTO public.adicional (id_adicional, nm_adicional, ds_adicional, vl_preco_adicional, produto_id, is_disponivel)
+SELECT (id_produto * 10) + 1, 'Extra Bacon', 'Fatias crocantes', 5.00, id_produto, TRUE
+FROM public.produto WHERE categoria_produto IN ('Lanches', 'Pizza')
+    ON CONFLICT (id_adicional) DO NOTHING;
 
-INSERT INTO public.adicional (nm_adicional, ds_adicional, vl_preco_adicional, produto_id, is_disponivel)
-SELECT 'Queijo Extra', 'Mussarela derretida', 4.00, id_produto, TRUE
-FROM public.produto
-WHERE categoria_produto IN ('Lanches', 'Pizza')
-    ON CONFLICT DO NOTHING;
+-- Queijo Extra (Índice 2)
+INSERT INTO public.adicional (id_adicional, nm_adicional, ds_adicional, vl_preco_adicional, produto_id, is_disponivel)
+SELECT (id_produto * 10) + 2, 'Queijo Extra', 'Mussarela derretida', 4.00, id_produto, TRUE
+FROM public.produto WHERE categoria_produto IN ('Lanches', 'Pizza')
+    ON CONFLICT (id_adicional) DO NOTHING;
 
-INSERT INTO public.adicional (nm_adicional, ds_adicional, vl_preco_adicional, produto_id, is_disponivel)
-SELECT 'Leite Condensado', 'Extra', 3.00, id_produto, TRUE
-FROM public.produto
-WHERE categoria_produto IN ('Doces', 'Açaí', 'Sobremesa', 'Pizza Doce')
-    ON CONFLICT DO NOTHING;
+-- Leite Condensado (Índice 1)
+INSERT INTO public.adicional (id_adicional, nm_adicional, ds_adicional, vl_preco_adicional, produto_id, is_disponivel)
+SELECT (id_produto * 10) + 1, 'Leite Condensado', 'Extra', 3.00, id_produto, TRUE
+FROM public.produto WHERE categoria_produto IN ('Doces', 'Açaí', 'Sobremesa', 'Pizza Doce')
+    ON CONFLICT (id_adicional) DO NOTHING;
 
-INSERT INTO public.adicional (nm_adicional, ds_adicional, vl_preco_adicional, produto_id, is_disponivel)
-SELECT 'Granola', 'Crocante', 2.00, id_produto, TRUE
-FROM public.produto
-WHERE categoria_produto IN ('Doces', 'Açaí', 'Sobremesa')
-    ON CONFLICT DO NOTHING;
+-- Granola (Índice 2)
+INSERT INTO public.adicional (id_adicional, nm_adicional, ds_adicional, vl_preco_adicional, produto_id, is_disponivel)
+SELECT (id_produto * 10) + 2, 'Granola', 'Crocante', 2.00, id_produto, TRUE
+FROM public.produto WHERE categoria_produto IN ('Doces', 'Açaí', 'Sobremesa')
+    ON CONFLICT (id_adicional) DO NOTHING;
 
-INSERT INTO public.adicional (nm_adicional, ds_adicional, vl_preco_adicional, produto_id, is_disponivel)
-SELECT 'Cream Cheese', 'Philadelphia', 6.00, id_produto, TRUE
-FROM public.produto
-WHERE categoria_produto IN ('Sushi', 'Temaki', 'Sashimi')
-    ON CONFLICT DO NOTHING;
+-- Cream Cheese (Índice 1)
+INSERT INTO public.adicional (id_adicional, nm_adicional, ds_adicional, vl_preco_adicional, produto_id, is_disponivel)
+SELECT (id_produto * 10) + 1, 'Cream Cheese', 'Philadelphia', 6.00, id_produto, TRUE
+FROM public.produto WHERE categoria_produto IN ('Sushi', 'Temaki', 'Sashimi')
+    ON CONFLICT (id_adicional) DO NOTHING;
 
-INSERT INTO public.adicional (nm_adicional, ds_adicional, vl_preco_adicional, produto_id, is_disponivel)
-SELECT 'Cebolinha', 'Extra', 1.00, id_produto, TRUE
-FROM public.produto
-WHERE categoria_produto IN ('Sushi', 'Temaki', 'Pratos Quentes')
-    ON CONFLICT DO NOTHING;
+-- Cebolinha (Índice 2)
+INSERT INTO public.adicional (id_adicional, nm_adicional, ds_adicional, vl_preco_adicional, produto_id, is_disponivel)
+SELECT (id_produto * 10) + 2, 'Cebolinha', 'Extra', 1.00, id_produto, TRUE
+FROM public.produto WHERE categoria_produto IN ('Sushi', 'Temaki', 'Pratos Quentes')
+    ON CONFLICT (id_adicional) DO NOTHING;
 
-INSERT INTO public.adicional (nm_adicional, ds_adicional, vl_preco_adicional, produto_id, is_disponivel)
-SELECT 'Ovo Frito', 'Gema mole', 3.00, id_produto, TRUE
-FROM public.produto
-WHERE categoria_produto IN ('Refeição')
-    ON CONFLICT DO NOTHING;
+-- Ovo Frito (Índice 1)
+INSERT INTO public.adicional (id_adicional, nm_adicional, ds_adicional, vl_preco_adicional, produto_id, is_disponivel)
+SELECT (id_produto * 10) + 1, 'Ovo Frito', 'Gema mole', 3.00, id_produto, TRUE
+FROM public.produto WHERE categoria_produto IN ('Refeição')
+    ON CONFLICT (id_adicional) DO NOTHING;
 
-INSERT INTO public.adicional (nm_adicional, ds_adicional, vl_preco_adicional, produto_id, is_disponivel)
-SELECT 'Batata Frita Extra', 'Pequena porção', 8.00, id_produto, TRUE
-FROM public.produto
-WHERE categoria_produto IN ('Refeição')
-    ON CONFLICT DO NOTHING;
+-- Batata Frita Extra (Índice 2)
+INSERT INTO public.adicional (id_adicional, nm_adicional, ds_adicional, vl_preco_adicional, produto_id, is_disponivel)
+SELECT (id_produto * 10) + 2, 'Batata Frita Extra', 'Pequena porção', 8.00, id_produto, TRUE
+FROM public.produto WHERE categoria_produto IN ('Refeição')
+    ON CONFLICT (id_adicional) DO NOTHING;
 
-INSERT INTO public.adicional (nm_adicional, ds_adicional, vl_preco_adicional, produto_id, is_disponivel)
-SELECT 'Gelo e Limão', 'No copo', 0.00, id_produto, TRUE
-FROM public.produto
-WHERE categoria_produto IN ('Bebidas')
-    ON CONFLICT DO NOTHING;
+-- Gelo e Limão (Índice 1)
+INSERT INTO public.adicional (id_adicional, nm_adicional, ds_adicional, vl_preco_adicional, produto_id, is_disponivel)
+SELECT (id_produto * 10) + 1, 'Gelo e Limão', 'No copo', 0.00, id_produto, TRUE
+FROM public.produto WHERE categoria_produto IN ('Bebidas')
+    ON CONFLICT (id_adicional) DO NOTHING;
 
-INSERT INTO public.adicional (nm_adicional, ds_adicional, vl_preco_adicional, produto_id, is_disponivel)
-SELECT 'Copo Descartável', 'Extra', 0.10, id_produto, TRUE
-FROM public.produto
-WHERE categoria_produto IN ('Bebidas')
-    ON CONFLICT DO NOTHING;
+-- Copo Descartável (Índice 2)
+INSERT INTO public.adicional (id_adicional, nm_adicional, ds_adicional, vl_preco_adicional, produto_id, is_disponivel)
+SELECT (id_produto * 10) + 2, 'Copo Descartável', 'Extra', 0.10, id_produto, TRUE
+FROM public.produto WHERE categoria_produto IN ('Bebidas')
+    ON CONFLICT (id_adicional) DO NOTHING;
 
 -- ==================================================================================
 -- 6. CUPONS (2 por Restaurante, IDs 2-21)
+-- IDs Determinísticos: (ID Restaurante * 10) + Índice
 -- ==================================================================================
 
-INSERT INTO public.cupom (codigo_cupom, ds_cupom, tipo_cupom, vl_desconto, percentual_desconto, vl_minimo_pedido,
+INSERT INTO public.cupom (id_cupom, codigo_cupom, ds_cupom, tipo_cupom, vl_desconto, percentual_desconto, vl_minimo_pedido,
                           dt_validade, qtd_uso_maximo, qtd_usado, is_ativo, restaurante_id, data_criacao)
-SELECT CONCAT('BEMVINDO_', id),
+SELECT (id * 10) + 1,
+       CONCAT('BEMVINDO_', id),
        'Desconto de boas vindas',
        'VALOR_FIXO',
        10.00,
@@ -432,11 +442,12 @@ SELECT CONCAT('BEMVINDO_', id),
        NOW()
 FROM public.restaurante
 WHERE id BETWEEN 2 AND 21
-    ON CONFLICT (codigo_cupom) DO NOTHING;
+    ON CONFLICT (id_cupom) DO NOTHING;
 
-INSERT INTO public.cupom (codigo_cupom, ds_cupom, tipo_cupom, vl_desconto, percentual_desconto, vl_minimo_pedido,
+INSERT INTO public.cupom (id_cupom, codigo_cupom, ds_cupom, tipo_cupom, vl_desconto, percentual_desconto, vl_minimo_pedido,
                           dt_validade, qtd_uso_maximo, qtd_usado, is_ativo, restaurante_id, data_criacao)
-SELECT CONCAT('VIP_', id),
+SELECT (id * 10) + 2,
+       CONCAT('VIP_', id),
        'Desconto para clientes VIP',
        'PERCENTUAL',
        NULL,
@@ -450,7 +461,7 @@ SELECT CONCAT('VIP_', id),
        NOW()
 FROM public.restaurante
 WHERE id BETWEEN 2 AND 21
-    ON CONFLICT (codigo_cupom) DO NOTHING;
+    ON CONFLICT (id_cupom) DO NOTHING;
 
 -- ==================================================================================
 -- 7. DIAS DE FUNCIONAMENTO
@@ -462,15 +473,9 @@ FROM public.restaurante r
          CROSS JOIN (VALUES ('TERCA'), ('QUARTA'), ('QUINTA'), ('SEXTA'), ('SABADO'), ('DOMINGO')) AS d(dia)
 WHERE id BETWEEN 2 AND 21 ON CONFLICT DO NOTHING;
 
-
 -- ==================================================================================
 -- 8. PEDIDOS (20 Pedidos variados)
--- IDs: 1 a 20
--- Distribuição:
--- - 12 ENTREGUE (Com Avaliação)
--- - 4 SAIU_PARA_ENTREGA / EM_ROTA
--- - 3 CONFIRMADO / EM_PREPARO
--- - 1 CANCELADO
+-- IDs: 1 a 20 (Já definidos manualmente)
 -- ==================================================================================
 
 INSERT INTO public.pedido (id_pedido, cliente_id, restaurante_id, endereco_origem_id, endereco_entrega_id, cupom_id, dt_criacao, dt_atualizacao, vl_subtotal, vl_entrega, vl_desconto, vl_total, status, forma_pagamento, tempo_estimado_entrega, ds_observacoes, is_aceito, dt_aceitacao, motivo_recusa) VALUES
@@ -603,6 +608,7 @@ WHERE e.id IN (SELECT DISTINCT entregador_id FROM public.avaliacao);
 
 -- ==================================================================================
 -- 13. ATUALIZAÇÃO DE SEQUÊNCIAS (Para evitar erros futuros)
+-- Ajustado para garantir que o próximo ID gerado automaticamente seja maior que o manual
 -- ==================================================================================
 
 SELECT setval('pedido_id_pedido_seq', (SELECT MAX(id_pedido) FROM pedido));
