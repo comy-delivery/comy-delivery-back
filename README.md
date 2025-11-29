@@ -1,273 +1,266 @@
 Comy Delivery – Backend
+Plataforma de Delivery • Arquitetura Moderna • APIs Corporativas
+<br> <p align="center"> <img src="https://img.shields.io/badge/Java-21-EC2025?style=for-the-badge&logo=java&logoColor=white" /> <img src="https://img.shields.io/badge/Spring_Boot-3.5.7-6DB33F?style=for-the-badge&logo=springboot&logoColor=white" /> <img src="https://img.shields.io/badge/PostgreSQL-14+-4169E1?style=for-the-badge&logo=postgresql&logoColor=white" /> <img src="https://img.shields.io/badge/Maven-3.9+-C71A36?style=for-the-badge&logo=apachemaven&logoColor=white" /> <img src="https://img.shields.io/badge/Swagger-OpenAPI-85EA2D?style=for-the-badge&logo=swagger&logoColor=black" /> </p> <br>
 
-Plataforma robusta de delivery desenvolvida em Spring Boot, fornecendo APIs REST para gestão completa de restaurantes, pedidos, entregas e usuários.
+Aplicação backend do Comy Delivery, construída com padrões empresariais, arquitetura modular e foco em robustez, escalabilidade e segurança.
+Responsável por todas as APIs REST da plataforma – incluindo usuários, pedidos, entregas, avaliações, cupons e integração externa.
 
 Índice
 
 Visão Geral
 
+Arquitetura
+
 Tecnologias
 
-Pré-requisitos
+Requisitos
 
-Configuração do Ambiente
+Configuração
 
-Instalação
-
-Execução do Projeto
+Execução
 
 Estrutura do Código
 
-Funcionalidades
+Principais Domínios
 
 Documentação da API
 
 Variáveis de Ambiente
 
-Banco de Dados
+Dados Iniciais
 
-Testes da API
+Testes de API
 
-Troubleshooting
+Suporte e Troubleshooting
 
 Equipe
 
-1. Visão Geral
+Visão Geral
 
-O Comy Delivery é um backend moderno e escalável projetado para sustentar uma plataforma de delivery.
-O sistema integra restaurantes, clientes e entregadores, oferecendo funcionalidades de gestão de pedidos, cálculo automático de frete, sistema de cupons, avaliações, e recuperação de senha via e-mail.
+O backend do Comy Delivery foi desenvolvido com foco em:
 
-2. Tecnologias
+Disponibilidade – APIs responsivas e independentes
+
+Escalabilidade – arquitetura modular orientada a domínio
+
+Segurança – senhas criptografadas com BCrypt, camadas isoladas e boas práticas
+
+Integridade dos dados – validação avançada e regras de negócio consolidadas
+
+Integração externa – consumo de APIs e cálculo de distâncias
+
+A solução implementa toda a regra de negócios necessária para sustentar o ecossistema de delivery composto por:
+
+◼ Clientes
+◼ Restaurantes
+◼ Entregadores
+◼ Administradores
+
+Arquitetura
+
+✔ Arquitetura em camadas
+✔ DTO Pattern
+✔ Services isolados
+✔ Spring Data JPA com repositórios inteligentes
+✔ Integração via Feign Client
+✔ Documentação automática via OpenAPI
+✔ Validação backend-first
+
+Controller → Service → Repository → Model → Database
+
+Tecnologias
 
 Java 21
 
 Spring Boot 3.5.7
 
+PostgreSQL
+
 Spring Data JPA
 
 Spring Validation
 
-Spring Cloud OpenFeign (CEP)
-
-PostgreSQL
-
 Lombok
-
-BCrypt
 
 JavaMailSender
 
-Springdoc OpenAPI (Swagger)
+OpenFeign
+
+Swagger / OpenAPI
 
 Maven
 
-3. Pré-requisitos
+Requisitos
 
 Java 21+
 
-Maven 3.9+ (ou Maven Wrapper incluso)
+Maven 3.9+
 
 PostgreSQL 14+
 
 Git
 
-IDE (IntelliJ IDEA recomendado)
+IDE (IntelliJ recomendado)
 
-4. Configuração do Ambiente
+Configuração
 Banco de Dados
-
-Crie o banco:
-
 CREATE DATABASE comy_delivery;
 
 Variáveis de Ambiente
 
-Configure no sistema ou crie um arquivo .env:
+Crie um .env com:
 
-# Banco de Dados
 DATABASE_URL=jdbc:postgresql://localhost:5432/comy_delivery
-DATABASE_USERNAME=seu_usuario
-DATABASE_PASSWORD=sua_senha
+DATABASE_USERNAME=postgres
+DATABASE_PASSWORD=postgres
 
-# E-mail (Gmail)
-EMAIL_SENDER=seu_email@gmail.com
+EMAIL_SENDER=seuemail@gmail.com
 SENHA_EMAIL_SENDER=sua_senha_app
 
-# API Externa
-AWESOMEAPI_KEY=sua_chave
+AWESOMEAPI_KEY=sua_chave_cep
 
-# URLs (opcional)
 FRONTEND_URL=http://localhost:4200
 BACKEND_URL=http://localhost:8084
 PASSWORD_RECOVERY_URL=http://localhost:4200/reset-password
 
-
-Para envio de e-mails via Gmail, habilite verificação em duas etapas e gere uma senha de app.
-
-5. Instalação
-
-Clone o repositório:
-
-git clone https://github.com/seu-usuario/comy-delivery-back.git
-cd comy-delivery-back
-
-
-Instale dependências:
-
-./mvnw clean install        # Linux/Mac
-mvnw.cmd clean install      # Windows
-
-6. Execução do Projeto
-Via Maven Wrapper (Recomendado)
+Execução
+Maven Wrapper (Recomendado)
 ./mvnw spring-boot:run
 
-Via Maven
-mvn spring-boot:run
-
-Via JAR
+JAR
 ./mvnw clean package
-java -jar target/comy-delivery-back-0.0.1-SNAPSHOT.jar
+java -jar target/comy-delivery-back.jar
 
-Via IDE
+IDE
 
-Execute a classe:
+Executar classe:
 
 ComyDeliveryBackApplication.java
 
-7. Endpoints e Acesso
-
-Base API: http://localhost:8084
-
-Documentação Swagger: http://localhost:8084/swagger-ui.html
-
-Health Check: http://localhost:8084/api/health
-
-8. Estrutura do Código
+Estrutura do Código
 src/main/java/com/comy_delivery_back/
-├── client/                # Integrações externas
-├── configuration/         # CORS, Swagger, beans globais
-├── controller/            # Endpoints REST
-├── dto/                   # Request/Response DTOs
-├── enums/                 # Tipos e estados
-├── exception/             # Exceções customizadas
-├── model/                 # Entidades JPA
-├── repository/            # Repositórios JPA
-├── scheduler/             # Tarefas agendadas
-├── security/              # Configuração de autenticação
-├── service/               # Regras de negócio
-└── utils/                 # Funções auxiliares
+├── client/
+├── configuration/
+├── controller/
+├── dto/
+│   ├── request/
+│   └── response/
+├── enums/
+├── exception/
+├── model/
+├── repository/
+├── scheduler/
+├── security/
+├── service/
+└── utils/
 
-9. Funcionalidades
+Principais Domínios
 Usuários
 
 Cadastro e autenticação
 
 Recuperação de senha
 
-Desativação de conta (soft delete)
+Perfis: Cliente, Restaurante, Entregador, Admin
 
 Restaurantes
+
+Cadastro completo
 
 Catálogo de produtos
 
 Promoções
 
-Horários de funcionamento
-
-Dashboard gerencial
+Gestão operacional
 
 Pedidos
 
-Múltiplos itens e adicionais
+Criação de pedido
 
-Cupons de desconto
-
-Cálculo automático de frete por distância
+Adicionais e cupons
 
 Fluxo completo de status
 
+Dashboard
+
 Entregas
 
-Atribuição automática de entregador
+Atribuição automática
 
-Status em tempo real
+Rastreamento por status
 
 Dashboard do entregador
 
+Avaliações
+
+Nota do restaurante
+
+Nota do entregador
+
 Endereços
 
-Busca de CEP via AwesomeAPI
-
-Conversão para coordenadas
+CEP → Coordenadas
 
 Cálculo de distância (Haversine)
 
-10. Documentação da API
+Documentação da API
 
-Documentação gerada automaticamente:
+A interface de documentação está disponível em:
 
-🔗 http://localhost:8084/swagger-ui.html
+📄 http://localhost:8084/swagger-ui.html
 
-11. Variáveis de Ambiente – Tabela
-Variável	Descrição	Obrigatório	Padrão
-DATABASE_URL	URL do PostgreSQL	Sim	—
-DATABASE_USERNAME	Usuário do banco	Sim	—
-DATABASE_PASSWORD	Senha do banco	Sim	—
-EMAIL_SENDER	E-mail remetente	Sim	—
-SENHA_EMAIL_SENDER	Senha de App Gmail	Sim	—
-AWESOMEAPI_KEY	API CEP	Sim	—
-FRONTEND_URL	URL do Frontend	Não	http://localhost:4200
+Variáveis de Ambiente
+Variável	Descrição	Obrigatória
+DATABASE_URL	URL do PostgreSQL	✔
+DATABASE_USERNAME	Usuário	✔
+DATABASE_PASSWORD	Senha	✔
+EMAIL_SENDER	Gmail remetente	✔
+SENHA_EMAIL_SENDER	Senha de App	✔
+AWESOMEAPI_KEY	API CEP	✔
+FRONTEND_URL	URL do Frontend	✖
+BACKEND_URL	URL do Backend	✖
+PASSWORD_RECOVERY_URL	Reset de senha	✖
+Dados Iniciais
 
-BACKEND_URL	URL do Backend	Não	http://localhost:8084
+Usuários gerados automaticamente:
 
-PASSWORD_RECOVERY_URL	URL de reset de senha	Não	http://localhost:8084/reset-password
-12. Banco de Dados
-Inicialização
-
-Hibernate ddl-auto=update
-
-Dados iniciais em data.sql
-
-Usuários iniciais
-Tipo	Usuário	Senha
+Perfil	Login	Senha
 Admin	admin_master	SenhaForte123
 Restaurante	pizzaria_top	SenhaForte123
 Cliente	cliente_joao	SenhaForte123
 Entregador	driver_carlos	SenhaForte123
-13. Testes da API
-cURL
+Testes de API
+Health Check
 curl http://localhost:8084/api/health
-curl http://localhost:8084/api/restaurante/2
 
-Postman / Insomnia
+Swagger
 
-Importe diretamente a documentação Swagger.
+Importar a collection diretamente do Swagger UI.
 
-14. Troubleshooting
-Erro: Connection refused (Banco)
+Suporte e Troubleshooting
+Conexão negada ao banco
 
-Verifique se o PostgreSQL está em execução e se as credenciais estão corretas.
+Verificar serviço PostgreSQL
 
-Erro: AuthenticationFailedException (Email)
+Conferir credenciais
 
-Gere nova senha de App no Gmail.
+Erro ao enviar e-mail
 
-Erro: Port 8084 already in use
+Verificação em duas etapas
 
-Altere a porta:
+Criar senha de app
 
+Porta em uso
 server.port=8085
 
-15. Equipe
+Equipe de Desenvolvimento
+Integrante	GitHub
+Arthur	https://github.com/Thurrrr
 
-Arthur
+Emilio	https://github.com/emilioaugusto
 
-Emilio
+Heloisa	https://github.com/helomt
 
-Heloisa
+Jude	https://github.com/judevieira
 
-Jude
-
-Sinara
-
-Contato: dev.hmtvrs@gmail.com
+Sinara	https://github.com/sinara-santinoni
