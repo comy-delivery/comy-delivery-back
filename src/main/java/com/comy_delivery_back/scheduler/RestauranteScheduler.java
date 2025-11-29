@@ -14,7 +14,7 @@ public class RestauranteScheduler {
     }
 
     //executa a cada 5 min
-    @Scheduled(cron = "0 0/5 * * * *")
+    @Scheduled(cron = "0 0/55 * * * *")
     public void verificarHorariosRestaurantes() {
         System.out.println("SCHEDULER: Verificando e atualizando status de abertura dos restaurantes. (A cada 5 min)");
 

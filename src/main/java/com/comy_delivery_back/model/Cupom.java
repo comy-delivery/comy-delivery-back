@@ -59,6 +59,7 @@ public class Cupom {
     @PrePersist
     public void prePersist(){
         isAtivo = true;
+        dataCriacao = LocalDateTime.now();
     }
 
 }

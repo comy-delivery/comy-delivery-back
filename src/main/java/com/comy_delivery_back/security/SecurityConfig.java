@@ -7,11 +7,14 @@ import com.comy_delivery_back.service.TokenService;
 import com.comy_delivery_back.service.UsuarioService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -23,9 +26,15 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 @Configuration
@@ -136,9 +145,13 @@ public class SecurityConfig {
                                                    DaoAuthenticationProvider daoAuthenticationProvider,
                                                    AuthenticationSuccessHandler oauth2AuthenticationSuccessHandler) throws Exception {
         httpSecurity
+                .cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(sessionConfig ->
                         sessionConfig.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
+                )
                 .oauth2Login(oauth2 -> oauth2
                         .successHandler(oauth2AuthenticationSuccessHandler)
                         .authorizationEndpoint(endpoint -> endpoint.baseUri("/oauth2/authorization"))
@@ -168,7 +181,7 @@ public class SecurityConfig {
 //                        //Adicional
 //                        .requestMatchers(HttpMethod.POST, "/api/adicional").hasRole("RESTAURANTE")
 //                        .requestMatchers(HttpMethod.GET, "/api/adicional/{id}").hasAnyRole("RESTAURANTE","CLIENTE")
-//                        .requestMatchers(HttpMethod.GET, "/api/adicional/produto/{produtoId}").hasAnyRole("RESTAURANTE","CLIENTE")
+                        .requestMatchers(HttpMethod.GET, "/api/adicional/produto/{produtoId}").hasAnyRole("RESTAURANTE","CLIENTE")
 //                        .requestMatchers(HttpMethod.GET, "/api/adicional/disponiveis").hasAnyRole("RESTAURANTE","CLIENTE")
 //                        .requestMatchers(HttpMethod.PUT, "/api/adicional/{id}").hasRole("RESTAURANTE")
 //                        .requestMatchers(HttpMethod.PATCH, "/api/adicional/{id}/ativar").hasRole("RESTAURANTE")

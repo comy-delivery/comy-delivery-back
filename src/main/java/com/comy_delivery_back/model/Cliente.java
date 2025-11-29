@@ -7,6 +7,7 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 @Data
@@ -48,5 +49,10 @@ public class Cliente extends Usuario{
 
     @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDate dataCadastroCliente = LocalDate.now();
+
+    @PrePersist
+    public void prePersist(){
+        dataCadastroCliente = LocalDate.now();
+    }
 
 }

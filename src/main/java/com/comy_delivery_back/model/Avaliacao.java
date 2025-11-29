@@ -43,4 +43,9 @@ public class Avaliacao {
 
     private Integer avaliacaoEntrega;
 
+    @PrePersist
+    public void prePersist(){
+        dtAvaliacao = LocalDateTime.now();
+    }
+
 }
