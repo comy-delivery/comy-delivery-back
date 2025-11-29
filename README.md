@@ -1,17 +1,13 @@
-🍕 Comy Delivery – Backend
+🍕 Comy Delivery - Backend
 
+Aplicação backend corporativa desenvolvida com Spring Boot, fornecendo APIs REST completas para clientes, restaurantes e entregadores.
 
-
-
-
-
-
-
-
-
-Aplicação backend do sistema Comy Delivery, desenvolvida com Spring Boot, oferecendo APIs REST completas para gestão de clientes, restaurantes, entregadores, pedidos e entregas.
-
-Sobre • Tecnologias • Instalação • Como Rodar • Funcionalidades • Equipe
+Sobre
+ • Tecnologias
+ • Instalação
+ • Como Rodar
+ • Funcionalidades
+ • Equipe
 
 📑 Índice
 
@@ -33,36 +29,24 @@ Documentação da API
 
 Variáveis de Ambiente
 
-Banco de Dados
-
-Testando a API
-
-Troubleshooting
+Build para Produção
 
 Equipe de Desenvolvimento
 
-📌 Sobre o Projeto
+🧩 Sobre o Projeto
 
-O Comy Delivery – Backend é uma plataforma robusta que gerencia toda a lógica de negócios do sistema Comy Delivery.
-O backend fornece:
+O Comy Delivery - Backend é a camada responsável por toda lógica de negócio da plataforma:
+gestão de usuários, autenticação, pedidos, entregas, avaliações, cupons e integração com serviços externos.
 
-Autenticação e autorização
+Construído com arquitetura limpa e profissional, garante:
 
-Gestão de usuários (clientes, restaurantes, entregadores, admins)
+Segurança
 
-Gestão de restaurantes e produtos
+Escalabilidade
 
-Sistema de pedidos completo
+Performance
 
-Rastreamento de entregas
-
-Sistema de cupons
-
-Avaliações
-
-Notificações por e-mail (recuperação de senha)
-
-Integração externa com API de CEP
+Manutenibilidade
 
 🛠️ Tecnologias Utilizadas
 
@@ -74,23 +58,21 @@ Spring Data JPA
 
 Spring Validation
 
-Spring Security (estrutura)
-
 OpenFeign (CEP)
-
-Lombok
 
 PostgreSQL
 
-Swagger / OpenAPI
+Lombok
 
 JavaMailSender
 
+Swagger / OpenAPI
+
 Maven
 
-🧰 Pré-requisitos
+📦 Pré-requisitos
 
-Java 21+
+Java 21
 
 Maven 3.9+
 
@@ -98,32 +80,29 @@ PostgreSQL 14+
 
 Git
 
-IDE (IntelliJ recomendado)
+IDE (IntelliJ recomendada)
 
 ⚙️ Instalação e Configuração
-1. Clone o repositório
-git clone https://github.com/seu-usuario/comy-delivery-back.git
+1. Clonar o repositório
+git clone https://github.com/comy-delivery/comy-delivery-back.git
 cd comy-delivery-back
 
-2. Configure o banco de dados
+2. Criar o banco de dados
 CREATE DATABASE comy_delivery;
 
-3. Configure as variáveis de ambiente / .env
+3. Configurar variáveis (.env)
 DATABASE_URL=jdbc:postgresql://localhost:5432/comy_delivery
-DATABASE_USERNAME=seu_usuario
-DATABASE_PASSWORD=sua_senha
+DATABASE_USERNAME=postgres
+DATABASE_PASSWORD=root
 
 EMAIL_SENDER=seu_email@gmail.com
 SENHA_EMAIL_SENDER=sua_senha_app
 
-AWESOMEAPI_KEY=sua_chave
+AWESOMEAPI_KEY=sua_chave_api
 
 FRONTEND_URL=http://localhost:4200
 BACKEND_URL=http://localhost:8084
 PASSWORD_RECOVERY_URL=http://localhost:4200/reset-password
-
-4. Instalar dependências
-./mvnw clean install
 
 ▶️ Como Rodar o Projeto
 Via Maven Wrapper
@@ -134,37 +113,30 @@ mvn spring-boot:run
 
 Via JAR
 ./mvnw clean package
-java -jar target/comy-delivery-back-0.0.1-SNAPSHOT.jar
+java -jar target/comy-delivery-back.jar
 
-📂 Estrutura do Projeto
+📁 Estrutura do Projeto
 src/main/java/com/comy_delivery_back/
-├── client/
-├── configuration/
-├── controller/
-├── dto/
-│   ├── request/
-│   └── response/
-├── enums/
-├── exception/
-├── model/
-├── repository/
-├── scheduler/
-├── security/
-├── service/
-└── utils/
+├── controller/     
+├── service/        
+├── repository/     
+├── model/          
+├── dto/            
+├── configuration/  
+├── security/       
+├── utils/          
+└── exception/      
 
-🧩 Funcionalidades
-Usuários
+🚀 Funcionalidades
+👥 Usuários
 
 Cadastro e autenticação
 
-Recuperação de senha por e-mail
+Recuperação de senha
 
-Perfis: cliente, restaurante, entregador e admin
+Perfis: Cliente, Restaurante, Entregador, Admin
 
-Restaurantes
-
-Cadastro e atualização
+🍽️ Restaurantes
 
 Catálogo de produtos
 
@@ -174,94 +146,52 @@ Horários de funcionamento
 
 Dashboard
 
-Pedidos
+🛍️ Pedidos
 
-Criação de pedido com múltiplos itens
-
-Adicionais
+Itens + adicionais
 
 Cupons
 
 Fluxo completo de status
 
-Dashboard para restaurante
+Dashboard do restaurante
 
-Entregas
+🚚 Entregas
 
 Atribuição automática
 
-Rastreio em tempo real
+Status em tempo real
 
 Dashboard do entregador
 
-Avaliações
+📍 Endereços
 
-Comentários
+Busca por CEP
 
-Nota do restaurante
+Conversão para coordenadas
 
-Nota do entregador
-
-Endereços
-
-Busca por CEP via AwesomeAPI
-
-Cálculo de distância
+Distância (Haversine)
 
 📘 Documentação da API
 
-Swagger disponível em:
+A documentação detalhada está disponível em:
 
 🔗 http://localhost:8084/swagger-ui.html
 
 🔐 Variáveis de Ambiente
-Variável	Descrição	Obrigatório
-DATABASE_URL	URL do PostgreSQL	✔️
+Variável	Descrição	Obrigatória
+DATABASE_URL	URL do banco	✔️
 DATABASE_USERNAME	Usuário	✔️
 DATABASE_PASSWORD	Senha	✔️
 EMAIL_SENDER	Gmail remetente	✔️
-SENHA_EMAIL_SENDER	Senha de app	✔️
-AWESOMEAPI_KEY	Chave da API CEP	✔️
-FRONTEND_URL	URL do frontend	❌
-BACKEND_URL	URL do backend	❌
-PASSWORD_RECOVERY_URL	Link para reset	❌
-🗄️ Banco de Dados
-Hibernate
-
-ddl-auto=update
-
-Dados iniciais (seed)
-
-Usuários padrões:
-
-Tipo	Login	Senha
-Admin	admin_master	SenhaForte123
-Restaurante	pizzaria_top	SenhaForte123
-Cliente	cliente_joao	SenhaForte123
-Entregador	driver_carlos	SenhaForte123
-🔍 Testando a API
-cURL
-curl http://localhost:8084/api/health
-
-Postman / Insomnia
-
-Importe o Swagger.
-
-🐛 Troubleshooting
-Banco não conecta
-
-Verifique se PostgreSQL está rodando
-
-Confira usuário e senha
-
-Erro ao enviar e-mail
-
-Ative verificação em duas etapas
-
-Gere senha de app
-
-Porta em uso
-server.port=8085
+SENHA_EMAIL_SENDER	Senha de App	✔️
+AWESOMEAPI_KEY	API CEP	✔️
+FRONTEND_URL	URL do front	❌
+BACKEND_URL	URL do back	❌
+PASSWORD_RECOVERY_URL	Reset de senha	❌
+🏭 Build para Produção
+./mvnw clean package -DskipTests
+java -jar target/comy-delivery-back.jar
 
 👥 Equipe de Desenvolvimento
 Integrante	GitHub
