@@ -7,14 +7,12 @@ import com.comy_delivery_back.service.TokenService;
 import com.comy_delivery_back.service.UsuarioService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -29,6 +27,7 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -60,52 +59,6 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    @Bean
-    public AuthenticationSuccessHandler oauth2AuthenticationSucessHandler() {
-        return ((request, response, authentication) -> {
-
-            //pega informacoes do usuario google
-            OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
-            String email = oAuth2User.getAttribute("email");
-            String nome = oAuth2User.getAttribute("name");
-
-            try {
-                //pega usuario existent
-                Usuario usuario = usuarioService.processOAuth2User(email, nome);
-                String token = tokenService.generateToken(usuario);
-                String refreshToken = tokenService.refreshToken(usuario);
-
-                LoginResponseDTO loginResponseDTO = new LoginResponseDTO(token, refreshToken, usuario.getId());
-
-                response.setContentType("application/json;charset=UTF-8"); //tipo
-                response.setStatus(HttpServletResponse.SC_OK); //resposta
-
-                //converte o dto para json string
-                String jsonResponse = objectMapper.writeValueAsString(loginResponseDTO);
-
-                //escreve string
-                response.getWriter().write(jsonResponse);
-
-            } catch (UsuarioNaoRegistradoException e) {
-                response.setContentType("application/json;charset=UTF-8");
-                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-
-                //criando a resposta
-                String jsonError = objectMapper.writeValueAsString(Map.of(
-                        "status", "REGISTRO_PENDENTE",
-                        "message", "Usuário não encontrado. Complete o cadastro com este e-mail.",
-                        "email", email,
-                        "nome", nome
-                ));
-
-                //escreve a string
-                response.getWriter().write(jsonError);
-            }
-
-            //finaliza requisicao
-            response.getWriter().flush();
-        });
-    }
 
     //correcao do problema de prefixamento de roles
     @Bean
@@ -145,7 +98,6 @@ public class SecurityConfig {
                                                    DaoAuthenticationProvider daoAuthenticationProvider,
                                                    AuthenticationSuccessHandler oauth2AuthenticationSuccessHandler) throws Exception {
         httpSecurity
-                .cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(sessionConfig ->
                         sessionConfig.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -181,7 +133,7 @@ public class SecurityConfig {
 //                        //Adicional
 //                        .requestMatchers(HttpMethod.POST, "/api/adicional").hasRole("RESTAURANTE")
 //                        .requestMatchers(HttpMethod.GET, "/api/adicional/{id}").hasAnyRole("RESTAURANTE","CLIENTE")
-                        .requestMatchers(HttpMethod.GET, "/api/adicional/produto/{produtoId}").hasAnyRole("RESTAURANTE","CLIENTE")
+//                        .requestMatchers(HttpMethod.GET, "/api/adicional/produto/{produtoId}").hasAnyRole("RESTAURANTE","CLIENTE")
 //                        .requestMatchers(HttpMethod.GET, "/api/adicional/disponiveis").hasAnyRole("RESTAURANTE","CLIENTE")
 //                        .requestMatchers(HttpMethod.PUT, "/api/adicional/{id}").hasRole("RESTAURANTE")
 //                        .requestMatchers(HttpMethod.PATCH, "/api/adicional/{id}/ativar").hasRole("RESTAURANTE")
