@@ -25,7 +25,6 @@ import java.util.List;
 @RequestMapping("/api/produto")
 @Tag(name = "Produto Controller", description = "Controller para as operações com o banco de dados para os produtos")
 public class ProdutoController {
-
     private final ProdutoService produtoService;
 
     public ProdutoController(ProdutoService produtoService) {

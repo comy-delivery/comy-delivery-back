@@ -107,7 +107,8 @@ public class ProdutoService {
         Produto produto = produtoRepository.findById(id)
                 .orElseThrow(() -> new ProdutoNaoEncontradoException(id));
         produto.setAtivo(false);
-        produtoRepository.save(produto);
+
+        produtoRepository.delete(produto);
     }
 
     @Transactional
