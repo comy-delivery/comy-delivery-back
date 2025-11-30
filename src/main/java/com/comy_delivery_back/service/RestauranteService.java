@@ -261,6 +261,14 @@ public class RestauranteService {
         return new RestauranteResponseDTO(restaurante);
     }
 
+    @Transactional(readOnly = true)
+    public List<RestauranteResponseDTO> listarAtivos() {
+        return restauranteRepository.findByIsAtivoTrue()
+                .stream()
+                .map(RestauranteResponseDTO::new)
+                .toList();
+    }
+
     @Transactional
     public EnderecoResponseDTO alterarEnderecoRestaurante(Long idRestaurante, Long idEndereco,
                                                           AtualizarEnderecoRequestDTO enderecoRequestDTO){

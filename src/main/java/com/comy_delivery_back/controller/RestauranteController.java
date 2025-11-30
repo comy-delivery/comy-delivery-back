@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -127,6 +128,18 @@ public class RestauranteController {
     public ResponseEntity<List<RestauranteResponseDTO>> listarRestaurantesAbertos() {
         List<RestauranteResponseDTO> abertos = restauranteService.listarRestaurantesAbertos();
         return ResponseEntity.ok(abertos);
+    }
+
+    @Operation(summary = "Listar todos os restaurantes ativos")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Lista de restaurantes ativos retornada com sucesso",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = RestauranteResponseDTO.class)))
+    })
+    @GetMapping("/ativos")
+    public ResponseEntity<List<RestauranteResponseDTO>> listarAtivos() {
+        List<RestauranteResponseDTO> restaurantes = restauranteService.listarAtivos();
+        return ResponseEntity.ok(restaurantes);
     }
 
     @Operation(summary = "Listar Endereços do Restaurante",

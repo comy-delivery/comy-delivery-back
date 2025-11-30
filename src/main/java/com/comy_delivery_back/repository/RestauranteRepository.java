@@ -19,6 +19,7 @@ public interface RestauranteRepository extends JpaRepository<Restaurante, Long> 
     Optional<Restaurante> findByUsername(String username);
     List<Restaurante> findAllByIsAbertoTrue();
     List<Restaurante> findByIsDisponivelTrue();
+    List<Restaurante> findByIsAtivoTrue();
     List<Restaurante> findByCategoria(CategoriaRestaurante categoriaRestaurante);
     Optional<Restaurante> findByTokenRecuperacaoSenha(String token);
 

@@ -262,6 +262,7 @@ public class SecurityConfig {
                         // .requestMatchers(HttpMethod.DELETE, "/api/restaurante/{id}").hasAnyRole("RESTAURANTE","ADMIN")
                         // .requestMatchers(HttpMethod.PUT, "/api/restaurante/{idRestaurante}/enderecos/{idEndereco}").hasRole("RESTAURANTE")
                         .requestMatchers(HttpMethod.GET, "/api/restaurante/abertos").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/restaurante/ativos").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/restaurante/{idRestaurante}/enderecos").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/restaurante/{idRestaurante}/produtos").permitAll()
                         .requestMatchers(HttpMethod.PATCH, "/api/restaurante/{id}/status/abrir").permitAll()
