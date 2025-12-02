@@ -1,9 +1,9 @@
 -- ==================================================================================
--- SCRIPT DE POPULAÇÃO CORRIGIDO (COM IDs EXPLÍCITOS E PROTEÇÃO CONTRA DUPLICIDADE)
+-- SCRIPT DE POPULAÇÃO CORRIGIDO E VALIDADO
 -- ==================================================================================
 
 -- ==================================================================================
--- 1. USUÁRIOS (Tabela Pai - Herança JOINED)
+-- 1. USUÁRIOS (Tabela Pai - Herança JOINED) - SEM ALTERAÇÕES
 -- ==================================================================================
 
 -- ADMIN (ID 1)
@@ -57,7 +57,7 @@ VALUES (27, 'driver_felipe', '$2a$10$CgsJdAealQODbmdKpEQIWevMNDmnzik7MOw1KAnCJD2
         TRUE) ON CONFLICT (id) DO NOTHING;
 
 -- ==================================================================================
--- 2. DETALHES DOS USUÁRIOS
+-- 2. DETALHES DOS USUÁRIOS - SEM ALTERAÇÕES
 -- ==================================================================================
 
 -- ADMIN (ID 1)
@@ -132,8 +132,7 @@ VALUES (27, 'Felipe Motos', 'felipe@driver.com', '72437769062', '48988881111', '
         4.9) ON CONFLICT (id) DO NOTHING;
 
 -- ==================================================================================
--- 3. ENDEREÇOS (RESTAURANTES E CLIENTES) - Região de Tubarão/SC
--- (IDs Definidos: 100 + ID do Usuário para evitar colisão e duplicidade)
+-- 3. ENDEREÇOS (RESTAURANTES E CLIENTES) - Região de Tubarão/SC - SEM ALTERAÇÕES
 -- ==================================================================================
 
 INSERT INTO public.endereco (id_endereco, logradouro, numero, bairro, cidade, cep, estado, tipo_endereco, latitude, longitude,
@@ -169,42 +168,10 @@ VALUES
     ON CONFLICT (id_endereco) DO NOTHING;
 
 -- ==================================================================================
--- 4. PRODUTOS (10 por restaurante, 2 em promoção)
--- IDs Determinísticos: (ID Restaurante * 100) + Índice (1 a 10)
--- Ex: Restaurante 2 terá produtos 201 a 210
+-- 4. PRODUTOS (10 por restaurante, 2 em promoção) - SEM ALTERAÇÕES
 -- ==================================================================================
 
--- LANCHES (Restaurantes 2, 3, 4, 5)
-INSERT INTO public.produto (id_produto, nm_produto, ds_produto, vl_preco, categoria_produto, tempo_preparacao, is_promocao,
-                            vl_preco_promocional, is_ativo, restaurante_id, data_cadastro_produto)
-SELECT
-    (r.id * 100) + p.idx, -- Gera ID único: 201, 202... 301, 302...
-    p.nm_produto,
-    p.ds_produto,
-    p.vl_preco,
-    p.categoria_produto,
-    p.tempo_preparacao,
-    p.is_promocao,
-    p.vl_preco_promocional,
-    TRUE,
-    r.id,
-    NOW()
-FROM (VALUES
-          (1, 'X-Bacon', 'Pão, carne, queijo e bacon', 25.00, 'Lanches', 20, FALSE, NULL),
-          (2, 'X-Salada', 'Pão, carne, queijo e salada', 20.00, 'Lanches', 20, TRUE, 15.00),
-          (3, 'X-Tudo', 'Completo com tudo dentro', 35.00, 'Lanches', 25, FALSE, NULL),
-          (4, 'Smash Simples', 'Carne prensada e queijo', 18.00, 'Lanches', 15, FALSE, NULL),
-          (5, 'Smash Duplo', 'Duas carnes prensadas', 22.00, 'Lanches', 15, TRUE, 19.00),
-          (6, 'Batata Frita P', 'Porção individual', 12.00, 'Acompanhamento', 10, FALSE, NULL),
-          (7, 'Batata Frita G', 'Porção família', 20.00, 'Acompanhamento', 15, FALSE, NULL),
-          (8, 'Refrigerante Lata', '350ml gelado', 6.00, 'Bebidas', 0, FALSE, NULL),
-          (9, 'Suco Natural', 'Laranja 500ml', 10.00, 'Bebidas', 5, FALSE, NULL),
-          (10, 'Milkshake', 'Morango 500ml', 18.00, 'Sobremesa', 10, FALSE, NULL)
-     ) AS p(idx, nm_produto, ds_produto, vl_preco, categoria_produto, tempo_preparacao, is_promocao, vl_preco_promocional)
-         CROSS JOIN (VALUES (2), (3), (4), (5)) AS r(id)
-    ON CONFLICT (id_produto) DO NOTHING;
-
--- DOCES (Restaurantes 6 a 11)
+-- LANCHES (Restaurantes 2, 3)
 INSERT INTO public.produto (id_produto, nm_produto, ds_produto, vl_preco, categoria_produto, tempo_preparacao, is_promocao,
                             vl_preco_promocional, is_ativo, restaurante_id, data_cadastro_produto)
 SELECT
@@ -220,18 +187,117 @@ SELECT
     r.id,
     NOW()
 FROM (VALUES
-          (1, 'Bolo de Pote', 'Chocolate belga', 15.00, 'Doces', 0, TRUE, 12.00),
-          (2, 'Torta de Limão', 'Fatia generosa', 12.00, 'Doces', 0, FALSE, NULL),
-          (3, 'Brigadeiro Gourmet', '4 unidades', 10.00, 'Doces', 0, FALSE, NULL),
-          (4, 'Brownie', 'Com nozes', 8.00, 'Doces', 0, TRUE, 6.00),
-          (5, 'Cheesecake', 'Frutas vermelhas', 18.00, 'Doces', 0, FALSE, NULL),
-          (6, 'Açaí 300ml', 'Puro', 15.00, 'Açaí', 5, FALSE, NULL),
-          (7, 'Açaí 500ml', 'Completo', 22.00, 'Açaí', 5, FALSE, NULL),
-          (8, 'Água s/ Gás', '500ml', 4.00, 'Bebidas', 0, FALSE, NULL),
-          (9, 'Café Expresso', 'Grão moído na hora', 5.00, 'Bebidas', 3, FALSE, NULL),
-          (10, 'Coxinha de Morango', 'Chocolate ao redor', 7.00, 'Doces', 0, FALSE, NULL)
+          (1, 'Hamburguer Artesanal de Carne', 'Pão, carne, queijo, alface e tomate e bacon', 35.00, 'Lanches', 20, FALSE, NULL),
+          (2, 'Hamburguer Artesanal de Frango', 'Pão, frango, onion rings, queijo e salada', 25.00, 'Lanches', 20, TRUE, 15.00),
+          (3, 'Hamburguer Artesanal Vegetariano', 'Pão, carne de soja, picles, vegan cheese e salada', 35.00, 'Lanches', 25, FALSE, NULL),
+          (4, 'Hamburguer Bacon Cheddar', 'Triplo burguer, com salada, cebola caramelizada e  muito cheddar', 55.00, 'Acompanhamento', 35, FALSE, NULL),
+          (5, 'Batata Rustica', '300 g de batata rustica temperada com ervas', 22.00, 'Lanches', 15, TRUE, 19.00),
+          (6, 'Refrigerante Lata', '350ml gelado', 6.00, 'Bebidas', 0, FALSE, NULL)
      ) AS p(idx, nm_produto, ds_produto, vl_preco, categoria_produto, tempo_preparacao, is_promocao, vl_preco_promocional)
-         CROSS JOIN (VALUES (6), (7), (8), (9), (10), (11)) AS r(id)
+         CROSS JOIN (VALUES (2), (3)) AS r(id)
+    ON CONFLICT (id_produto) DO NOTHING;
+
+-- FastFood (Restaurantes 4, 5)
+INSERT INTO public.produto (id_produto, nm_produto, ds_produto, vl_preco, categoria_produto, tempo_preparacao, is_promocao,
+                            vl_preco_promocional, is_ativo, restaurante_id, data_cadastro_produto)
+SELECT
+    (r.id * 100) + p.idx,
+    p.nm_produto,
+    p.ds_produto,
+    p.vl_preco,
+    p.categoria_produto,
+    p.tempo_preparacao,
+    p.is_promocao,
+    p.vl_preco_promocional,
+    TRUE,
+    r.id,
+    NOW()
+FROM (VALUES
+          (1, 'Hamburguer de Carne', 'Pão, carne, queijo, alface e tomete e bacon', 35.00, 'Hmburguer', 5, FALSE, NULL),
+          (2, 'Hamburguer de Frango', 'Pão, frango, onion rings, queijo e salada', 25.00, 'Hamburguer', 5, TRUE, 15.00),
+          (3, 'Combo de 2 burguer, 2 batatas e Refrigerante', 'Combo para uma grande fome', 80.00, 'Combo', 10, FALSE, NULL),
+          (4, 'Combo burguer, batata e refrigerante', 'Combo ', 55.00, 'Combo', 10, FALSE, NULL),
+          (5, 'Batata frit M', '350 g de batata frita', 12.00, 'Acompanhamentos', 10, TRUE, 9.00),
+          (6, 'Refrigerante de Cola', '350ml gelado', 6.00, 'Bebidas', 0, FALSE, NULL),
+          (7, 'Refrigerante de Laranja', '350ml gelado', 6.00, 'Bebidas', 0, FALSE, NULL),
+          (8, 'Refrigerante de Limão', '350ml gelado', 6.00, 'Bebidas', 0, FALSE, NULL)
+     ) AS p(idx, nm_produto, ds_produto, vl_preco, categoria_produto, tempo_preparacao, is_promocao, vl_preco_promocional)
+         CROSS JOIN (VALUES (4), (5)) AS r(id)
+    ON CONFLICT (id_produto) DO NOTHING;
+
+-- DOCES (Restaurantes 8, 9)
+INSERT INTO public.produto (id_produto, nm_produto, ds_produto, vl_preco, categoria_produto, tempo_preparacao, is_promocao,
+                            vl_preco_promocional, is_ativo, restaurante_id, data_cadastro_produto)
+SELECT
+    (r.id * 100) + p.idx,
+    p.nm_produto,
+    p.ds_produto,
+    p.vl_preco,
+    p.categoria_produto,
+    p.tempo_preparacao,
+    p.is_promocao,
+    p.vl_preco_promocional,
+    TRUE,
+    r.id,
+    NOW()
+FROM (VALUES
+          (1, 'Bolo de Cenoura', 'Bolo de cenoura com cobertura de chocolate', 15.00, 'Bolos', 0, TRUE, 12.00),
+          (2, 'Bolo de chocolate', 'Bolo de chocolate belga servido com sorvete de baunilha e cobertura', 18.00, 'Bolos', 0, FALSE, NULL),
+          (3, 'Bolo de coco', 'Bolo de coco macio e com recheio de brigadeiro branco', 10.00, 'Bolos', 0, FALSE, NULL),
+          (4, 'Bolo Red Velvet', 'Bolo red velvet, com cobertura de chantilly e frutas vermelhas', 8.00, 'Bolos', 0, TRUE, 6.00)
+
+     ) AS p(idx, nm_produto, ds_produto, vl_preco, categoria_produto, tempo_preparacao, is_promocao, vl_preco_promocional)
+         CROSS JOIN (VALUES (8), (9)) AS r(id)
+    ON CONFLICT (id_produto) DO NOTHING;
+
+
+--SORVETE (Restaurantes 6, 7)
+INSERT INTO public.produto (id_produto, nm_produto, ds_produto, vl_preco, categoria_produto, tempo_preparacao, is_promocao,
+                            vl_preco_promocional, is_ativo, restaurante_id, data_cadastro_produto)
+SELECT
+    (r.id * 100) + p.idx,
+    p.nm_produto,
+    p.ds_produto,
+    p.vl_preco,
+    p.categoria_produto,
+    p.tempo_preparacao,
+    p.is_promocao,
+    p.vl_preco_promocional,
+    TRUE,
+    r.id,
+    NOW()
+FROM (VALUES
+          (1, 'Milkshake de Morango', 'Bolo de cenoura com cobertura de chocolate', 15.00, 'Milkshake', 0, TRUE, 12.00),
+          (2, 'Milkshake de Morango', 'Bolo de chocolate belga servido com sorvete de baunilha e cobertura', 18.00, 'Milkshake', 0, FALSE, NULL),
+          (3, 'Sorvete de baunilha', 'Duas bolas de sorvete com cobertura', 6.00, 'Casquinha', 0, FALSE, NULL),
+          (4, 'Sorvete de chocolate', 'Duas bolas de sorvete com cobertura', 6.00, 'Casquinha', 0, TRUE, 5.00),
+          (5, 'Sorvete de morango', 'Duas bolas de sorvete com cobertura', 6.00, 'Casquinha', 0, TRUE, 4.00)
+     ) AS p(idx, nm_produto, ds_produto, vl_preco, categoria_produto, tempo_preparacao, is_promocao, vl_preco_promocional)
+         CROSS JOIN (VALUES (6), (7)) AS r(id)
+    ON CONFLICT (id_produto) DO NOTHING;
+
+--AÇAI (Restaurantes 10, 11)
+INSERT INTO public.produto (id_produto, nm_produto, ds_produto, vl_preco, categoria_produto, tempo_preparacao, is_promocao,
+                            vl_preco_promocional, is_ativo, restaurante_id, data_cadastro_produto)
+SELECT
+    (r.id * 100) + p.idx,
+    p.nm_produto,
+    p.ds_produto,
+    p.vl_preco,
+    p.categoria_produto,
+    p.tempo_preparacao,
+    p.is_promocao,
+    p.vl_preco_promocional,
+    TRUE,
+    r.id,
+    NOW()
+FROM (VALUES
+          (1, 'Açaí 300ml', 'Copo de açai para personalização de 300ml', 15.00, 'Açaí', 0, TRUE, 12.00),
+          (2, 'Açaí 500ml', 'Copo de açai para personalização de 500ml', 18.00, 'Açaí', 0, FALSE, NULL),
+          (3, 'Açaí 1 litro', 'Copo de açai para personalização de 1Litro', 22.00, 'Açaí', 0, FALSE, NULL)
+
+     ) AS p(idx, nm_produto, ds_produto, vl_preco, categoria_produto, tempo_preparacao, is_promocao, vl_preco_promocional)
+         CROSS JOIN (VALUES  (10), (11)) AS r(id)
     ON CONFLICT (id_produto) DO NOTHING;
 
 -- PIZZA (Restaurantes 12, 13)
@@ -250,21 +316,16 @@ SELECT
     r.id,
     NOW()
 FROM (VALUES
-          (1, 'Pizza Calabresa M', 'Clássica', 40.00, 'Pizza', 30, TRUE, 35.00),
-          (2, 'Pizza 4 Queijos G', 'Muito queijo', 60.00, 'Pizza', 35, FALSE, NULL),
-          (3, 'Pizza Frango Catupiry M', 'Cremosa', 45.00, 'Pizza', 30, FALSE, NULL),
-          (4, 'Pizza Portuguesa G', 'Ovos, presunto, cebola', 58.00, 'Pizza', 35, TRUE, 50.00),
-          (5, 'Pizza Marguerita M', 'Manjericão fresco', 38.00, 'Pizza', 30, FALSE, NULL),
-          (6, 'Pizza Chocolate P', 'Sobremesa', 30.00, 'Pizza Doce', 25, FALSE, NULL),
-          (7, 'Borda Recheada', 'Catupiry', 10.00, 'Adicional', 0, FALSE, NULL),
-          (8, 'Coca Cola 2L', 'Gelada', 14.00, 'Bebidas', 0, FALSE, NULL),
-          (9, 'Guaraná 2L', 'Gelado', 12.00, 'Bebidas', 0, FALSE, NULL),
-          (10, 'Cerveja Long Neck', 'Heineken', 9.00, 'Bebidas', 0, FALSE, NULL)
+          (1, 'Pizza de Bacon e Milho', 'Pizza de 12 fatias', 40.00, 'Pizza Salgada', 30, TRUE, 35.00),
+          (2, 'Pizza Calabreza', 'Pizza de calabresa manjericão e mussarela', 35.00, 'Pizza Salgada', 35, FALSE, NULL),
+          (3, 'Pizza Dois Amores', 'Pizza de chocolate preto com morango', 45.00, 'Pizza Doce', 30, FALSE, NULL),
+          (4, 'Pizza de Frango', 'Pizza de frango com catupiry', 58.00, 'Pizza Salgada', 35, TRUE, 50.00),
+          (5, 'Pizza de Quatro Queijos', 'Mussarela, gorgonzola, parmesão, provolone ', 38.00, 'Pizza Salgada', 30, FALSE, NULL)
      ) AS p(idx, nm_produto, ds_produto, vl_preco, categoria_produto, tempo_preparacao, is_promocao, vl_preco_promocional)
          CROSS JOIN (VALUES (12), (13)) AS r(id)
     ON CONFLICT (id_produto) DO NOTHING;
 
--- ASIATICA (Restaurantes 14, 15, 16, 17)
+-- JAPONESA (Restaurantes 14, 15)
 INSERT INTO public.produto (id_produto, nm_produto, ds_produto, vl_preco, categoria_produto, tempo_preparacao, is_promocao,
                             vl_preco_promocional, is_ativo, restaurante_id, data_cadastro_produto)
 SELECT
@@ -291,10 +352,10 @@ FROM (VALUES
           (9, 'Refrigerante Lata', 'Lata', 6.00, 'Bebidas', 0, FALSE, NULL),
           (10, 'Água', '500ml', 4.00, 'Bebidas', 0, FALSE, NULL)
      ) AS p(idx, nm_produto, ds_produto, vl_preco, categoria_produto, tempo_preparacao, is_promocao, vl_preco_promocional)
-         CROSS JOIN (VALUES (14), (15), (16), (17)) AS r(id)
+         CROSS JOIN (VALUES (14), (15)) AS r(id)
     ON CONFLICT (id_produto) DO NOTHING;
 
--- SAUDAVEL (Restaurantes 18, 19)
+-- Vegetariana (Restaurantes 18, 19)
 INSERT INTO public.produto (id_produto, nm_produto, ds_produto, vl_preco, categoria_produto, tempo_preparacao, is_promocao,
                             vl_preco_promocional, is_ativo, restaurante_id, data_cadastro_produto)
 SELECT
@@ -310,18 +371,40 @@ SELECT
     r.id,
     NOW()
 FROM (VALUES
-          (1, 'Salada Caesar', 'Frango grelhado e molho', 28.00, 'Saladas', 15, TRUE, 22.00),
-          (2, 'Wrap de Atum', 'Integral', 20.00, 'Lanches', 10, FALSE, NULL),
-          (3, 'Marmita Fit', 'Frango e batata doce', 25.00, 'Refeição', 0, FALSE, NULL),
-          (4, 'Suco Detox', 'Verde', 12.00, 'Bebidas', 5, TRUE, 9.00),
-          (5, 'Poke Havaiano', 'Salmão e frutas', 40.00, 'Poke', 15, FALSE, NULL),
-          (6, 'Omelete Proteico', '3 ovos e queijo', 18.00, 'Refeição', 10, FALSE, NULL),
-          (7, 'Tapioca Frango', 'Sem glúten', 16.00, 'Lanches', 10, FALSE, NULL),
-          (8, 'Salada de Frutas', 'Mel e granola', 14.00, 'Sobremesa', 5, FALSE, NULL),
-          (9, 'Smoothie Manga', 'Com iogurte', 15.00, 'Bebidas', 5, FALSE, NULL),
-          (10, 'Água de Coco', 'Natural', 8.00, 'Bebidas', 0, FALSE, NULL)
+          (1, 'Buddha Bowl', 'Grão de bico, brocolis, abobora e arroz', 28.00, 'Pratos', 15, TRUE, 22.00),
+          (2, 'Feijoada Vegetariana', 'Feijoada preparada sem carne, servida com couve', 20.00, 'Pratos', 10, FALSE, NULL),
+          (3, 'Hamburguer Vegetariano', 'Hamburguer de soja, alface, tomate, cebola', 25.00, 'Prato', 0, FALSE, NULL),
+          (4, 'Moqueca de Palmito', 'Uma delicia baiana', 32.00, 'Pratos', 5, TRUE, 9.00),
+          (5, 'Salada de Grãos', 'Pepino, alface, pimentão', 20.00, 'Salada', 15, FALSE, NULL),
+          (6, 'Strogonoff de Cogumelo', 'Strogonoff vegetariano deito de cogumelo', 35.00, 'Refeição', 10, FALSE, NULL)
      ) AS p(idx, nm_produto, ds_produto, vl_preco, categoria_produto, tempo_preparacao, is_promocao, vl_preco_promocional)
          CROSS JOIN (VALUES (18), (19)) AS r(id)
+    ON CONFLICT (id_produto) DO NOTHING;
+
+-- Chinesa (Restaurantes 16, 17)
+INSERT INTO public.produto (id_produto, nm_produto, ds_produto, vl_preco, categoria_produto, tempo_preparacao, is_promocao,
+                            vl_preco_promocional, is_ativo, restaurante_id, data_cadastro_produto)
+SELECT
+    (r.id * 100) + p.idx,
+    p.nm_produto,
+    p.ds_produto,
+    p.vl_preco,
+    p.categoria_produto,
+    p.tempo_preparacao,
+    p.is_promocao,
+    p.vl_preco_promocional,
+    TRUE,
+    r.id,
+    NOW()
+FROM (VALUES
+          (1, 'Frango xadrez', 'Bowl de frango xadrez', 18.00, 'Pratos', 15, TRUE, 22.00),
+          (2, 'Guioza Chinesa', 'Guioza de carne', 20.00, 'Pratos', 10, FALSE, NULL),
+          (3, 'Kung Pao Chicken', 'Bowl de kung pao chicken com arroz', 25.00, 'Prato', 0, FALSE, NULL),
+          (4, 'Mapo Tofu', 'Tofu grelhado', 12.00, 'Pratos', 5, TRUE, 9.00),
+          (5, 'Rolinho primavera', 'Rolinho de queijo, carne e vegetariano (6 un)', 20.00, 'Acompanhamento', 15, FALSE, NULL),
+          (6, 'Yakisoba', 'Carne, Frango ou Vegetariano', 35.00, 'Pratos', 10, FALSE, NULL)
+     ) AS p(idx, nm_produto, ds_produto, vl_preco, categoria_produto, tempo_preparacao, is_promocao, vl_preco_promocional)
+         CROSS JOIN (VALUES (16), (17)) AS r(id)
     ON CONFLICT (id_produto) DO NOTHING;
 
 -- BRASILEIRA (Restaurantes 20, 21)
@@ -340,131 +423,93 @@ SELECT
     r.id,
     NOW()
 FROM (VALUES
-          (1, 'Feijoada Completa', 'Para 1 pessoa', 35.00, 'Refeição', 0, TRUE, 29.90),
-          (2, 'Prato Feito (PF)', 'Bife, arroz, feijão', 25.00, 'Refeição', 15, FALSE, NULL),
-          (3, 'Virado à Paulista', 'Tradicional', 30.00, 'Refeição', 20, FALSE, NULL),
-          (4, 'Bife a Cavalo', 'Com ovo frito', 28.00, 'Refeição', 15, TRUE, 24.00),
-          (5, 'Parmegiana Frango', 'Com purê', 32.00, 'Refeição', 25, FALSE, NULL),
-          (6, 'Strogonoff Carne', 'Com batata palha', 30.00, 'Refeição', 15, FALSE, NULL),
-          (7, 'Pudim de Leite', 'Fatia', 10.00, 'Sobremesa', 0, FALSE, NULL),
-          (8, 'Mousse Maracujá', 'Potinho', 8.00, 'Sobremesa', 0, FALSE, NULL),
-          (9, 'Refrigerante 600ml', 'Garrafa', 8.00, 'Bebidas', 0, FALSE, NULL),
-          (10, 'Suco de Laranja', 'Jarra 1L', 20.00, 'Bebidas', 10, FALSE, NULL)
+          (1, 'Ala Minuta', 'Arroz, Feijão, Bife, Ovo e Batata Frita', 35.00, 'Refeição', 0, TRUE, 29.90),
+          (2, 'Feijoada', 'Acompanha arroz, couve, laranja', 25.00, 'Refeição', 15, FALSE, NULL),
+          (3, 'Galeto Assado', 'Frango assado, acompanha brocolis e arroz', 30.00, 'Refeição', 20, FALSE, NULL),
+          (4, 'Macarrão a Bolonhesa', 'Macarrão, carne moída, parmesão ralado', 28.00, 'Massas', 15, TRUE, 24.00),
+          (5, 'Parmegiana Carne', 'Acompanha arroz e batata frita', 32.00, 'Refeição', 25, FALSE, NULL),
+          (6, 'Strogonoff Carne', 'Com arroz e batata palha', 30.00, 'Refeição', 15, FALSE, NULL)
      ) AS p(idx, nm_produto, ds_produto, vl_preco, categoria_produto, tempo_preparacao, is_promocao, vl_preco_promocional)
          CROSS JOIN (VALUES (20), (21)) AS r(id)
     ON CONFLICT (id_produto) DO NOTHING;
 
 -- ==================================================================================
--- 5. ADICIONAIS
--- IDs Determinísticos: (ID Produto * 10) + Índice
--- Garante que o adicional está vinculado ao produto de forma única
+-- 5. ADICIONAIS - SEM ALTERAÇÕES
 -- ==================================================================================
 
--- Extra Bacon (Índice 1)
+-- 5.1 Adicionais para Lanches, Burgers e Pizzas Salgadas
 INSERT INTO public.adicional (id_adicional, nm_adicional, ds_adicional, vl_preco_adicional, produto_id, is_disponivel)
 SELECT (id_produto * 10) + 1, 'Extra Bacon', 'Fatias crocantes', 5.00, id_produto, TRUE
-FROM public.produto WHERE categoria_produto IN ('Lanches', 'Pizza')
+FROM public.produto
+WHERE categoria_produto IN ('Lanches', 'Hamburguer', 'Hmburguer', 'Pizza Salgada', 'Combo', 'Acompanhamento', 'Acompanhamentos')
     ON CONFLICT (id_adicional) DO NOTHING;
 
--- Queijo Extra (Índice 2)
 INSERT INTO public.adicional (id_adicional, nm_adicional, ds_adicional, vl_preco_adicional, produto_id, is_disponivel)
 SELECT (id_produto * 10) + 2, 'Queijo Extra', 'Mussarela derretida', 4.00, id_produto, TRUE
-FROM public.produto WHERE categoria_produto IN ('Lanches', 'Pizza')
+FROM public.produto
+WHERE categoria_produto IN ('Lanches', 'Hamburguer', 'Hmburguer', 'Pizza Salgada', 'Combo', 'Acompanhamento', 'Acompanhamentos')
     ON CONFLICT (id_adicional) DO NOTHING;
 
--- Leite Condensado (Índice 1)
+-- 5.2 Adicionais para Doces, Açaí, Sorvetes e Pizza Doce
 INSERT INTO public.adicional (id_adicional, nm_adicional, ds_adicional, vl_preco_adicional, produto_id, is_disponivel)
 SELECT (id_produto * 10) + 1, 'Leite Condensado', 'Extra', 3.00, id_produto, TRUE
-FROM public.produto WHERE categoria_produto IN ('Doces', 'Açaí', 'Sobremesa', 'Pizza Doce')
+FROM public.produto
+WHERE categoria_produto IN ('DOCE', 'Bolos', 'Açaí', 'Sobremesa', 'Pizza Doce', 'Milkshake', 'Casquinha')
     ON CONFLICT (id_adicional) DO NOTHING;
 
--- Granola (Índice 2)
 INSERT INTO public.adicional (id_adicional, nm_adicional, ds_adicional, vl_preco_adicional, produto_id, is_disponivel)
-SELECT (id_produto * 10) + 2, 'Granola', 'Crocante', 2.00, id_produto, TRUE
-FROM public.produto WHERE categoria_produto IN ('Doces', 'Açaí', 'Sobremesa')
+SELECT (id_produto * 10) + 2, 'Granola Crocante', 'Porção extra', 2.00, id_produto, TRUE
+FROM public.produto
+WHERE categoria_produto IN ('Açaí', 'Milkshake', 'Casquinha')
     ON CONFLICT (id_adicional) DO NOTHING;
 
--- Cream Cheese (Índice 1)
+-- 5.3 Adicionais para Comida Japonesa/Asiática
 INSERT INTO public.adicional (id_adicional, nm_adicional, ds_adicional, vl_preco_adicional, produto_id, is_disponivel)
-SELECT (id_produto * 10) + 1, 'Cream Cheese', 'Philadelphia', 6.00, id_produto, TRUE
-FROM public.produto WHERE categoria_produto IN ('Sushi', 'Temaki', 'Sashimi')
+SELECT (id_produto * 10) + 1, 'Cream Cheese', 'Philadelphia Original', 6.00, id_produto, TRUE
+FROM public.produto
+WHERE categoria_produto IN ('Sushi', 'Temaki', 'Temakis', 'Sashimi', 'Poke', 'Entrada')
     ON CONFLICT (id_adicional) DO NOTHING;
 
--- Cebolinha (Índice 2)
 INSERT INTO public.adicional (id_adicional, nm_adicional, ds_adicional, vl_preco_adicional, produto_id, is_disponivel)
 SELECT (id_produto * 10) + 2, 'Cebolinha', 'Extra', 1.00, id_produto, TRUE
-FROM public.produto WHERE categoria_produto IN ('Sushi', 'Temaki', 'Pratos Quentes')
+FROM public.produto
+WHERE categoria_produto IN ('Sushi', 'Temaki', 'Temakis', 'Pratos Quentes', 'Lamens', 'Poke')
     ON CONFLICT (id_adicional) DO NOTHING;
 
--- Ovo Frito (Índice 1)
+-- 5.4 Adicionais para Refeições e Pratos (Brasileira/Saudável)
 INSERT INTO public.adicional (id_adicional, nm_adicional, ds_adicional, vl_preco_adicional, produto_id, is_disponivel)
 SELECT (id_produto * 10) + 1, 'Ovo Frito', 'Gema mole', 3.00, id_produto, TRUE
-FROM public.produto WHERE categoria_produto IN ('Refeição')
+FROM public.produto
+WHERE categoria_produto IN ('Refeição', 'Pratos', 'Prato', 'Massas', 'Brasileira')
     ON CONFLICT (id_adicional) DO NOTHING;
 
--- Batata Frita Extra (Índice 2)
 INSERT INTO public.adicional (id_adicional, nm_adicional, ds_adicional, vl_preco_adicional, produto_id, is_disponivel)
 SELECT (id_produto * 10) + 2, 'Batata Frita Extra', 'Pequena porção', 8.00, id_produto, TRUE
-FROM public.produto WHERE categoria_produto IN ('Refeição')
+FROM public.produto
+WHERE categoria_produto IN ('Refeição', 'Pratos', 'Prato')
     ON CONFLICT (id_adicional) DO NOTHING;
 
--- Gelo e Limão (Índice 1)
+-- 5.5 Adicionais para Bebidas
 INSERT INTO public.adicional (id_adicional, nm_adicional, ds_adicional, vl_preco_adicional, produto_id, is_disponivel)
 SELECT (id_produto * 10) + 1, 'Gelo e Limão', 'No copo', 0.00, id_produto, TRUE
-FROM public.produto WHERE categoria_produto IN ('Bebidas')
-    ON CONFLICT (id_adicional) DO NOTHING;
-
--- Copo Descartável (Índice 2)
-INSERT INTO public.adicional (id_adicional, nm_adicional, ds_adicional, vl_preco_adicional, produto_id, is_disponivel)
-SELECT (id_produto * 10) + 2, 'Copo Descartável', 'Extra', 0.10, id_produto, TRUE
-FROM public.produto WHERE categoria_produto IN ('Bebidas')
+FROM public.produto
+WHERE categoria_produto IN ('Bebidas')
     ON CONFLICT (id_adicional) DO NOTHING;
 
 -- ==================================================================================
--- 6. CUPONS (2 por Restaurante, IDs 2-21)
--- IDs Determinísticos: (ID Restaurante * 10) + Índice
+-- 6. CUPONS - SEM ALTERAÇÕES
 -- ==================================================================================
 
-INSERT INTO public.cupom (id_cupom, codigo_cupom, ds_cupom, tipo_cupom, vl_desconto, percentual_desconto, vl_minimo_pedido,
-                          dt_validade, qtd_uso_maximo, qtd_usado, is_ativo, restaurante_id, data_criacao)
-SELECT (id * 10) + 1,
-       CONCAT('BEMVINDO_', id),
-       'Desconto de boas vindas',
-       'VALOR_FIXO',
-       10.00,
-       NULL,
-       30.00,
-       '2025-12-31T23:59:59',
-       100,
-       0,
-       TRUE,
-       id,
-       NOW()
-FROM public.restaurante
-WHERE id BETWEEN 2 AND 21
-    ON CONFLICT (id_cupom) DO NOTHING;
+INSERT INTO public.cupom (id_cupom, codigo_cupom, ds_cupom, tipo_cupom, vl_desconto, percentual_desconto, vl_minimo_pedido, dt_validade, qtd_uso_maximo, qtd_usado, is_ativo, restaurante_id, data_criacao)
+SELECT (id * 10) + 1, CONCAT('BEMVINDO_', id), 'Desconto de boas vindas', 'VALOR_FIXO', 10.00, NULL, 30.00, '2025-12-31T23:59:59', 100, 0, TRUE, id, NOW()
+FROM public.restaurante WHERE id BETWEEN 2 AND 21 ON CONFLICT (id_cupom) DO NOTHING;
 
-INSERT INTO public.cupom (id_cupom, codigo_cupom, ds_cupom, tipo_cupom, vl_desconto, percentual_desconto, vl_minimo_pedido,
-                          dt_validade, qtd_uso_maximo, qtd_usado, is_ativo, restaurante_id, data_criacao)
-SELECT (id * 10) + 2,
-       CONCAT('VIP_', id),
-       'Desconto para clientes VIP',
-       'PERCENTUAL',
-       NULL,
-       15.00, -- 15%
-       50.00,
-       '2025-12-31T23:59:59',
-       50,
-       0,
-       TRUE,
-       id,
-       NOW()
-FROM public.restaurante
-WHERE id BETWEEN 2 AND 21
-    ON CONFLICT (id_cupom) DO NOTHING;
+INSERT INTO public.cupom (id_cupom, codigo_cupom, ds_cupom, tipo_cupom, vl_desconto, percentual_desconto, vl_minimo_pedido, dt_validade, qtd_uso_maximo, qtd_usado, is_ativo, restaurante_id, data_criacao)
+SELECT (id * 10) + 2, CONCAT('VIP_', id), 'Desconto para clientes VIP', 'PERCENTUAL', NULL, 15.00, 50.00, '2025-12-31T23:59:59', 50, 0, TRUE, id, NOW()
+FROM public.restaurante WHERE id BETWEEN 2 AND 21 ON CONFLICT (id_cupom) DO NOTHING;
 
 -- ==================================================================================
--- 7. DIAS DE FUNCIONAMENTO
+-- 7. DIAS DE FUNCIONAMENTO - SEM ALTERAÇÕES
 -- ==================================================================================
 
 INSERT INTO public.restaurante_dias_funcionamento (restaurante_id, dias_funcionamento)
@@ -474,99 +519,125 @@ FROM public.restaurante r
 WHERE id BETWEEN 2 AND 21 ON CONFLICT DO NOTHING;
 
 -- ==================================================================================
--- 8. PEDIDOS (20 Pedidos variados)
--- IDs: 1 a 20 (Já definidos manualmente)
+-- 8. PEDIDOS - CORRIGIDO (USO DE IDs EXPLÍCITOS DE ENDEREÇO)
 -- ==================================================================================
 
 INSERT INTO public.pedido (id_pedido, cliente_id, restaurante_id, endereco_origem_id, endereco_entrega_id, cupom_id, dt_criacao, dt_atualizacao, vl_subtotal, vl_entrega, vl_desconto, vl_total, status, forma_pagamento, tempo_estimado_entrega, ds_observacoes, is_aceito, dt_aceitacao, motivo_recusa) VALUES
 -- Pedidos ENTREGUES (IDs 1-12)
-(1, 22, 2, (SELECT id_endereco FROM endereco WHERE restaurante_id=2 LIMIT 1), (SELECT id_endereco FROM endereco WHERE cliente_id=22 LIMIT 1), NULL, NOW() - INTERVAL '5 days', NOW() - INTERVAL '5 days', 50.00, 5.00, 0.00, 55.00, 'ENTREGUE', 'CREDITO', 40, 'Sem cebola', TRUE, NOW() - INTERVAL '5 days', NULL),
-    (2, 23, 3, (SELECT id_endereco FROM endereco WHERE restaurante_id=3 LIMIT 1), (SELECT id_endereco FROM endereco WHERE cliente_id=23 LIMIT 1), NULL, NOW() - INTERVAL '4 days', NOW() - INTERVAL '4 days', 60.00, 7.00, 0.00, 67.00, 'ENTREGUE', 'PIX', 35, NULL, TRUE, NOW() - INTERVAL '4 days', NULL),
-    (3, 24, 4, (SELECT id_endereco FROM endereco WHERE restaurante_id=4 LIMIT 1), (SELECT id_endereco FROM endereco WHERE cliente_id=24 LIMIT 1), NULL, NOW() - INTERVAL '3 days', NOW() - INTERVAL '3 days', 45.00, 5.00, 0.00, 50.00, 'ENTREGUE', 'DEBITO', 30, 'Capricha no molho', TRUE, NOW() - INTERVAL '3 days', NULL),
-    (4, 25, 5, (SELECT id_endereco FROM endereco WHERE restaurante_id=5 LIMIT 1), (SELECT id_endereco FROM endereco WHERE cliente_id=25 LIMIT 1), (SELECT id_cupom FROM cupom WHERE restaurante_id=5 LIMIT 1), NOW() - INTERVAL '3 days', NOW() - INTERVAL '3 days', 80.00, 8.00, 10.00, 78.00, 'ENTREGUE', 'CREDITO', 50, NULL, TRUE, NOW() - INTERVAL '3 days', NULL),
-    (5, 26, 6, (SELECT id_endereco FROM endereco WHERE restaurante_id=6 LIMIT 1), (SELECT id_endereco FROM endereco WHERE cliente_id=26 LIMIT 1), NULL, NOW() - INTERVAL '2 days', NOW() - INTERVAL '2 days', 35.00, 5.00, 0.00, 40.00, 'ENTREGUE', 'DINHEIRO', 25, 'Troco para 50', TRUE, NOW() - INTERVAL '2 days', NULL),
-    (6, 22, 7, (SELECT id_endereco FROM endereco WHERE restaurante_id=7 LIMIT 1), (SELECT id_endereco FROM endereco WHERE cliente_id=22 LIMIT 1), NULL, NOW() - INTERVAL '2 days', NOW() - INTERVAL '2 days', 40.00, 6.00, 0.00, 46.00, 'ENTREGUE', 'PIX', 30, NULL, TRUE, NOW() - INTERVAL '2 days', NULL),
-    (7, 23, 8, (SELECT id_endereco FROM endereco WHERE restaurante_id=8 LIMIT 1), (SELECT id_endereco FROM endereco WHERE cliente_id=23 LIMIT 1), NULL, NOW() - INTERVAL '1 day', NOW() - INTERVAL '1 day', 55.00, 5.00, 0.00, 60.00, 'ENTREGUE', 'CREDITO', 45, NULL, TRUE, NOW() - INTERVAL '1 day', NULL),
-    (8, 24, 9, (SELECT id_endereco FROM endereco WHERE restaurante_id=9 LIMIT 1), (SELECT id_endereco FROM endereco WHERE cliente_id=24 LIMIT 1), NULL, NOW() - INTERVAL '1 day', NOW() - INTERVAL '1 day', 30.00, 5.00, 0.00, 35.00, 'ENTREGUE', 'DEBITO', 20, 'Não tocar campainha', TRUE, NOW() - INTERVAL '1 day', NULL),
-    (9, 25, 10, (SELECT id_endereco FROM endereco WHERE restaurante_id=10 LIMIT 1), (SELECT id_endereco FROM endereco WHERE cliente_id=25 LIMIT 1), (SELECT id_cupom FROM cupom WHERE restaurante_id=10 LIMIT 1), NOW() - INTERVAL '5 hours', NOW() - INTERVAL '4 hours', 45.00, 6.00, 10.00, 41.00, 'ENTREGUE', 'PIX', 35, NULL, TRUE, NOW() - INTERVAL '5 hours', NULL),
-    (10, 26, 11, (SELECT id_endereco FROM endereco WHERE restaurante_id=11 LIMIT 1), (SELECT id_endereco FROM endereco WHERE cliente_id=26 LIMIT 1), NULL, NOW() - INTERVAL '4 hours', NOW() - INTERVAL '3 hours', 25.00, 5.00, 0.00, 30.00, 'ENTREGUE', 'DINHEIRO', 25, NULL, TRUE, NOW() - INTERVAL '4 hours', NULL),
-    (11, 22, 12, (SELECT id_endereco FROM endereco WHERE restaurante_id=12 LIMIT 1), (SELECT id_endereco FROM endereco WHERE cliente_id=22 LIMIT 1), NULL, NOW() - INTERVAL '3 hours', NOW() - INTERVAL '2 hours', 90.00, 10.00, 0.00, 100.00, 'ENTREGUE', 'CREDITO', 50, 'Bem passado', TRUE, NOW() - INTERVAL '3 hours', NULL),
-    (12, 23, 13, (SELECT id_endereco FROM endereco WHERE restaurante_id=13 LIMIT 1), (SELECT id_endereco FROM endereco WHERE cliente_id=23 LIMIT 1), NULL, NOW() - INTERVAL '2 hours', NOW() - INTERVAL '1 hour', 65.00, 7.00, 0.00, 72.00, 'ENTREGUE', 'PIX', 40, NULL, TRUE, NOW() - INTERVAL '2 hours', NULL),
+-- Pedido 1: Restaurante 2 (Endereço 102), Cliente 22 (Endereço 122)
+(1, 22, 2, 102, 122, NULL, NOW() - INTERVAL '5 days', NOW() - INTERVAL '5 days', 50.00, 5.00, 0.00, 55.00, 'ENTREGUE', 'CREDITO', 40, 'Sem cebola', TRUE, NOW() - INTERVAL '5 days', NULL),
+-- Pedido 2: Restaurante 3 (Endereço 103), Cliente 23 (Endereço 123)
+(2, 23, 3, 103, 123, NULL, NOW() - INTERVAL '4 days', NOW() - INTERVAL '4 days', 60.00, 7.00, 0.00, 67.00, 'ENTREGUE', 'PIX', 35, NULL, TRUE, NOW() - INTERVAL '4 days', NULL),
+-- Pedido 3: Restaurante 4 (Endereço 104), Cliente 24 (Endereço 124)
+(3, 24, 4, 104, 124, NULL, NOW() - INTERVAL '3 days', NOW() - INTERVAL '3 days', 45.00, 5.00, 0.00, 50.00, 'ENTREGUE', 'DEBITO', 30, 'Capricha no molho', TRUE, NOW() - INTERVAL '3 days', NULL),
+-- Pedido 4: Restaurante 5 (Endereço 105), Cliente 25 (Endereço 125)
+(4, 25, 5, 105, 125, (SELECT id_cupom FROM cupom WHERE restaurante_id=5 LIMIT 1), NOW() - INTERVAL '3 days', NOW() - INTERVAL '3 days', 80.00, 8.00, 10.00, 78.00, 'ENTREGUE', 'CREDITO', 50, NULL, TRUE, NOW() - INTERVAL '3 days', NULL),
+-- Pedido 5: Restaurante 6 (Endereço 106), Cliente 26 (Endereço 126)
+    (5, 26, 6, 106, 126, NULL, NOW() - INTERVAL '2 days', NOW() - INTERVAL '2 days', 35.00, 5.00, 0.00, 40.00, 'ENTREGUE', 'DINHEIRO', 25, 'Troco para 50', TRUE, NOW() - INTERVAL '2 days', NULL),
+-- Pedido 6: Restaurante 7 (Endereço 107), Cliente 22 (Endereço 122)
+    (6, 22, 7, 107, 122, NULL, NOW() - INTERVAL '2 days', NOW() - INTERVAL '2 days', 40.00, 6.00, 0.00, 46.00, 'ENTREGUE', 'PIX', 30, NULL, TRUE, NOW() - INTERVAL '2 days', NULL),
+-- Pedido 7: Restaurante 8 (Endereço 108), Cliente 23 (Endereço 123)
+    (7, 23, 8, 108, 123, NULL, NOW() - INTERVAL '1 day', NOW() - INTERVAL '1 day', 55.00, 5.00, 0.00, 60.00, 'ENTREGUE', 'CREDITO', 45, NULL, TRUE, NOW() - INTERVAL '1 day', NULL),
+-- Pedido 8: Restaurante 9 (Endereço 109), Cliente 24 (Endereço 124)
+    (8, 24, 9, 109, 124, NULL, NOW() - INTERVAL '1 day', NOW() - INTERVAL '1 day', 30.00, 5.00, 0.00, 35.00, 'ENTREGUE', 'DEBITO', 20, 'Não tocar campainha', TRUE, NOW() - INTERVAL '1 day', NULL),
+-- Pedido 9: Restaurante 10 (Endereço 110), Cliente 25 (Endereço 125)
+    (9, 25, 10, 110, 125, (SELECT id_cupom FROM cupom WHERE restaurante_id=10 LIMIT 1), NOW() - INTERVAL '5 hours', NOW() - INTERVAL '4 hours', 45.00, 6.00, 10.00, 41.00, 'ENTREGUE', 'PIX', 35, NULL, TRUE, NOW() - INTERVAL '5 hours', NULL),
+-- Pedido 10: Restaurante 11 (Endereço 111), Cliente 26 (Endereço 126)
+    (10, 26, 11, 111, 126, NULL, NOW() - INTERVAL '4 hours', NOW() - INTERVAL '3 hours', 25.00, 5.00, 0.00, 30.00, 'ENTREGUE', 'DINHEIRO', 25, NULL, TRUE, NOW() - INTERVAL '4 hours', NULL),
+-- Pedido 11: Restaurante 12 (Endereço 112), Cliente 22 (Endereço 122)
+    (11, 22, 12, 112, 122, NULL, NOW() - INTERVAL '3 hours', NOW() - INTERVAL '2 hours', 90.00, 10.00, 0.00, 100.00, 'ENTREGUE', 'CREDITO', 50, 'Bem passado', TRUE, NOW() - INTERVAL '3 hours', NULL),
+-- Pedido 12: Restaurante 13 (Endereço 113), Cliente 23 (Endereço 123)
+    (12, 23, 13, 113, 123, NULL, NOW() - INTERVAL '2 hours', NOW() - INTERVAL '1 hour', 65.00, 7.00, 0.00, 72.00, 'ENTREGUE', 'PIX', 40, NULL, TRUE, NOW() - INTERVAL '2 hours', NULL),
 
 -- Pedidos EM ROTA (IDs 13-16)
-    (13, 24, 14, (SELECT id_endereco FROM endereco WHERE restaurante_id=14 LIMIT 1), (SELECT id_endereco FROM endereco WHERE cliente_id=24 LIMIT 1), NULL, NOW() - INTERVAL '40 minutes', NOW(), 70.00, 8.00, 0.00, 78.00, 'SAIU_PARA_ENTREGA', 'CREDITO', 45, NULL, TRUE, NOW() - INTERVAL '35 minutes', NULL),
-    (14, 25, 15, (SELECT id_endereco FROM endereco WHERE restaurante_id=15 LIMIT 1), (SELECT id_endereco FROM endereco WHERE cliente_id=25 LIMIT 1), NULL, NOW() - INTERVAL '30 minutes', NOW(), 55.00, 6.00, 0.00, 61.00, 'SAIU_PARA_ENTREGA', 'PIX', 35, NULL, TRUE, NOW() - INTERVAL '25 minutes', NULL),
-    (15, 26, 16, (SELECT id_endereco FROM endereco WHERE restaurante_id=16 LIMIT 1), (SELECT id_endereco FROM endereco WHERE cliente_id=26 LIMIT 1), NULL, NOW() - INTERVAL '25 minutes', NOW(), 40.00, 5.00, 0.00, 45.00, 'SAIU_PARA_ENTREGA', 'DEBITO', 30, NULL, TRUE, NOW() - INTERVAL '20 minutes', NULL),
-    (16, 22, 17, (SELECT id_endereco FROM endereco WHERE restaurante_id=17 LIMIT 1), (SELECT id_endereco FROM endereco WHERE cliente_id=22 LIMIT 1), NULL, NOW() - INTERVAL '20 minutes', NOW(), 85.00, 9.00, 0.00, 94.00, 'SAIU_PARA_ENTREGA', 'CREDITO', 50, NULL, TRUE, NOW() - INTERVAL '15 minutes', NULL),
+-- Pedido 13: Restaurante 14 (Endereço 114), Cliente 24 (Endereço 124)
+    (13, 24, 14, 114, 124, NULL, NOW() - INTERVAL '40 minutes', NOW(), 70.00, 8.00, 0.00, 78.00, 'SAIU_PARA_ENTREGA', 'CREDITO', 45, NULL, TRUE, NOW() - INTERVAL '35 minutes', NULL),
+-- Pedido 14: Restaurante 15 (Endereço 115), Cliente 25 (Endereço 125)
+    (14, 25, 15, 115, 125, NULL, NOW() - INTERVAL '30 minutes', NOW(), 55.00, 6.00, 0.00, 61.00, 'SAIU_PARA_ENTREGA', 'PIX', 35, NULL, TRUE, NOW() - INTERVAL '25 minutes', NULL),
+-- Pedido 15: Restaurante 16 (Endereço 116), Cliente 26 (Endereço 126)
+    (15, 26, 16, 116, 126, NULL, NOW() - INTERVAL '25 minutes', NOW(), 40.00, 5.00, 0.00, 45.00, 'SAIU_PARA_ENTREGA', 'DEBITO', 30, NULL, TRUE, NOW() - INTERVAL '20 minutes', NULL),
+-- Pedido 16: Restaurante 17 (Endereço 117), Cliente 22 (Endereço 122)
+    (16, 22, 17, 117, 122, NULL, NOW() - INTERVAL '20 minutes', NOW(), 85.00, 9.00, 0.00, 94.00, 'SAIU_PARA_ENTREGA', 'CREDITO', 50, NULL, TRUE, NOW() - INTERVAL '15 minutes', NULL),
 
 -- Pedidos EM PREPARO / CONFIRMADO / PENDENTE (IDs 17-19)
-    (17, 23, 18, (SELECT id_endereco FROM endereco WHERE restaurante_id=18 LIMIT 1), (SELECT id_endereco FROM endereco WHERE cliente_id=23 LIMIT 1), NULL, NOW() - INTERVAL '15 minutes', NOW(), 35.00, 5.00, 0.00, 40.00, 'EM_PREPARO', 'PIX', 25, NULL, TRUE, NOW() - INTERVAL '10 minutes', NULL),
-    (18, 24, 19, (SELECT id_endereco FROM endereco WHERE restaurante_id=19 LIMIT 1), (SELECT id_endereco FROM endereco WHERE cliente_id=24 LIMIT 1), NULL, NOW() - INTERVAL '10 minutes', NOW(), 45.00, 5.00, 0.00, 50.00, 'CONFIRMADO', 'CREDITO', 30, 'Retirar cebola', TRUE, NOW() - INTERVAL '5 minutes', NULL),
-    (19, 25, 20, (SELECT id_endereco FROM endereco WHERE restaurante_id=20 LIMIT 1), (SELECT id_endereco FROM endereco WHERE cliente_id=25 LIMIT 1), NULL, NOW() - INTERVAL '5 minutes', NOW(), 60.00, 7.00, 0.00, 67.00, 'PENDENTE', 'DEBITO', 40, NULL, FALSE, NULL, NULL),
+-- Pedido 17: Restaurante 18 (Endereço 118), Cliente 23 (Endereço 123)
+    (17, 23, 18, 118, 123, NULL, NOW() - INTERVAL '15 minutes', NOW(), 35.00, 5.00, 0.00, 40.00, 'EM_PREPARO', 'PIX', 25, NULL, TRUE, NOW() - INTERVAL '10 minutes', NULL),
+-- Pedido 18: Restaurante 19 (Endereço 119), Cliente 24 (Endereço 124)
+    (18, 24, 19, 119, 124, NULL, NOW() - INTERVAL '10 minutes', NOW(), 45.00, 5.00, 0.00, 50.00, 'CONFIRMADO', 'CREDITO', 30, 'Retirar cebola', TRUE, NOW() - INTERVAL '5 minutes', NULL),
+-- Pedido 19: Restaurante 20 (Endereço 120), Cliente 25 (Endereço 125)
+    (19, 25, 20, 120, 125, NULL, NOW() - INTERVAL '5 minutes', NOW(), 60.00, 7.00, 0.00, 67.00, 'PENDENTE', 'DEBITO', 40, NULL, FALSE, NULL, NULL),
 
 -- Pedido CANCELADO (ID 20)
-    (20, 26, 21, (SELECT id_endereco FROM endereco WHERE restaurante_id=21 LIMIT 1), (SELECT id_endereco FROM endereco WHERE cliente_id=26 LIMIT 1), NULL, NOW() - INTERVAL '1 day', NOW() - INTERVAL '23 hours', 30.00, 5.00, 0.00, 35.00, 'CANCELADO', 'DINHEIRO', 25, NULL, FALSE, NULL, 'Restaurante sem entregadores')
+-- Pedido 20: Restaurante 21 (Endereço 121), Cliente 26 (Endereço 126)
+    (20, 26, 21, 121, 126, NULL, NOW() - INTERVAL '1 day', NOW() - INTERVAL '23 hours', 30.00, 5.00, 0.00, 35.00, 'CANCELADO', 'DINHEIRO', 25, NULL, FALSE, NULL, 'Restaurante sem entregadores')
 ON CONFLICT (id_pedido) DO NOTHING;
 
 -- ==================================================================================
--- 9. ITENS DO PEDIDO
+-- 9. ITENS DO PEDIDO - CORRIGIDO
 -- ==================================================================================
 
--- Inserção dos itens (2 unidades do primeiro produto encontrado do restaurante)
-INSERT INTO public.item_pedido (pedido_id, produto_id, qt_quantidade, vl_preco_unitario, vl_subtotal, ds_observacao)
+INSERT INTO public.item_pedido (id_item_pedido, pedido_id, produto_id, qt_quantidade, vl_preco_unitario, vl_subtotal, ds_observacao)
 SELECT
+    p.id_pedido, -- ID do item = ID do pedido para facilitar
     p.id_pedido,
-    (SELECT pr.id_produto FROM produto pr WHERE pr.restaurante_id = p.restaurante_id LIMIT 1),
+    (SELECT pr.id_produto FROM produto pr WHERE pr.restaurante_id = p.restaurante_id ORDER BY RANDOM() LIMIT 1),
     2,
-    (SELECT pr.vl_preco FROM produto pr WHERE pr.restaurante_id = p.restaurante_id LIMIT 1),
-    (SELECT pr.vl_preco FROM produto pr WHERE pr.restaurante_id = p.restaurante_id LIMIT 1) * 2,
+    0, -- Valor inicial 0, atualizado abaixo
+    0,
     'Padrão'
-FROM public.pedido p WHERE p.id_pedido BETWEEN 1 AND 20
-ON CONFLICT DO NOTHING;
+FROM public.pedido p
+WHERE p.id_pedido BETWEEN 1 AND 20
+ON CONFLICT (id_item_pedido) DO NOTHING;
 
--- Vinculando adicionais a alguns itens (Pedidos 1, 3, 11, 13)
+-- Atualizar preços corretos nos itens
+UPDATE item_pedido ip
+SET
+    vl_preco_unitario = pr.vl_preco,
+    vl_subtotal = pr.vl_preco * ip.qt_quantidade
+    FROM produto pr
+WHERE ip.produto_id = pr.id_produto;
+
+-- Vinculando adicionais
 INSERT INTO public.item_pedido_adicional (item_pedido_id, adicional_id)
 SELECT
     ip.id_item_pedido,
     (SELECT a.id_adicional FROM adicional a WHERE a.produto_id = ip.produto_id LIMIT 1)
 FROM item_pedido ip
-WHERE ip.pedido_id IN (1, 3, 11, 13)
+WHERE EXISTS (SELECT 1 FROM adicional a WHERE a.produto_id = ip.produto_id)
+  AND ip.id_item_pedido <= 10
 ON CONFLICT DO NOTHING;
 
 -- ==================================================================================
--- 10. ENTREGAS
--- IDs iniciam em 1
--- Entregadores: 27 a 34
+-- 10. ENTREGAS - CORRIGIDO (IDs de Endereço Explícitos)
 -- ==================================================================================
 
 INSERT INTO public.entrega (id_entrega, pedido_id, entregador_id, status_entrega, endereco_origem_id, endereco_destino_id, tempo_estimado_minutos, vl_entrega, data_hora_inicio, data_hora_conclusao, avaliacao_cliente) VALUES
--- Concluídas (IDs 1-12)
-(1, 1, 27, 'CONCLUIDA', (SELECT endereco_origem_id FROM pedido WHERE id_pedido=1), (SELECT endereco_entrega_id FROM pedido WHERE id_pedido=1), 40, 5.00, NOW()-INTERVAL '5 days', NOW()-INTERVAL '5 days'+INTERVAL '40 min', 5.0),
-(2, 2, 28, 'CONCLUIDA', (SELECT endereco_origem_id FROM pedido WHERE id_pedido=2), (SELECT endereco_entrega_id FROM pedido WHERE id_pedido=2), 35, 7.00, NOW()-INTERVAL '4 days', NOW()-INTERVAL '4 days'+INTERVAL '35 min', 4.0),
-(3, 3, 29, 'CONCLUIDA', (SELECT endereco_origem_id FROM pedido WHERE id_pedido=3), (SELECT endereco_entrega_id FROM pedido WHERE id_pedido=3), 30, 5.00, NOW()-INTERVAL '3 days', NOW()-INTERVAL '3 days'+INTERVAL '30 min', 5.0),
-(4, 4, 30, 'CONCLUIDA', (SELECT endereco_origem_id FROM pedido WHERE id_pedido=4), (SELECT endereco_entrega_id FROM pedido WHERE id_pedido=4), 50, 8.00, NOW()-INTERVAL '3 days', NOW()-INTERVAL '3 days'+INTERVAL '50 min', 3.0),
-(5, 5, 31, 'CONCLUIDA', (SELECT endereco_origem_id FROM pedido WHERE id_pedido=5), (SELECT endereco_entrega_id FROM pedido WHERE id_pedido=5), 25, 5.00, NOW()-INTERVAL '2 days', NOW()-INTERVAL '2 days'+INTERVAL '25 min', 5.0),
-(6, 6, 32, 'CONCLUIDA', (SELECT endereco_origem_id FROM pedido WHERE id_pedido=6), (SELECT endereco_entrega_id FROM pedido WHERE id_pedido=6), 30, 6.00, NOW()-INTERVAL '2 days', NOW()-INTERVAL '2 days'+INTERVAL '30 min', 4.5),
-(7, 7, 33, 'CONCLUIDA', (SELECT endereco_origem_id FROM pedido WHERE id_pedido=7), (SELECT endereco_entrega_id FROM pedido WHERE id_pedido=7), 45, 5.00, NOW()-INTERVAL '1 day', NOW()-INTERVAL '1 day'+INTERVAL '45 min', 5.0),
-(8, 8, 34, 'CONCLUIDA', (SELECT endereco_origem_id FROM pedido WHERE id_pedido=8), (SELECT endereco_entrega_id FROM pedido WHERE id_pedido=8), 20, 5.00, NOW()-INTERVAL '1 day', NOW()-INTERVAL '1 day'+INTERVAL '20 min', 4.0),
-(9, 9, 27, 'CONCLUIDA', (SELECT endereco_origem_id FROM pedido WHERE id_pedido=9), (SELECT endereco_entrega_id FROM pedido WHERE id_pedido=9), 35, 6.00, NOW()-INTERVAL '5 hours', NOW()-INTERVAL '4 hours', 5.0),
-(10, 10, 28, 'CONCLUIDA', (SELECT endereco_origem_id FROM pedido WHERE id_pedido=10), (SELECT endereco_entrega_id FROM pedido WHERE id_pedido=10), 25, 5.00, NOW()-INTERVAL '4 hours', NOW()-INTERVAL '3 hours', 4.8),
-(11, 11, 29, 'CONCLUIDA', (SELECT endereco_origem_id FROM pedido WHERE id_pedido=11), (SELECT endereco_entrega_id FROM pedido WHERE id_pedido=11), 50, 10.00, NOW()-INTERVAL '3 hours', NOW()-INTERVAL '2 hours', 2.0),
-(12, 12, 30, 'CONCLUIDA', (SELECT endereco_origem_id FROM pedido WHERE id_pedido=12), (SELECT endereco_entrega_id FROM pedido WHERE id_pedido=12), 40, 7.00, NOW()-INTERVAL '2 hours', NOW()-INTERVAL '1 hour', 5.0),
+-- Entregas CONCLUIDAS (IDs 1-12)
+(1, 1, 27, 'CONCLUIDA', 102, 122, 40, 5.00, NOW()-INTERVAL '5 days', NOW()-INTERVAL '5 days'+INTERVAL '40 min', 5.0),
+(2, 2, 28, 'CONCLUIDA', 103, 123, 35, 7.00, NOW()-INTERVAL '4 days', NOW()-INTERVAL '4 days'+INTERVAL '35 min', 4.0),
+(3, 3, 29, 'CONCLUIDA', 104, 124, 30, 5.00, NOW()-INTERVAL '3 days', NOW()-INTERVAL '3 days'+INTERVAL '30 min', 5.0),
+(4, 4, 30, 'CONCLUIDA', 105, 125, 50, 8.00, NOW()-INTERVAL '3 days', NOW()-INTERVAL '3 days'+INTERVAL '50 min', 3.0),
+(5, 5, 31, 'CONCLUIDA', 106, 126, 25, 5.00, NOW()-INTERVAL '2 days', NOW()-INTERVAL '2 days'+INTERVAL '25 min', 5.0),
+(6, 6, 32, 'CONCLUIDA', 107, 122, 30, 6.00, NOW()-INTERVAL '2 days', NOW()-INTERVAL '2 days'+INTERVAL '30 min', 4.5),
+(7, 7, 33, 'CONCLUIDA', 108, 123, 45, 5.00, NOW()-INTERVAL '1 day', NOW()-INTERVAL '1 day'+INTERVAL '45 min', 5.0),
+(8, 8, 34, 'CONCLUIDA', 109, 124, 20, 5.00, NOW()-INTERVAL '1 day', NOW()-INTERVAL '1 day'+INTERVAL '20 min', 4.0),
+(9, 9, 27, 'CONCLUIDA', 110, 125, 35, 6.00, NOW()-INTERVAL '5 hours', NOW()-INTERVAL '4 hours', 5.0),
+(10, 10, 28, 'CONCLUIDA', 111, 126, 25, 5.00, NOW()-INTERVAL '4 hours', NOW()-INTERVAL '3 hours', 4.8),
+(11, 11, 29, 'CONCLUIDA', 112, 122, 50, 10.00, NOW()-INTERVAL '3 hours', NOW()-INTERVAL '2 hours', 2.0),
+(12, 12, 30, 'CONCLUIDA', 113, 123, 40, 7.00, NOW()-INTERVAL '2 hours', NOW()-INTERVAL '1 hour', 5.0),
 
--- Em Rota (IDs 13-16)
-(13, 13, 31, 'EM_ROTA', (SELECT endereco_origem_id FROM pedido WHERE id_pedido=13), (SELECT endereco_entrega_id FROM pedido WHERE id_pedido=13), 45, 8.00, NOW()-INTERVAL '10 min', NULL, NULL),
-(14, 14, 32, 'EM_ROTA', (SELECT endereco_origem_id FROM pedido WHERE id_pedido=14), (SELECT endereco_entrega_id FROM pedido WHERE id_pedido=14), 35, 6.00, NOW()-INTERVAL '5 min', NULL, NULL),
-(15, 15, 33, 'EM_ROTA', (SELECT endereco_origem_id FROM pedido WHERE id_pedido=15), (SELECT endereco_entrega_id FROM pedido WHERE id_pedido=15), 30, 5.00, NOW()-INTERVAL '15 min', NULL, NULL),
-(16, 16, 34, 'EM_ROTA', (SELECT endereco_origem_id FROM pedido WHERE id_pedido=16), (SELECT endereco_entrega_id FROM pedido WHERE id_pedido=16), 50, 9.00, NOW()-INTERVAL '20 min', NULL, NULL),
+-- Entregas EM_ROTA (IDs 13-16)
+(13, 13, 31, 'EM_ROTA', 114, 124, 45, 8.00, NOW()-INTERVAL '10 min', NULL, NULL),
+(14, 14, 32, 'EM_ROTA', 115, 125, 35, 6.00, NOW()-INTERVAL '5 min', NULL, NULL),
+(15, 15, 33, 'EM_ROTA', 116, 126, 30, 5.00, NOW()-INTERVAL '15 min', NULL, NULL),
+(16, 16, 34, 'EM_ROTA', 117, 122, 50, 9.00, NOW()-INTERVAL '20 min', NULL, NULL),
 
--- Pendente (ID 17, sem entregador) - Apenas criado a tabela, sem ID definido pois ainda não foi "aceito" pelo entregador no fluxo normal, mas aqui inserimos para teste de listagem
-(17, 19, NULL, 'PENDENTE', (SELECT endereco_origem_id FROM pedido WHERE id_pedido=19), (SELECT endereco_entrega_id FROM pedido WHERE id_pedido=19), 25, 5.00, NULL, NULL, NULL)
+-- Entrega PENDENTE (ID 17 - Vinculada ao Pedido 19)
+(17, 19, NULL, 'PENDENTE', 120, 125, 25, 5.00, NULL, NULL, NULL)
     ON CONFLICT (id_entrega) DO NOTHING;
 
 -- ==================================================================================
--- 11. AVALIAÇÕES (Apenas para entregas CONCLUIDAS)
--- IDs iniciam em 1
+-- 11. AVALIAÇÕES - SEM ALTERAÇÕES
 -- ==================================================================================
 
 INSERT INTO public.avaliacao (id_avaliacao, restaurante_id, cliente_id, pedido_id, entregador_id, nu_nota, ds_comentario, dt_avaliacao, avaliacao_entrega) VALUES
@@ -585,10 +656,9 @@ INSERT INTO public.avaliacao (id_avaliacao, restaurante_id, cliente_id, pedido_i
     ON CONFLICT (id_avaliacao) DO NOTHING;
 
 -- ==================================================================================
--- 12. ATUALIZAÇÃO DAS MÉDIAS (Restaurantes e Entregadores)
+-- 12. ATUALIZAÇÃO DAS MÉDIAS
 -- ==================================================================================
 
--- Atualizar média dos Restaurantes
 UPDATE public.restaurante r
 SET avaliacao_media_restaurante = (
     SELECT COALESCE(AVG(a.nu_nota), 0.0)
@@ -597,7 +667,6 @@ SET avaliacao_media_restaurante = (
 )
 WHERE r.id IN (SELECT DISTINCT restaurante_id FROM public.avaliacao);
 
--- Atualizar média dos Entregadores
 UPDATE public.entregador e
 SET avaliacao_media_entregador = (
     SELECT COALESCE(AVG(a.avaliacao_entrega), 0.0)
@@ -607,16 +676,14 @@ SET avaliacao_media_entregador = (
 WHERE e.id IN (SELECT DISTINCT entregador_id FROM public.avaliacao);
 
 -- ==================================================================================
--- 13. ATUALIZAÇÃO DE SEQUÊNCIAS (Para evitar erros futuros)
--- Ajustado para garantir que o próximo ID gerado automaticamente seja maior que o manual
+-- 13. ATUALIZAÇÃO DE SEQUÊNCIAS (ESSENCIAL PARA NÃO DAR ERRO AO CRIAR NOVO REGISTRO)
 -- ==================================================================================
 
+SELECT setval('usuario_id_seq', (SELECT MAX(id) FROM usuario));
 SELECT setval('pedido_id_pedido_seq', (SELECT MAX(id_pedido) FROM pedido));
 SELECT setval('item_pedido_id_item_pedido_seq', (SELECT MAX(id_item_pedido) FROM item_pedido));
 SELECT setval('entrega_id_entrega_seq', (SELECT MAX(id_entrega) FROM entrega));
 SELECT setval('avaliacao_id_avaliacao_seq', (SELECT MAX(id_avaliacao) FROM avaliacao));
-
-SELECT setval('usuario_id_seq', (SELECT MAX(id) FROM usuario));
 SELECT setval('endereco_id_endereco_seq', (SELECT MAX(id_endereco) FROM endereco));
 SELECT setval('produto_id_produto_seq', (SELECT MAX(id_produto) FROM produto));
 SELECT setval('adicional_id_adicional_seq', (SELECT MAX(id_adicional) FROM adicional));
