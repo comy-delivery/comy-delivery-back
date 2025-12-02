@@ -105,8 +105,6 @@ public class EntregaService {
                 }
                 log.info("Entrega {} concluída. Avaliação: {}", idEntrega, atualizarStatusEntregaDTO.avaliacaoCliente());
                 entrega.setAvaliacaoCliente(atualizarStatusEntregaDTO.avaliacaoCliente());
-            } else {
-                throw new IllegalArgumentException("A avaliação do cliente é obrigatória na conclusão da entrega.");
             }
 
         } else if (novoStatus == StatusEntrega.CANCELADA) {

@@ -186,7 +186,7 @@ public class SecurityConfig {
 //
 //                        //Entrega
                         .requestMatchers(HttpMethod.POST, "/api/entrega").permitAll()
-                        .requestMatchers(HttpMethod.PATCH, "/api/entrega/{id}").permitAll()
+                        .requestMatchers(HttpMethod.PATCH, "/api/entrega/{id}").hasRole("ENTREGADOR")
                         .requestMatchers(HttpMethod.GET, "/api/entrega/{id}").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/entrega/pedido/{idPedido}").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/entrega/status").permitAll()

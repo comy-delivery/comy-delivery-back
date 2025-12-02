@@ -124,22 +124,7 @@ public class PedidoService {
 
         pedido = pedidoRepository.save(pedido);
 
-        try {
-            log.info("Iniciando criação automática da entrega para o pedido {}", pedido.getIdPedido());
-
-            EntregaRequestDTO entregaDTO = new EntregaRequestDTO(
-                    pedido.getIdPedido(),
-                    pedido.getTempoEstimadoEntrega(),
-                    pedido.getEnderecoOrigem().getIdEndereco(),
-                    pedido.getEnderecoEntrega().getIdEndereco(),
-                    pedido.getVlEntrega()
-            );
-
-            entregaService.cadastrarEntrega(entregaDTO);
-
-        } catch (Exception e) {
-            log.error("Erro ao criar entrega automática para o pedido {}: {}", pedido.getIdPedido(), e.getMessage());
-        }
+        // ❌ REMOVIDO BLOCO DE CRIAÇÃO DE ENTREGA. A entrega será criada em aceitarPedido.
 
         log.info("Pedido criado com sucesso. ID: {}, Total: {}", pedido.getIdPedido(), pedido.getVlTotal());
         return new PedidoResponseDTO(pedido);
@@ -168,6 +153,28 @@ public class PedidoService {
             pedido.setDtAceitacao(LocalDateTime.now());
             pedido.setStatus(StatusPedido.CONFIRMADO);
             pedido.setDtAtualizacao(LocalDateTime.now());
+
+            // ✅ CRIAÇÃO AUTOMÁTICA DA ENTREGA APÓS ACEITAÇÃO DO RESTAURANTE
+            try {
+                log.info("Iniciando criação automática da entrega para o pedido {}", pedido.getIdPedido());
+
+                EntregaRequestDTO entregaDTO = new EntregaRequestDTO(
+                        pedido.getIdPedido(),
+                        pedido.getTempoEstimadoEntrega(),
+                        pedido.getEnderecoOrigem().getIdEndereco(),
+                        pedido.getEnderecoEntrega().getIdEndereco(),
+                        pedido.getVlEntrega()
+                );
+
+                // Chama o serviço de entrega para criar a entidade com StatusEntrega.PENDENTE
+                entregaService.cadastrarEntrega(entregaDTO);
+                log.info("Entrega criada com sucesso para o pedido {}", pedido.getIdPedido());
+
+            } catch (Exception e) {
+                log.error("Erro CRÍTICO ao criar entrega automática para o pedido {}: {}", pedido.getIdPedido(), e.getMessage());
+            }
+            // FIM DA CRIAÇÃO AUTOMÁTICA DA ENTREGA
+
 
             emailService.enviarEmailConfirmacaoPedido(
                     pedido.getCliente().getEmailCliente(),
@@ -565,7 +572,6 @@ public class PedidoService {
         }
 
     }
-
 
 
     private void validarTransicaoStatus(StatusPedido statusAtual, StatusPedido novoStatus) {
