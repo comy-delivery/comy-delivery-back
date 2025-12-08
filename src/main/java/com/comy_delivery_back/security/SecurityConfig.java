@@ -238,8 +238,8 @@ public class SecurityConfig {
                         // .requestMatchers(HttpMethod.GET, "/api/pedido/restaurante/{restauranteId}/dashboard").hasRole("RESTAURANTE")
                         .requestMatchers(HttpMethod.GET, "/api/pedido/{id}/tempo-estimado").permitAll()
                         .requestMatchers(HttpMethod.PATCH, "/api/pedido/{id}/finalizar").permitAll()
-                        // .requestMatchers(HttpMethod.PATCH, "/api/pedido/{id}/cupom").hasAnyRole("RESTAURANTE","CLIENTE")
-                        // .requestMatchers(HttpMethod.DELETE, "/api/pedido/{id}/cupom").hasAnyRole("RESTAURANTE","CLIENTE")
+                         .requestMatchers(HttpMethod.PATCH, "/api/pedido/{id}/cupom").permitAll()
+                         .requestMatchers(HttpMethod.DELETE, "/api/pedido/{id}/cupom").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/pedido/{id}/desconto").permitAll()
 //
                         //Produto
