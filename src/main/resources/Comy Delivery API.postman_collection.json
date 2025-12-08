@@ -1,0 +1,3271 @@
+{
+	"info": {
+		"_postman_id": "965ebad4-133d-4da3-9eeb-b0a02c8b6f34",
+		"name": "Comy Delivery API",
+		"description": "Coleção de endpoints para o projeto Comy Delivery Back.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "23843700"
+	},
+	"item": [
+		{
+			"name": "Adicional",
+			"item": [
+				{
+					"name": "Criar Adicional",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nmAdicional\": \"Borda de Cheddar\",\n  \"dsAdicional\": \"Borda recheada com catupiry original\",\n  \"vlPrecoAdicional\": 6.00,\n  \"produtoId\": 201\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/adicional",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"adicional"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/adicional/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"adicional",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Listar por Produto",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/adicional/produto/201",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"adicional",
+								"produto",
+								"201"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Disponíveis",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/adicional/disponiveis",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"adicional",
+								"disponiveis"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar Adicional",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nmAdicional\": \"Borda de Cheddar\",\n  \"dsAdicional\": \"Borda recheada com cheddar\",\n  \"vlPrecoAdicional\": 6.00,\n  \"produtoId\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/adicional/3",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"adicional",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Ativar Adicional",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/adicional/2/ativar",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"adicional",
+								"2",
+								"ativar"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Desativar Adicional",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/adicional/2/desativar",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"adicional",
+								"2",
+								"desativar"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Deletar Adicional",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/adicional/3",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"adicional",
+								"3"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Admin",
+			"item": [
+				{
+					"name": "Cadastrar Admin",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"admin_user\",\n  \"password\": \"SenhaForte123\",\n  \"nmAdmin\": \"Nome do Admin\",\n  \"emailAdmin\": \"admin@email.com\",\n  \"cpfAdmin\": \"45279341045\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/admin",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"admin"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar Admin por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}api/admin/1",
+							"host": [
+								"{{baseUrl}}api"
+							],
+							"path": [
+								"admin",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Deletar Admin",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}api/admin/5",
+							"host": [
+								"{{baseUrl}}api"
+							],
+							"path": [
+								"admin",
+								"5"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Reativar Admin",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}api/admin/5/reativar",
+							"host": [
+								"{{baseUrl}}api"
+							],
+							"path": [
+								"admin",
+								"5",
+								"reativar"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Avaliacao",
+			"item": [
+				{
+					"name": "Adicionar Avaliação",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"restauranteId\": 2,\n  \"clienteId\": 3,\n  \"pedidoId\": 2,\n  \"entregadorId\":4,\n  \"nuNota\": 5,\n  \"dsComentario\": \"Comida excelente!\",\n  \"avaliacaoEntrega\": 5\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/avaliacao",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"avaliacao"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Listar por Restaurante",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/avaliacao/restaurante/{{restauranteId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"avaliacao",
+								"restaurante",
+								"{{restauranteId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Deletar Avaliação",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/avaliacao/{{id}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"avaliacao",
+								"{{id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Cliente",
+			"item": [
+				{
+					"name": "Cadastrar Cliente",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"helomt\",\n  \"password\": \"SenhaForte123\",\n  \"nmCliente\": \"Nome do Cliente\",\n  \"emailCliente\": \"heloisamt@gmail.com\",\n  \"cpfCliente\": \"07204235975\",\n  \"telefoneCliente\": \"11999999999\",\n  \"enderecos\": [\n    {\n      \"logradouro\": \"Rua Exemplo\",\n      \"numero\": \"123\",\n      \"bairro\": \"Centro\",\n      \"cidade\": \"São Paulo\",\n      \"cep\": \"01001000\",\n      \"estado\": \"SP\",\n      \"tipoEndereco\": \"CASA\"\n    }\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/cliente",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"cliente"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar Cliente por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/cliente/11",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"cliente",
+								"11"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Clientes Ativos",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/cliente/ativos",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"cliente",
+								"ativos"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar Dados Cliente",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nmCliente\": \"Nome Atualizado\",\n  \"emailCliente\": \"novoemail@email.com\",\n  \"telefoneCliente\": \"11988888888\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/cliente/11",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"cliente",
+								"11"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Deletar Cliente",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/cliente/12",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"cliente",
+								"12"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Endereços do Cliente",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/cliente/3/enderecos",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"cliente",
+								"3",
+								"enderecos"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Cadastrar Novo Endereço",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"logradouro\": \"Rua Nova\",\n  \"numero\": \"100\",\n  \"cep\": \"01001000\",\n  \"tipoEndereco\": \"TRABALHO\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/cliente/11/enderecos",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"cliente",
+								"11",
+								"enderecos"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar Endereço",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"numero\": \"101\",\n  \"complemento\": \"Apto 10\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/cliente/11/enderecos/8",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"cliente",
+								"11",
+								"enderecos",
+								"8"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Pedidos do Cliente",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/cliente/3/pedidos",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"cliente",
+								"3",
+								"pedidos"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Restaurantes Proximos",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/cliente/35/restaurantes-distancia",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"cliente",
+								"35",
+								"restaurantes-distancia"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Iniciar Recuperação Senha",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"cliente@email.com\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/cliente/recuperar-senha",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"cliente",
+								"recuperar-senha"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Redefinir Senha",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"token\": \"token-uuid-aqui\",\n  \"novaSenha\": \"NovaSenha123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/cliente/redefinir-senha",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"cliente",
+								"redefinir-senha"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Cupom",
+			"item": [
+				{
+					"name": "Criar Cupom",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"codigoCupom\": \"DESCONTO20\",\n  \"dsCupom\": \"Desconto de 10 reais\",\n  \"tipoCupom\": \"VALOR_FIXO\",\n  \"vlDesconto\": 20.00,\n  \"vlMinimoPedido\": 500.00,\n  \"dtValidade\": \"31-12-2025\",\n  \"qtdUsoMaximo\": 100,\n  \"restauranteId\": 2\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/cupom",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"cupom"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar Cupom por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/cupom/2",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"cupom",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar Cupom por Código",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/cupom/codigo/BEMVINDO10",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"cupom",
+								"codigo",
+								"BEMVINDO10"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Cupons Ativos",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/cupom",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"cupom"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Listar por Restaurante",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/cupom/restaurante/2",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"cupom",
+								"restaurante",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Validar Cupom",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/cupom/BEMVINDO10/validar?valorPedido=100.00",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"cupom",
+								"BEMVINDO10",
+								"validar"
+							],
+							"query": [
+								{
+									"key": "valorPedido",
+									"value": "100.00"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Verificar Validade",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/cupom/1/verificar-validade",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"cupom",
+								"1",
+								"verificar-validade"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Aplicar Desconto",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/cupom/1/aplicar-desconto?valorPedido=100.00",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"cupom",
+								"1",
+								"aplicar-desconto"
+							],
+							"query": [
+								{
+									"key": "valorPedido",
+									"value": "100.00"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Incrementar Uso",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/cupom/1/incrementar-uso",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"cupom",
+								"1",
+								"incrementar-uso"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar Cupom",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"codigoCupom\": \"NOVOCODIGO\",\n  \"dsCupom\": \"Nova descricao\",\n  \"tipoCupom\": \"VALOR_FIXO\",\n  \"vlDesconto\": 15.00,\n  \"dtValidade\": \"01-01-2026\",\n  \"qtdUsoMaximo\": 50,\n  \"restauranteId\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/cupom/3",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"cupom",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Desativar Cupom",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/cupom/2/desativar",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"cupom",
+								"2",
+								"desativar"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Ativar Cupom Copy",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/cupom/2/ativar",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"cupom",
+								"2",
+								"ativar"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Deletar Cupom",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/cupom/3",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"cupom",
+								"3"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Endereco",
+			"item": [
+				{
+					"name": "Buscar por CEP (API Externa)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/endereco/88705060",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"endereco",
+								"88705060"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Remover Endereço",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/endereco/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"endereco",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Adicionar Endereço",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"logradouro\": \"Rua Teste\",\n  \"numero\": \"123\",\n  \"cep\": \"01001000\",\n  \"tipoEndereco\": \"CASA\",\n  \"cidade\": \"São Paulo\",\n  \"estado\": \"SP\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/endereco",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"endereco"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar Endereço por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/endereco/buscar/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"endereco",
+								"buscar",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar Endereço",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"cep\":\"88705060\",\n  \"numero\": \"456\",\n  \"complemento\": \"Fundos\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/endereco/alterar/2",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"endereco",
+								"alterar",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Definir como Padrão",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/endereco/8/padrao",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"endereco",
+								"8",
+								"padrao"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Vincular Endereço",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/endereco/9/vincular?usuarioId=8&tipoUsuario=RESTAURANTE",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"endereco",
+								"9",
+								"vincular"
+							],
+							"query": [
+								{
+									"key": "usuarioId",
+									"value": "8"
+								},
+								{
+									"key": "tipoUsuario",
+									"value": "RESTAURANTE"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Entrega",
+			"item": [
+				{
+					"name": "Cadastrar Entrega",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"pedidoId\": 1,\n  \"tempoEstimadoMinutos\": 30,\n  \"enderecoOrigem\": 1,\n  \"enderecoDestino\": 2\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/entrega",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"entrega"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar Status Entrega",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"statusEntrega\": \"EM_ROTA\",\n  \"entregadorId\": 4\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/entrega/8",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"entrega",
+								"8"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Vincular Avaliacao na Entrega",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"statusEntrega\": \"EM_ROTA\",\n  \"entregadorId\": 4\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/entrega/7/avaliacao/3",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"entrega",
+								"7",
+								"avaliacao",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar Entrega por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/entrega/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"entrega",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar Entrega por Pedido",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/entrega/pedido/2",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"entrega",
+								"pedido",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Entregas por Status",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/entrega/status?status=PENDENTE",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"entrega",
+								"status"
+							],
+							"query": [
+								{
+									"key": "status",
+									"value": "PENDENTE"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Entregas do Entregador",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/entrega/entregador/4",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"entrega",
+								"entregador",
+								"4"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Entregas do Entregador por Status",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/entrega/entregador/4/status?status=CONCLUIDA",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"entrega",
+								"entregador",
+								"4",
+								"status"
+							],
+							"query": [
+								{
+									"key": "status",
+									"value": "CONCLUIDA"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Dashboard Entregador",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/entrega/entregador/4/dashboard",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"entrega",
+								"entregador",
+								"4",
+								"dashboard"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Entregador",
+			"item": [
+				{
+					"name": "Cadastrar Entregador",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"motoboy_user4\",\n  \"password\": \"SenhaForte123\",\n  \"nmEntregador\": \"Carlos Motoboy\",\n  \"emailEntregador\": \"carlos6@email.com\",\n  \"cpfEntregador\": \"48782562067\",\n  \"telefoneEntregador\": \"11999999999\",\n  \"veiculo\": \"CARRO\",\n  \"placa\":\"QHP6404\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/entregador",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"entregador"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar Entregador por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/entregador/4",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"entregador",
+								"4"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Entregadores Disponíveis",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/entregador/disponiveis",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"entregador",
+								"disponiveis"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar Dados Entregador",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nmEntregador\": \"Carlos Silva\",\n  \"telefoneEntregador\": \"11988888888\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/entregador/13",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"entregador",
+								"13"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Deletar Entregador",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/entregador/14",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"entregador",
+								"14"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Marcar como Disponível",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/entregador/4/disponivel",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"entregador",
+								"4",
+								"disponivel"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Marcar como Indisponível",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/entregador/4/indisponivel",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"entregador",
+								"4",
+								"indisponivel"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Atribuir Entrega",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/entregador/4/atribuir/2",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"entregador",
+								"4",
+								"atribuir",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Iniciar Entrega",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/entregador/entrega/2/iniciar",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"entregador",
+								"entrega",
+								"2",
+								"iniciar"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Finalizar Entrega",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/entregador/entrega/7/finalizar",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"entregador",
+								"entrega",
+								"7",
+								"finalizar"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Cancelar Entrega",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/entregador/entrega/3/cancelar",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"entregador",
+								"entrega",
+								"3",
+								"cancelar"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Iniciar Recuperação Senha",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"carlos@email.com\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/entregador/recuperacao/iniciar",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"entregador",
+								"recuperacao",
+								"iniciar"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Redefinir Senha",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"token\": \"token-uuid-entregador\",\n  \"novaSenha\": \"NovaSenha123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/entregador/recuperacao/redefinir",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"entregador",
+								"recuperacao",
+								"redefinir"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Health",
+			"item": [
+				{
+					"name": "Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/health",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"health"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Item Pedido",
+			"item": [
+				{
+					"name": "Adicionar Item",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"produtoId\": 1,\n  \"pedidoId\": 4,\n  \"qtQuantidade\": 2,\n  \"dsObservacao\": \"Sem cebola\",\n  \"adicionaisIds\": [1]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/item",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"item"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar Item por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/item/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"item",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Itens por Pedido",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/item/pedido/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"item",
+								"pedido",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar Quantidade",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/item/5/quantidade?novaQuantidade=1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"item",
+								"5",
+								"quantidade"
+							],
+							"query": [
+								{
+									"key": "novaQuantidade",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar Observação",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/item/5/observacao?observacao=Nova obs",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"item",
+								"5",
+								"observacao"
+							],
+							"query": [
+								{
+									"key": "observacao",
+									"value": "Nova obs"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Adicionar Adicionais",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "[1, 2]",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/item/5/adicionais",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"item",
+								"5",
+								"adicionais"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Remover Adicionais",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "[1]",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/item/5/adicionais",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"item",
+								"5",
+								"adicionais"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Calcular Subtotal",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/item/5/subtotal",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"item",
+								"5",
+								"subtotal"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Remover Item",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/item/5",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"item",
+								"5"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Duplicar Item",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/item/4/duplicar",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"item",
+								"4",
+								"duplicar"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Pedido",
+			"item": [
+				{
+					"name": "Criar Pedido",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"cliente\": 3,\n  \"restaurante\": 2,\n  \"enderecoEntregaId\": 2,\n  \"enderecoOrigemId\": 1,\n  \"itensPedido\": [\n    {\n      \"produtoId\": 1,\n      \"qtQuantidade\": 1\n    }\n  ],\n  \"formaPagamento\": \"CREDITO\",\n  \"dsObservacoes\": \"Entrega rápida\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/pedido",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"pedido"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Aceitar Pedido",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"aceitar\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/pedido/4/aceitar",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"pedido",
+								"4",
+								"aceitar"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Recusar Pedido (com motivo)",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/pedido/2/recusar?motivo=Falta de ingredientes",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"pedido",
+								"2",
+								"recusar"
+							],
+							"query": [
+								{
+									"key": "motivo",
+									"value": "Falta de ingredientes"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar Pedido por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/pedido/2",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"pedido",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Listar por Cliente",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/pedido/cliente/3",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"pedido",
+								"cliente",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Listar por Restaurante",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/pedido/restaurante/2",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"pedido",
+								"restaurante",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Pendentes (Restaurante)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/pedido/restaurante/2/pendentes",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"pedido",
+								"restaurante",
+								"2",
+								"pendentes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Aceitos (Restaurante)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/pedido/restaurante/2/aceitos",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"pedido",
+								"restaurante",
+								"2",
+								"aceitos"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Recusados (Restaurante)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/pedido/restaurante/2/recusados",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"pedido",
+								"restaurante",
+								"2",
+								"recusados"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar Status Pedido",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/pedido/4/status?status=SAIU_PARA_ENTREGA",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"pedido",
+								"4",
+								"status"
+							],
+							"query": [
+								{
+									"key": "status",
+									"value": "SAIU_PARA_ENTREGA"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Cancelar Pedido",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/pedido/4?motivo=Desistencia",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"pedido",
+								"4"
+							],
+							"query": [
+								{
+									"key": "motivo",
+									"value": "Desistencia"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Calcular Subtotal",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/pedido/3/subtotal",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"pedido",
+								"3",
+								"subtotal"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Calcular Total",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/pedido/3/total",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"pedido",
+								"3",
+								"total"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Calcular Valor Entrega",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/pedido/4/valor-entrega",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"pedido",
+								"4",
+								"valor-entrega"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Calcular Tempo Estimado",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/pedido/4/tempo-estimado",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"pedido",
+								"4",
+								"tempo-estimado"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Finalizar Pedido",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/pedido/4/finalizar",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"pedido",
+								"4",
+								"finalizar"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Aplicar Cupom",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/pedido/4/cupom?cupomId=2",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"pedido",
+								"4",
+								"cupom"
+							],
+							"query": [
+								{
+									"key": "cupomId",
+									"value": "2"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Remover Cupom",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/pedido/4/cupom",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"pedido",
+								"4",
+								"cupom"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Calcular Desconto",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/pedido/4/desconto",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"pedido",
+								"4",
+								"desconto"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Dashboard Restaurante",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/pedido/restaurante/2/dashboard",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"pedido",
+								"restaurante",
+								"2",
+								"dashboard"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Produto",
+			"item": [
+				{
+					"name": "Criar Produto",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "produto",
+									"value": "{\n  \"nmProduto\": \"Pizza Calabresa\",\n  \"dsProduto\": \"Deliciosa pizza de calabresa\",\n  \"vlPreco\": 40.00,\n  \"restauranteId\": 2,\n  \"categoriaProduto\": \"Pizzas\",\n  \"tempoPreparacao\": 25\n}",
+									"contentType": "application/json",
+									"type": "text"
+								},
+								{
+									"key": "imagem",
+									"type": "file",
+									"src": "/D:/Usuario/Downloads/imagens-20251127T190609Z-1-001/imagens/cardapios/pizzas/pizza-calabresa.png"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/produto",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"produto"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar Produto por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/produto/201",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"produto",
+								"201"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Listar por Restaurante",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/produto/restaurante/2",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"produto",
+								"restaurante",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Promoções",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/produto/promocoes",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"produto",
+								"promocoes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar Produto",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "produto",
+									"value": "{\n  \"nmProduto\": \"Pizza Calabresa com Queijo\",\n  \"vlPreco\": 42.00,\n\"restauranteId\": \"2\",\n\"categoriaProduto\":\"Spaghette\"\n}",
+									"contentType": "application/json",
+									"type": "text"
+								},
+								{
+									"key": "imagem",
+									"type": "file",
+									"src": "/D:/Usuario/Downloads/acai-1l.png"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/produto/2",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"produto",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Deletar Produto",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/produto/5",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"produto",
+								"5"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar Imagem",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "imagem",
+									"type": "file",
+									"src": "/D:/Usuario/Downloads/forno-magico-pizzaria.png"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/produto/2/imagem",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"produto",
+								"2",
+								"imagem"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar Imagem",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/produto/201/imagem",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"produto",
+								"201",
+								"imagem"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Ajustar Promoção",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/produto/1/promocao?vlPrecoPromocional=35.00&isPromocao=true",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"produto",
+								"1",
+								"promocao"
+							],
+							"query": [
+								{
+									"key": "vlPrecoPromocional",
+									"value": "35.00"
+								},
+								{
+									"key": "isPromocao",
+									"value": "true"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Categorias",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/produto/restaurante/2/categorias",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"produto",
+								"restaurante",
+								"2",
+								"categorias"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Restaurante",
+			"item": [
+				{
+					"name": "Cadastrar Restaurante",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "restaurante",
+									"value": "{\n  \"username\": \"pizzaria_nova8\",\n  \"password\": \"SenhaForte123\",\n  \"nmRestaurante\": \"Pizzaria Nova\",\n  \"emailRestaurante\": \"contato8@pizzarianova.com\",\n  \"cnpj\": \"91713983000169\",\n  \"telefoneRestaurante\": \"11999998888\",\n  \"descricaoRestaurante\": \"A melhor pizza da cidade\",\n  \"categoria\": \"PIZZA\",\n  \"horarioAbertura\": \"18:00:00\",\n  \"horarioFechamento\": \"23:00:00\",\n  \"diasFuncionamento\": [\n    \"SEXTA\",\n    \"SABADO\",\n    \"DOMINGO\"\n  ],\n  \"tempoMediaEntrega\": 45,\n  \"enderecos\": [\n    {\n      \"logradouro\": \"Av. Paulista\",\n      \"numero\": \"1000\",\n      \"complemento\": \"Loja 1\",\n      \"bairro\": \"Bela Vista\",\n      \"cidade\": \"São Paulo\",\n      \"cep\": \"88705060\",\n      \"estado\": \"SP\",\n      \"tipoEndereco\": \"MATRIZ\",\n      \"pontoDeReferencia\": \"Próximo ao metro\"\n    }\n  ]\n}",
+									"contentType": "application/json",
+									"type": "text"
+								},
+								{
+									"key": "imagemBanner",
+									"type": "file",
+									"src": []
+								},
+								{
+									"key": "imagemLogo",
+									"type": "file",
+									"src": []
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/restaurante",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"restaurante"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar Restaurante por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/restaurante/8",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"restaurante",
+								"8"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar por CNPJ",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/restaurante/cnpj/12345678000199",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"restaurante",
+								"cnpj",
+								"12345678000199"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar Restaurante",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "restaurante",
+									"value": "{\n  \"nmRestaurante\": \"Pizzaria Top Atualizada\",\n  \"tempoMediaEntrega\": 35\n}",
+									"contentType": "application/json",
+									"type": "text"
+								},
+								{
+									"key": "imagemLogo",
+									"type": "file",
+									"src": []
+								},
+								{
+									"key": "imagemBanner",
+									"type": "file",
+									"src": []
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/restaurante/8",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"restaurante",
+								"8"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Deletar Restaurante",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/restaurante/9",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"restaurante",
+								"9"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar Endereço do Restaurante",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"numero\": \"20\",\n  \"complemento\": \"Loja 2\",\n  \"tipoEndereco\":\"MATRIZ\",\n  \"cep\":\"88705060\",\n  \"logradouro\":\"Rua João\"\n\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/restaurante/8/enderecos/3",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"restaurante",
+								"8",
+								"enderecos",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Abertos",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/restaurante/abertos",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"restaurante",
+								"abertos"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Endereços",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/restaurante/2/enderecos",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"restaurante",
+								"2",
+								"enderecos"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Produtos",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/restaurante/2/produtos",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"restaurante",
+								"2",
+								"produtos"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Abrir Manualmente",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/restaurante/2/status/abrir",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"restaurante",
+								"2",
+								"status",
+								"abrir"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Fechar Manualmente",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/restaurante/2/status/fechar",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"restaurante",
+								"2",
+								"status",
+								"fechar"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Disponibilizar",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/restaurante/8/status/disponibilizar",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"restaurante",
+								"8",
+								"status",
+								"disponibilizar"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Indisponibilizar",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/restaurante/8/status/indisponibilizar",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"restaurante",
+								"8",
+								"status",
+								"indisponibilizar"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Iniciar Recuperação Senha",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"pizzaria@email.com\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/restaurante/recuperacao/iniciar",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"restaurante",
+								"recuperacao",
+								"iniciar"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Redefinir Senha",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"token\": \"token-uuid-restaurante\",\n  \"novaSenha\": \"NovaSenha123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/restaurante/recuperacao/redefinir",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"restaurante",
+								"recuperacao",
+								"redefinir"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar Logo",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "imagem",
+									"type": "file",
+									"src": "/D:/Usuario/Downloads/forno-magico-pizzaria.png"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/restaurante/8/logo",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"restaurante",
+								"8",
+								"logo"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar Logo",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/restaurante/8/logo",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"restaurante",
+								"8",
+								"logo"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar Banner",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJjb215LWRlbGl2ZXJ5LWFwaSIsInN1YiI6InBvbnRvX3BlcmZlaXRvIiwidXNlcklkIjoyLCJyb2xlcyI6IlJFU1RBVVJBTlRFIiwiaWF0IjoxNzY0MzY2MzA2LCJleHAiOjE5ODAzNjYzMDZ9.l49TCUX2X6DFhgIdMC2wDzTu4YP59aJiTfJlERp6PPU",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "imagem",
+									"type": "file",
+									"src": "/D:/Usuario/Downloads/imagens-20251127T190609Z-1-001/imagens/banners/banner-o-ponto-perfeito.png"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/restaurante/2/banner",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"restaurante",
+								"2",
+								"banner"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar Banner",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/restaurante/8/banner",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"restaurante",
+								"8",
+								"banner"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Adicionar Endereço",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"numero\": \"20\",\r\n  \"complemento\": \"Loja 2\",\r\n  \"tipoEndereco\":\"MATRIZ\",\r\n  \"cep\":\"88705060\",\r\n  \"logradouro\":\"Rua João\"\r\n\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/restaurante/2/enderecos",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"restaurante",
+								"2",
+								"enderecos"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Calcular Tempo Médio",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/restaurante/2/calcular-tempo-medio",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"restaurante",
+								"2",
+								"calcular-tempo-medio"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Abrir Todos",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/restaurante/status/abrir-todos",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"restaurante",
+								"status",
+								"abrir-todos"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\":\"ponto_perfeito\",\r\n    \"password\":\"SenhaForte123\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "OAuth2",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/register-complete",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"register-complete"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Refresh Token",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"refreshToken\":\"eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJjb215LWRlbGl2ZXJ5LWFwaSIsInN1YiI6ImNsaWVudGVfdXNlcjUiLCJ1c2VySWQiOjM1LCJyb2xlcyI6IkNMSUVOVEUiLCJpYXQiOjE3NjQyNzQ3NDUsImV4cCI6MTk4MDI3NDc0NX0.oNx_ZBJ23LbkWXWrau0KfREZoEM533HXEBkX44ZAOiE\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/refresh",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"refresh"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"auth": {
+				"type": "noauth"
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {},
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {},
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8084"
+		},
+		{
+			"key": "token",
+			"value": ""
+		}
+	]
+}
